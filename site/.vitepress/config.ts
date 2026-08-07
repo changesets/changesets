@@ -211,8 +211,8 @@ function getMainSidebar(): DefaultTheme.SidebarItem[] {
         },
         { text: "Snapshot Releases", link: "snapshot-releases" },
         { text: "Prereleases", link: "prereleases" },
-        { text: "Migrating from v2 to v3", link: "migration" },
         { text: "Beyond npm", link: "beyond-npm" },
+        { text: "Migrating from v2 to v3", link: "migration" },
       ],
     },
     {

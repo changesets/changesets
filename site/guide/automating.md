@@ -117,6 +117,10 @@ Also, in contrary to npm's [workflow recommendation](https://docs.npmjs.com/trus
 
 <<< ./_snippets/automating-trusted-publishing.yaml [.github/workflows/publish.yml]
 
+::: tip Require approval before publishing
+You can also consider [creating an environment](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments#creating-an-environment) with required reviewers to approve the publish job run. Set the environment name on the `publish` job [`environment`](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments#creating-an-environment) property to require their approval before the publish job can continue. This is one way to ensure that only trusted maintainers can publish packages.
+:::
+
 ### Token-based Publishing
 
 ::: warning
