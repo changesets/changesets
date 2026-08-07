@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { VPImage } from "vitepress/theme"
+import Socials from "../components/socials.vue"
+import DiscordLogo from "~icons/logos/discord"
+import OCLogo from "~icons/logos/opencollective"
 </script>
 
 # Announcing Changesets v3
@@ -22,15 +25,16 @@ Quick links:
 
 This release was lead by the new Changesets team, including:
 
-- Mateusz Burzyński ([@Andarist](https://github.com/Andarist))
-- Bjorn Lu ([@bluwy](https://github.com/bluwy))
-- Adam Haglund ([@beeequeue](https://github.com/beeequeue))
+- Mateusz Burzyński (<Socials bsky="andarist.bsky.social" github="Andarist" />)
+- Bjorn Lu (<Socials bsky="bluwy.me" github="bluwy" />)
+- Adam Haglund (<Socials bsky="haglund.dev" github="beeequeue" />)
 
-We'd like to thank all contributors who have helped discuss, test, and improve Changesets v3 during its development. If you're interested in helping the future of Changesets, come join us on [Discord](https://chat.changesets.dev).
+We'd like to thank all contributors who have helped discuss, test, and improve Changesets v3 during its development.
+If you're interested in helping the future of Changesets, come join us on [<DiscordLogo style="margin-left: 5px" />](https://chat.changesets.dev).
 
 As Changesets remains one of the most popular release tool in the npm ecosystem, with more than 3M weekly downloads, we'd like to thank everyone who has supported Changesets over the years.
 
-If you or your company uses Changesets, you can help support our work to improve and evolve the project via our [Open Collective](https://opencollective.com/changesets) or [GitHub Sponsors](https://github.com/sponsors/changesets).
+If you or your company uses Changesets, you can help support our work to improve and evolve the project via our <OCLogo /> [Open Collective](https://opencollective.com/changesets) or :heart: [GitHub Sponsors](https://github.com/sponsors/changesets).
 
 ## The New Stuff:tm:
 

@@ -1,3 +1,4 @@
+import icons from "unplugin-icons/vite";
 import { type DefaultTheme, defineConfig } from "vitepress";
 import { graphvizMarkdownPlugin } from "vitepress-plugin-graphviz";
 import {
@@ -75,6 +76,7 @@ export default defineConfig({
   },
   vite: {
     plugins: [
+      icons({ defaultStyle: "display: inline; vertical-align: middle;" }),
       groupIconVitePlugin({
         customIcon: {
           typescript: "vscode-icons:file-type-typescript-official",
