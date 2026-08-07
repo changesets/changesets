@@ -49,7 +49,6 @@ html {
 }
 
 h1,
-h1 *,
 h2,
 h3,
 h4,
@@ -57,6 +56,12 @@ h5,
 h6 {
   color: var(--vp-c-heading-1);
   font-family: var(--vp-font-family-serif) !important;
+  letter-spacing: -0.02em !important;
+}
+
+code {
+  /* the above heading letter-spacing does not work well with code blocks in headings */
+  letter-spacing: 0;
 }
 
 .VPDoc h1 {
