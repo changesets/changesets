@@ -61,7 +61,15 @@ Now, all change types will bump peer dependents by a **patch** version, while au
 
 This has been the most requested change to Changesets for years (as can be seen in the [closed issues](https://github.com/changesets/changesets/pull/2090)), and we're happy to finally release it!
 
-<!-- TODO: add image/graph/text example -->
+<VPImage
+  class="no-shadow"
+  style="max-height: 600px; margin: auto;"
+  alt="Publishing flow diagram"
+  :image="{
+    dark: '../assets/peer-bump-dark.excalidraw.svg',
+    light: '../assets/peer-bump-light.excalidraw.svg'
+  }"
+/>
 
 ### More robust and flexible version, pack, and publish flows
 
@@ -80,6 +88,7 @@ We are working on it, and it will be included in the next feature update.
 
 <VPImage
   class="no-shadow"
+  style="max-height: 400px; margin: auto;"
   alt="Publishing flow diagram"
   :image="{
     dark: '../assets/pack-then-publish.excalidraw.svg',
