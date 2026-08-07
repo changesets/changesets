@@ -246,7 +246,7 @@ describe("validateConfig", () => {
         config: { fixed: [["pkg-*", "@pkg/*"], ["@pkg-other/a"]] },
         expected: {
           ...defaultConfig,
-          fixed: [["pkg-*", "@pkg/*"], ["@pkg-other/a"]],
+          fixed: [["pkg-a", "pkg-b", "@pkg/a", "@pkg/b"], ["@pkg-other/a"]],
         },
       },
       {
@@ -262,7 +262,7 @@ describe("validateConfig", () => {
         config: { fixed: [["pkg-*", "!pkg-b", "@pkg/*"], ["@pkg-other/a"]] },
         expected: {
           ...defaultConfig,
-          fixed: [["pkg-*", "!pkg-b", "@pkg/*"], ["@pkg-other/a"]],
+          fixed: [["pkg-a", "@pkg/a", "@pkg/b"], ["@pkg-other/a"]],
         },
       },
       {
@@ -283,7 +283,7 @@ describe("validateConfig", () => {
         config: { linked: [["pkg-*", "@pkg/*"], ["@pkg-other/a"]] },
         expected: {
           ...defaultConfig,
-          linked: [["pkg-*", "@pkg/*"], ["@pkg-other/a"]],
+          linked: [["pkg-a", "pkg-b", "@pkg/a", "@pkg/b"], ["@pkg-other/a"]],
         },
       },
       {
@@ -299,7 +299,7 @@ describe("validateConfig", () => {
         config: { linked: [["pkg-*", "!pkg-b", "@pkg/*"], ["@pkg-other/a"]] },
         expected: {
           ...defaultConfig,
-          linked: [["pkg-*", "!pkg-b", "@pkg/*"], ["@pkg-other/a"]],
+          linked: [["pkg-a", "@pkg/a", "@pkg/b"], ["@pkg-other/a"]],
         },
       },
       {
