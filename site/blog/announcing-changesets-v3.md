@@ -62,9 +62,10 @@ Now, all change types will bump peer dependents by a **patch** version, while au
 This has been the most requested change to Changesets for years (as can be seen in the [closed issues](https://github.com/changesets/changesets/pull/2090)), and we're happy to finally release it!
 
 <VPImage
+  loading="lazy"
   class="no-shadow"
-  style="max-height: 600px; margin: auto;"
-  alt="Publishing flow diagram"
+  style="max-height: 600px"
+  alt="graph showing that peer dependents are bumped by patch versions instead of major"
   :image="{
     dark: '../assets/peer-bump-dark.excalidraw.svg',
     light: '../assets/peer-bump-light.excalidraw.svg'
@@ -87,8 +88,9 @@ We are working on it, and it will be included in the next feature update.
 <!-- https://lexidraw.app/#atproto=did:plc:skqg5gindwkuzjmjub6db6yn,3msdmimnqlf2s -->
 
 <VPImage
+  loading="lazy"
   class="no-shadow"
-  style="max-height: 400px; margin: auto;"
+  style="max-height: 400px"
   alt="Publishing flow diagram"
   :image="{
     dark: '../assets/pack-then-publish.excalidraw.svg',
@@ -101,7 +103,12 @@ We are working on it, and it will be included in the next feature update.
 Changesets now uses [`cac`](https://npmx.dev/cac) for CLI arguments and help messages rather than our old custom implementation,
 and we use [`@clack/prompts`](https://npmx.dev/@clack/prompts) for CLI prompts and rendering, which should make the CLI prettier and easier to use.
 
-![cli flow example](../assets/cli-example.webp)
+<VPImage
+  loading="lazy"
+  alt="cli flow example"
+  style="max-height: 260px"
+  image="../assets/cli-example.webp"
+/>
 
 ### Use installed formatters to format changelogs
 

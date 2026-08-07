@@ -63,9 +63,6 @@ export default defineConfig({
   lastUpdated: true,
   cleanUrls: true,
   markdown: {
-    image: {
-      lazyLoading: true,
-    },
     async config(md) {
       // @ts-expect-error upstream type issue
       await graphvizMarkdownPlugin(md);
