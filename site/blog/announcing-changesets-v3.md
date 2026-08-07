@@ -32,9 +32,13 @@ As Changesets remains one of the most popular release tool in the npm ecosystem,
 
 If you or your company uses Changesets, you can help support our work to improve and evolve the project via our [Open Collective](https://opencollective.com/changesets) or [GitHub Sponsors](https://github.com/sponsors/changesets).
 
-## Highlights
+## The New Stuff:tm:
 
-### New Website
+<!-- TODO: might need to update link -->
+
+**Check out the [Migrate from v2 to v3](../guide/migration.md) guide for a full list of breaking changes.**
+
+### Documentation Website
 
 You are currently reading this post on our new website: https://changesets.dev!
 
@@ -48,20 +52,6 @@ All Changesets packages have been updated to ESM-only and require Node.js `^22.1
 - Dependencies: 95 -> 39
 
 Internally, we are now using [pnpm](https://pnpm.io), [tsdown](https://tsdown.dev), [rolldown](https://rolldown.rs), [vitest](https://vitest.dev), [oxfmt](https://oxc.rs/docs/guide/usage/formatter.html), and more to develop and build our packages.
-
-### ... and more!
-
-- [Less aggressive peer dependency bumping](#less-aggressive-peer-dependency-bumping)
-- [More robust and flexible version, pack, and publish flows](#)
-- [Use installed formatters to format changelogs by default](#use-installed-formatters-to-format-changelogs)
-- [Improved CLI argument parsing and UX](#improved-cli-argument-parsing-and-ux)
-- [Greatly simplified pre-release metadata](#)
-- Re-written support for pnpm, npm, and yarn
-- More robust config loading and validation
-
-<!-- TODO: might need to update link -->
-
-Check out the [Migrate from v2 to v3](../guide/migration.md) guide for a full list of breaking changes.
 
 ### Less aggressive peer dependency bumping
 
