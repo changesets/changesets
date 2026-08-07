@@ -25,11 +25,10 @@ export const npmPublishQueue = createPromiseQueue(
 export function isAlreadyPublishedError(
   ...messages: (string | undefined)[]
 ): boolean {
-  return messages
-    .filter((message) => message != null)
-    .some((message) =>
-      message.includes("cannot publish over the previously published"),
-    );
+  return messages.some(
+    (message) =>
+      message?.includes("cannot publish over the previously published") ?? false,
+  );
 }
 
 export const isPublishSuccessful = (
