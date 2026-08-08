@@ -1,7 +1,6 @@
 <template>
   <span class="socials">
-    <a :href="bskyLink" target="_blank" rel="noopener"
-       :title="bskyAltText">
+    <a :href="bskyLink" target="_blank" rel="noopener" :title="bskyAltText">
       <BskyLogo
         v-if="$props.bsky"
         :alt="bskyAltText"
