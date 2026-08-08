@@ -46,7 +46,9 @@ If you or your company uses Changesets, you can help support our work to improve
 
 ## The New Stuff:tm:
 
-**Check out the [Migrate from v2 to v3](../guide/migration.md) guide for a full list of breaking changes.**
+::: danger Breaking changes
+Check out the [Migrate from v2 to v3](../guide/migration.md) guide for a full list of breaking changes.
+:::
 
 ### Documentation Website
 
