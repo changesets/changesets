@@ -5,13 +5,15 @@ import DiscordLogo from "~icons/logos/discord"
 import OCLogo from "~icons/logos/opencollective"
 </script>
 
+![Banner](/blog/announcing-changesets-v3.png)
+
 # Announcing Changesets v3
 
 _10 August 2026_
 
-![Banner](/blog/announcing-changesets-v3.png)
+Today, we are excited to announce the release of Changesets v3!
 
-Today, we are excited to announce the release of Changesets v3. Since the release of v2 seven years ago, this new version brings a host of improvements, cleanups, and modernizations to the Changesets CLI and its packages, and stands as a stepping stone for more ambitious changes we have planned for the future.
+Since the release of v2 seven years ago, this new version brings a host of improvements, cleanups, and modernizations to the Changesets CLI and its packages, and stands as a stepping stone for more ambitious changes we have planned for the future.
 
 Quick links:
 
@@ -29,16 +31,15 @@ This release was lead by the new Changesets team, including:
 - Bjorn Lu (<Socials bsky="bluwy.me" github="bluwy" />)
 - Adam Haglund (<Socials bsky="haglund.dev" github="beeequeue" />)
 
-We'd like to thank all contributors who have helped discuss, test, and improve Changesets v3 during its development.
-If you're interested in helping the future of Changesets, come join us on [<DiscordLogo style="margin-left: 5px" />](https://chat.changesets.dev).
+We'd also like to thank all contributors who have helped discuss, test, and improve Changesets v3 during its development.
+
+If you're interested in helping the future of Changesets, come join us on [<DiscordLogo style="margin-left: 5px" />](https://chat.changesets.dev)!
 
 As Changesets remains one of the most popular release tool in the npm ecosystem, with more than 3M weekly downloads, we'd like to thank everyone who has supported Changesets over the years.
 
 If you or your company uses Changesets, you can help support our work to improve and evolve the project via our <OCLogo /> [Open Collective](https://opencollective.com/changesets) or :heart: [GitHub Sponsors](https://github.com/sponsors/changesets).
 
 ## The New Stuff:tm:
-
-<!-- TODO: might need to update link -->
 
 **Check out the [Migrate from v2 to v3](../guide/migration.md) guide for a full list of breaking changes.**
 
@@ -120,6 +121,4 @@ Changesets now defaults to using any supported formatters it finds installed in 
 
 It uses our new package [`@changesets/format`](https://npmx.dev/@changesets/format) which so far supports `dprint`, `deno`, `oxfmt`, `biome`, and `prettier`.
 
-<!-- TODO: needs link -->
-
-You can see the [relevant section in the migration guide]() for how to configure it.
+You can see the [relevant section in the migration guide](../guide/migration.md#replace-prettier-with-format) for how to configure it.
