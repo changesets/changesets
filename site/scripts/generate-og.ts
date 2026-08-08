@@ -76,14 +76,14 @@ async function generateWebsiteOgImage() {
   const template = `
     <div tw="flex size-full items-center justify-center gap-8 bg-[#162a42] text-[#eee]">
       <img
-        tw="mb-4"
+        tw="mb-2"
         height="150"
         src="https://raw.githubusercontent.com/changesets/changesets/refs/heads/main/assets/images/changesets-icon-dark.svg"
       />
       
       <div tw="text-[8.5em] font-bold">Changesets</div>
     </div>
-  `;
+  `.trim();
 
   const buffer = await generateOgImage(template);
   await fs.writeFile(ogImagePath, buffer);
