@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import { VPImage } from "vitepress/theme"
-import Socials from "../components/socials.vue"
 import DiscordLogo from "~icons/logos/discord"
 import OCLogo from "~icons/logos/opencollective"
+import Socials from "../components/socials.vue"
+import cliExampleImage from "../assets/cli-example.webp"
+import packThenPublishImage from "../assets/pack-then-publish.excalidraw.svg"
+import packThenPublishLightImage from "../assets/pack-then-publish-light.excalidraw.svg"
+import peerBumpImage from "../assets/peer-bump-dark.excalidraw.svg"
+import peerBumpLightImage from "../assets/peer-bump-light.excalidraw.svg"
 </script>
 
 ![Banner](/blog/announcing-changesets-v3.png)
@@ -72,8 +77,8 @@ This has been the most requested change to Changesets for years (as can be seen 
   style="max-height: 600px"
   alt="graph showing that peer dependents are bumped by patch versions instead of major"
   :image="{
-    dark: '../assets/peer-bump-dark.excalidraw.svg',
-    light: '../assets/peer-bump-light.excalidraw.svg'
+    dark: packThenPublishImage,
+    light: packThenPublishLightImage,
   }"
 />
 
@@ -98,8 +103,8 @@ We are working on it, and it will be included in the next feature update.
   style="max-height: 400px"
   alt="Publishing flow diagram"
   :image="{
-    dark: '../assets/pack-then-publish.excalidraw.svg',
-    light: '../assets/pack-then-publish-light.excalidraw.svg'
+    dark: packThenPublishImage,
+    light: packThenPublishLightImage,
   }"
 />
 
@@ -114,7 +119,7 @@ and we use [`@clack/prompts`](https://npmx.dev/@clack/prompts) for CLI prompts a
   loading="lazy"
   alt="cli flow example"
   style="max-height: 260px"
-  image="../assets/cli-example.webp"
+  :image="cliExampleImage"
 />
 
 ### Use installed formatters to format changelogs
