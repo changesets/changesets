@@ -108,6 +108,8 @@ We are working on it, and it will be included in the next feature update.
 Changesets now uses [`cac`](https://npmx.dev/cac) for CLI arguments and help messages rather than our old custom implementation,
 and we use [`@clack/prompts`](https://npmx.dev/@clack/prompts) for CLI prompts and rendering, which should make the CLI prettier and easier to use.
 
+<!-- https://lexidraw.app/#atproto=did:plc:skqg5gindwkuzjmjub6db6yn,3mskqppq5nk2u -->
+
 <VPImage
   loading="lazy"
   alt="cli flow example"
