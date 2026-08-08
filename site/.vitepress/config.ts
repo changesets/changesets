@@ -56,7 +56,7 @@ export default defineConfig({
     [
       "link",
       {
-        href: "https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:wght@400;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:wght@400;700&family=Inter:ital,opsz,wght@0,14..32,400..700;1,14..32,400..700&display=swap",
       },
     ],
   ],
