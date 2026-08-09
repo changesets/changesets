@@ -36,13 +36,13 @@ const fixedGroupsExist: Rule = ({
   }
 };
 
-const noDuplicateFixedPackages: Rule = ({ writtenConfig, errors }) => {
-  if (!writtenConfig.fixed || writtenConfig.fixed.length === 0) return;
+const noDuplicateFixedPackages: Rule = ({ config, errors }) => {
+  if (config.fixed.length === 0) return;
 
   const foundNames = new Set<string>();
   const duplicatedNames = new Set<string>();
 
-  for (const fixedGroup of writtenConfig.fixed) {
+  for (const fixedGroup of config.fixed) {
     for (const name of fixedGroup) {
       if (foundNames.has(name)) {
         duplicatedNames.add(name);
@@ -76,13 +76,13 @@ const linkedGroupsExist: Rule = ({
   }
 };
 
-const noDuplicateLinkedPackages: Rule = ({ writtenConfig, errors }) => {
-  if (!writtenConfig.linked || writtenConfig.linked.length === 0) return;
+const noDuplicateLinkedPackages: Rule = ({ config, errors }) => {
+  if (config.linked.length === 0) return;
 
   const foundNames = new Set<string>();
   const duplicatedNames = new Set<string>();
 
-  for (const linkedGroup of writtenConfig.linked) {
+  for (const linkedGroup of config.linked) {
     for (const name of linkedGroup) {
       if (foundNames.has(name)) {
         duplicatedNames.add(name);

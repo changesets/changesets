@@ -479,11 +479,11 @@ describe("validateConfig", () => {
         ],
       },
       {
-        name: "rule: noDuplicateFixedPackages: globs",
+        name: "rule: noDuplicateFixedPackages: overlapping glob",
         pkgs: ["pkg-a", "pkg-b"],
-        config: { fixed: [["pkg-*"], ["pkg-*"]] },
+        config: { fixed: [["pkg-*"], ["pkg-a"]] },
         errors: [
-          'Invalid group: The package or glob "pkg-*" is defined in multiple groups',
+          'Invalid group: The package or glob "pkg-a" is defined in multiple groups',
         ],
       },
       // linked
@@ -524,11 +524,11 @@ describe("validateConfig", () => {
         ],
       },
       {
-        name: "rule: noDuplicateLinkedPackages: globs",
+        name: "rule: noDuplicateLinkedPackages: overlapping glob",
         pkgs: ["pkg-a", "pkg-b"],
-        config: { linked: [["pkg-*"], ["pkg-*"]] },
+        config: { linked: [["pkg-*"], ["pkg-a"]] },
         errors: [
-          'Invalid group: The package or glob "pkg-*" is defined in multiple groups',
+          'Invalid group: The package or glob "pkg-a" is defined in multiple groups',
         ],
       },
       // updateInternalDependencies
