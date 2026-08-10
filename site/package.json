@@ -17,7 +17,7 @@
     "@iconify-json/logos": "^1.2.11",
     "takumi-js": "^2.5.4",
     "unplugin-icons": "^23.0.1",
-    "vitepress": "^2.0.0-alpha.18",
+    "vitepress": "^2.0.0-alpha.19",
     "vitepress-plugin-graphviz": "^0.1.0",
     "vitepress-plugin-group-icons": "^1.7.6"
   },
