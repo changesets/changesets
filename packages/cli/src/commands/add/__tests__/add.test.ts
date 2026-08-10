@@ -50,10 +50,6 @@ const mockUserResponses = (mockResponses: {
     return returnValues[callCount++];
   });
 
-  const confirmAnswers: Record<string, boolean> = {
-    "Is this your desired changeset?": true,
-  };
-
   if (
     mockResponses.consoleSummaries != null &&
     mockResponses.editorSummaries != null
@@ -75,13 +71,6 @@ const mockUserResponses = (mockResponses: {
   } else {
     mockedUtils.askQuestion.mockResolvedValue(summary);
   }
-  mockedUtils.askConfirm.mockImplementation(async (question) => {
-    question = stripVTControlCharacters(question);
-    if (confirmAnswers[question]) {
-      return confirmAnswers[question];
-    }
-    throw new Error(`An answer could not be found for ${question}`);
-  });
 };
 
 beforeEach(() => {
@@ -173,7 +162,6 @@ describe("Add command", () => {
   it("should generate a changeset in a single package repo", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
-        private: true,
         name: "single-package",
         version: "1.0.0",
       }),
@@ -183,18 +171,8 @@ describe("Add command", () => {
     const summary = "summary message mock";
     mockedUtils.askList.mockResolvedValueOnce("minor");
 
-    const confirmAnswers: Record<string, boolean> = {
-      "Is this your desired changeset?": true,
-    };
     mockedUtils.askQuestion.mockResolvedValue("");
     mockedAskWithEditor.mockResolvedValueOnce(summary);
-    mockedUtils.askConfirm.mockImplementation(async (question) => {
-      question = stripVTControlCharacters(question);
-      if (confirmAnswers[question]) {
-        return confirmAnswers[question];
-      }
-      throw new Error(`An answer could not be found for ${question}`);
-    });
 
     await addChangeset({ cwd });
 
@@ -284,7 +262,6 @@ describe("Add command", () => {
   it("should use summary passed via message and keep confirmation flow", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
-        private: true,
         name: "single-package",
         version: "1.0.0",
       }),
@@ -292,7 +269,6 @@ describe("Add command", () => {
     });
 
     mockedUtils.askList.mockReturnValueOnce(Promise.resolve("minor"));
-    mockedUtils.askConfirm.mockReturnValueOnce(Promise.resolve(true));
 
     await addChangeset({ cwd, message: "summary from message" });
 
@@ -304,9 +280,6 @@ describe("Add command", () => {
         releases: [{ name: "single-package", type: "minor" }],
       }),
     );
-    expect(mockedUtils.askConfirm).toHaveBeenCalledWith(
-      "Is this your desired changeset?",
-    );
     expect(mockedUtils.askQuestion).not.toHaveBeenCalled();
     expect(mockedAskWithEditor).not.toHaveBeenCalled();
   });
@@ -314,7 +287,6 @@ describe("Add command", () => {
   it("should allow empty summary when message is an empty string", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
-        private: true,
         name: "single-package",
         version: "1.0.0",
       }),
@@ -322,7 +294,6 @@ describe("Add command", () => {
     });
 
     mockedUtils.askList.mockReturnValueOnce(Promise.resolve("patch"));
-    mockedUtils.askConfirm.mockReturnValueOnce(Promise.resolve(true));
 
     await addChangeset({ cwd, message: "" });
 
@@ -367,9 +338,6 @@ describe("Add command", () => {
         summary: "monorepo summary from message",
         releases: [{ name: "pkg-a", type: "patch" }],
       }),
-    );
-    expect(mockedUtils.askConfirm).toHaveBeenCalledWith(
-      "Is this your desired changeset?",
     );
     expect(mockedUtils.askQuestion).not.toHaveBeenCalled();
     expect(mockedAskWithEditor).not.toHaveBeenCalled();
@@ -532,7 +500,7 @@ describe("Add command", () => {
     ]);
   });
 
-  it("should not include private packages with a version in the prompt if private packages are configured to be not versionable", async () => {
+  it("should not include private packages with a version in the prompt by default", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -553,13 +521,7 @@ describe("Add command", () => {
         name: "pkg-c",
         version: "1.0.0",
       }),
-      ".changeset/config.json": JSON.stringify({
-        ...defaultConfig,
-        privatePackages: {
-          version: false,
-          tag: false,
-        },
-      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
     });
 
     mockUserResponses({ releases: { "pkg-a": "patch" } });
@@ -623,6 +585,110 @@ describe("Add command", () => {
           Ensure the packages to version are not ignored by the config
           Ensure that relevant package.json files have a \`version\` field"
     `);
+  });
+
+  it("should validate package names passed in from release type flags", async () => {
+    const loggerErrorSpy = vi.spyOn(clack.log, "error");
+
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    await expect(() =>
+      addChangeset({
+        cwd,
+        message: "test",
+        major: ["pkg-missing-major"],
+        minor: ["pkg-missing-minor"],
+        patch: ["pkg-missing-patch"],
+      }),
+    ).rejects.toThrow("The process exited with code: 1");
+
+    expect(loggerErrorSpy).toHaveBeenCalledOnce();
+    const output = stripVTControlCharacters(loggerErrorSpy.mock.calls[0][0]);
+    expect(output).toEqual(
+      [
+        "The package pkg-missing-major is passed to the `--major` option but it is not found in the project. You may have misspelled the package name.",
+        "The package pkg-missing-minor is passed to the `--minor` option but it is not found in the project. You may have misspelled the package name.",
+        "The package pkg-missing-patch is passed to the `--patch` option but it is not found in the project. You may have misspelled the package name.",
+      ].join("\n"),
+    );
+  });
+
+  it("should validate duplicate package names passed in from release type flags", async () => {
+    const loggerErrorSpy = vi.spyOn(clack.log, "error");
+
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    await expect(() =>
+      addChangeset({
+        cwd,
+        message: "test",
+        major: ["pkg-a"],
+        minor: ["pkg-a"],
+      }),
+    ).rejects.toThrow("The process exited with code: 1");
+
+    expect(loggerErrorSpy).toHaveBeenCalledOnce();
+    const output = stripVTControlCharacters(loggerErrorSpy.mock.calls[0][0]);
+    expect(output).toEqual(
+      "The package pkg-a is passed to multiple release type options: `--major`, `--minor`. Please select only one release type for this package.",
+    );
+  });
+
+  it("should not validate unknown package names as duplicates", async () => {
+    const loggerErrorSpy = vi.spyOn(clack.log, "error");
+
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    await expect(() =>
+      addChangeset({
+        cwd,
+        message: "test",
+        major: ["pkg-missing"],
+        minor: ["pkg-missing"],
+      }),
+    ).rejects.toThrow("The process exited with code: 1");
+
+    expect(loggerErrorSpy).toHaveBeenCalledOnce();
+    const output = stripVTControlCharacters(loggerErrorSpy.mock.calls[0][0]);
+    expect(output).toEqual(
+      [
+        "The package pkg-missing is passed to the `--major` option but it is not found in the project. You may have misspelled the package name.",
+        "The package pkg-missing is passed to the `--minor` option but it is not found in the project. You may have misspelled the package name.",
+      ].join("\n"),
+    );
   });
 
   it("should be able to add a changeset when called from subdirectory", async () => {

@@ -1,5 +1,63 @@
 # @changesets/apply-release-plan
 
+## 8.0.0-next.10
+
+### Major Changes
+
+- [#2190](https://github.com/changesets/changesets/pull/2190) [`96b65ee`](https://github.com/changesets/changesets/commit/96b65eec4af2c58301a11cd7dff42a6bde9c9f8a) Thanks [@bluwy](https://github.com/bluwy)! - Move versioned prerelease changesets to `.changeset/pre/` folder instead of accumulating in the root and tracking the versioned changeset ids in the `.changeset/pre.json` file. Existing `pre.json` will auto-migrate to this new structure on the next run of `changeset version` or when calling `changeset status`.
+
+  This change allows easier management of versioned prerelease changesets (for the final stable release) and current queued changesets (for the next prerelease). Changesets in `.changeset/pre/` can be edited or deleted depending if it's still relevant for the final stable release of a package. There's no need to synchronize the changeset ids in `pre.json` if certain changesets are deleted.
+
+### Patch Changes
+
+- Updated dependencies [[`96b65ee`](https://github.com/changesets/changesets/commit/96b65eec4af2c58301a11cd7dff42a6bde9c9f8a), [`3910adf`](https://github.com/changesets/changesets/commit/3910adf3ebaef14196093715228885c4819d0cbf), [`96b65ee`](https://github.com/changesets/changesets/commit/96b65eec4af2c58301a11cd7dff42a6bde9c9f8a)]:
+  - @changesets/git@4.0.0-next.9
+  - @changesets/types@7.0.0-next.9
+  - @changesets/config@4.0.0-next.9
+  - @changesets/should-skip-package@1.0.0-next.9
+
+## 8.0.0-next.9
+
+### Patch Changes
+
+- [#2177](https://github.com/changesets/changesets/pull/2177) [`b5e1762`](https://github.com/changesets/changesets/commit/b5e1762584718ec607ea79db0a00ae4238f8a784) Thanks [@Andarist](https://github.com/Andarist)! - Avoid writing an `undefined` version when updating dependencies in unversioned private packages.
+- Updated dependencies [[`a736a20`](https://github.com/changesets/changesets/commit/a736a20c230a89232a122fe12ffd612361e0eef9), [`b5e1762`](https://github.com/changesets/changesets/commit/b5e1762584718ec607ea79db0a00ae4238f8a784)]:
+  - @changesets/git@4.0.0-next.8
+  - @changesets/types@7.0.0-next.8
+  - @changesets/config@4.0.0-next.8
+  - @changesets/should-skip-package@1.0.0-next.8
+
+## 8.0.0-next.8
+
+### Patch Changes
+
+- [#2160](https://github.com/changesets/changesets/pull/2160) [`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640) Thanks [@beeequeue](https://github.com/beeequeue)! - Added or modified the `files` property in the manifest. This should not change any behavior.
+
+- [#2163](https://github.com/changesets/changesets/pull/2163) [`5f8d925`](https://github.com/changesets/changesets/commit/5f8d9255088639c07b90910343752ae26b0a324f) Thanks [@Andarist](https://github.com/Andarist)! - Update dependency ranges in the workspace root `package.json`.
+- Updated dependencies [[`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640)]:
+  - @changesets/git@4.0.0-next.7
+  - @changesets/should-skip-package@1.0.0-next.7
+  - @changesets/types@7.0.0-next.7
+  - @changesets/config@4.0.0-next.7
+
+## 8.0.0-next.7
+
+### Patch Changes
+
+- Updated dependencies [[`4c26f2f`](https://github.com/changesets/changesets/commit/4c26f2faac89b53d3305cf73c9e9cfca5aa88f5f), [`813bbf3`](https://github.com/changesets/changesets/commit/813bbf314d051bfee3b46a793f94b396ef2a4df1), [`6c79210`](https://github.com/changesets/changesets/commit/6c79210fabfe13d82ca4ac4dc92aab9b58fd58fd), [`18bc470`](https://github.com/changesets/changesets/commit/18bc470ab550b2def6b52656b7b72f86c04429cb)]:
+  - @changesets/types@7.0.0-next.6
+  - @changesets/git@4.0.0-next.6
+  - @changesets/config@4.0.0-next.6
+  - @changesets/should-skip-package@1.0.0-next.6
+
+## 8.0.0-next.6
+
+### Minor Changes
+
+- [#2070](https://github.com/changesets/changesets/pull/2070) [`694396c`](https://github.com/changesets/changesets/commit/694396ce49f0d7e2200c119b360e60e6bd11265f) Thanks [@bluwy](https://github.com/bluwy)! - Preserve the existing formatting of `package.json` when updating version and dependency ranges
+
+- [#2118](https://github.com/changesets/changesets/pull/2118) [`01f4da4`](https://github.com/changesets/changesets/commit/01f4da4e30aa90391def46b84b986fa223a055f5) Thanks [@bluwy](https://github.com/bluwy)! - Improve the default unformatted changelog new lines handling to ensure consistent spacing after the heading and the spacing between release lines
+
 ## 8.0.0-next.5
 
 ### Patch Changes

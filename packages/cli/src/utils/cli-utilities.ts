@@ -46,6 +46,7 @@ type QuestionOptions = {
   placeholder?: string;
   notEmpty?: boolean;
 };
+
 async function askQuestion(
   message: string,
   { placeholder, notEmpty }: QuestionOptions = {},
@@ -60,11 +61,14 @@ async function askQuestion(
   );
 }
 
-async function askConfirm(message: string): Promise<boolean> {
+async function askConfirm(
+  message: string,
+  initialValue: boolean = true,
+): Promise<boolean> {
   return cancelable(() =>
     confirm({
       message,
-      initialValue: true,
+      initialValue,
     }),
   );
 }

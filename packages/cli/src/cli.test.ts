@@ -1,20 +1,28 @@
-import { describe, expect, test, vi } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import { cli } from "./cli.ts";
 import { add } from "./commands/add/index.ts";
+import { gitTag } from "./commands/git-tag/index.ts";
 import { init } from "./commands/init/index.ts";
+import { pack } from "./commands/pack/index.ts";
 import { pre } from "./commands/pre/index.ts";
+import { publishPlan } from "./commands/publish-plan/index.ts";
 import { publish } from "./commands/publish/index.ts";
 import { status } from "./commands/status/index.ts";
-import { tag } from "./commands/tag/index.ts";
 import { version } from "./commands/version/index.ts";
 
 vi.mock("./commands/init/index.ts");
 vi.mock("./commands/add/index.ts");
 vi.mock("./commands/version/index.ts");
 vi.mock("./commands/publish/index.ts");
+vi.mock("./commands/publish-plan/index.ts");
+vi.mock("./commands/pack/index.ts");
 vi.mock("./commands/status/index.ts");
-vi.mock("./commands/tag/index.ts");
+vi.mock("./commands/git-tag/index.ts");
 vi.mock("./commands/pre/index.ts");
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
 
 interface CommandTest {
   command: string;
@@ -25,6 +33,7 @@ interface CommandTest {
 interface CommandCase {
   args: string[];
   options: Record<string, unknown>;
+  env?: Record<string, string>;
 }
 
 const tests: CommandTest[] = [
@@ -61,6 +70,45 @@ const tests: CommandTest[] = [
           since: "next",
         },
       },
+      {
+        args: [
+          "--major",
+          "pkg-a",
+          "--minor",
+          "pkg-b",
+          "--patch",
+          "pkg-c",
+          "--patch",
+          "pkg-d",
+        ],
+        options: {
+          major: ["pkg-a"],
+          minor: ["pkg-b"],
+          patch: ["pkg-c", "pkg-d"],
+        },
+      },
+      {
+        args: [
+          "--minor",
+          "pkg-a, pkg-b",
+          "--patch",
+          "pkg-c,pkg-d",
+          "--patch",
+          "pkg-e",
+        ],
+        options: {
+          minor: ["pkg-a", "pkg-b"],
+          patch: ["pkg-c", "pkg-d", "pkg-e"],
+        },
+      },
+      {
+        // Surrounding whitespace is trimmed and empty entries (from repeated
+        // or trailing commas) are dropped via `.filter(Boolean)`.
+        args: ["--patch", " pkg-a , , pkg-b , "],
+        options: {
+          patch: ["pkg-a", "pkg-b"],
+        },
+      },
     ],
   },
   {
@@ -73,6 +121,20 @@ const tests: CommandTest[] = [
       },
       {
         args: ["--ignore", "pkg-a", "--ignore", "pkg-b"],
+        options: {
+          ignore: ["pkg-a", "pkg-b"],
+        },
+      },
+      {
+        // The same comma-separated expansion applies to `--ignore`.
+        args: ["--ignore", "pkg-a,pkg-b"],
+        options: {
+          ignore: ["pkg-a", "pkg-b"],
+        },
+      },
+      {
+        // ...including trimming and dropping empty entries.
+        args: ["--ignore", " pkg-a , , pkg-b , "],
         options: {
           ignore: ["pkg-a", "pkg-b"],
         },
@@ -117,6 +179,63 @@ const tests: CommandTest[] = [
           gitTag: true,
         },
       },
+      {
+        args: ["--from-pack-dir", ".packed"],
+        options: {
+          fromPackDir: ".packed",
+          gitTag: true,
+        },
+      },
+      {
+        args: [],
+        env: {
+          CHANGESETS_OUTPUT: "output.ndjson",
+        },
+        options: {
+          gitTag: true,
+          output: "output.ndjson",
+        },
+      },
+    ],
+  },
+  {
+    command: "publish-plan",
+    fn: publishPlan,
+    cases: [
+      {
+        args: [],
+        options: {},
+      },
+      {
+        args: ["--output", "publish-plan.json"],
+        options: {
+          output: "publish-plan.json",
+        },
+      },
+    ],
+  },
+  {
+    command: "pack",
+    fn: pack,
+    cases: [
+      {
+        args: ["--out-dir", ".packed"],
+        options: {
+          outDir: ".packed",
+        },
+      },
+      {
+        args: [
+          "--from-publish-plan",
+          "publish-plan.json",
+          "--out-dir",
+          ".packed",
+        ],
+        options: {
+          fromPublishPlan: "publish-plan.json",
+          outDir: ".packed",
+        },
+      },
     ],
   },
   {
@@ -145,12 +264,21 @@ const tests: CommandTest[] = [
     ],
   },
   {
-    command: "tag",
-    fn: tag,
+    command: "git-tag",
+    fn: gitTag,
     cases: [
       {
         args: [],
         options: {},
+      },
+      {
+        args: [],
+        env: {
+          CHANGESETS_OUTPUT: "output.ndjson",
+        },
+        options: {
+          output: "output.ndjson",
+        },
       },
     ],
   },
@@ -183,9 +311,14 @@ const tests: CommandTest[] = [
 
 for (const { command, fn, cases } of tests) {
   describe(`changeset ${command}`, () => {
-    for (const { args, options } of cases) {
+    for (const { args, options, env } of cases) {
       test(`${args.join(" ") || "<no args>"}`, async () => {
         vi.clearAllMocks();
+        if (env) {
+          for (const [name, value] of Object.entries(env)) {
+            vi.stubEnv(name, value);
+          }
+        }
         cli.parse(["node", "changeset", command, ...args], { run: false });
         await cli.runMatchedCommand();
 

@@ -49,7 +49,7 @@ describe("readConfig", () => {
         "linked": [],
         "privatePackages": {
           "tag": false,
-          "version": true,
+          "version": false,
         },
         "snapshot": {
           "useCalculatedVersion": false,
@@ -99,7 +99,6 @@ describe("readConfig", () => {
       "pnpm-workspace.yaml": "packages: ['packages/*']",
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { ["$schema" as never]: _, ...rest } = defaultConfig;
     const result = await readConfig(cwd);
     expect(result.config).toStrictEqual(rest);
@@ -131,7 +130,7 @@ describe("defaultConfig", () => {
         "linked": [],
         "privatePackages": {
           "tag": false,
-          "version": true,
+          "version": false,
         },
         "snapshot": {
           "useCalculatedVersion": false,
@@ -247,7 +246,7 @@ describe("validateConfig", () => {
         config: { fixed: [["pkg-*", "@pkg/*"], ["@pkg-other/a"]] },
         expected: {
           ...defaultConfig,
-          fixed: [["pkg-*", "@pkg/*"], ["@pkg-other/a"]],
+          fixed: [["pkg-a", "pkg-b", "@pkg/a", "@pkg/b"], ["@pkg-other/a"]],
         },
       },
       {
@@ -263,7 +262,7 @@ describe("validateConfig", () => {
         config: { fixed: [["pkg-*", "!pkg-b", "@pkg/*"], ["@pkg-other/a"]] },
         expected: {
           ...defaultConfig,
-          fixed: [["pkg-*", "!pkg-b", "@pkg/*"], ["@pkg-other/a"]],
+          fixed: [["pkg-a", "@pkg/a", "@pkg/b"], ["@pkg-other/a"]],
         },
       },
       {
@@ -284,7 +283,7 @@ describe("validateConfig", () => {
         config: { linked: [["pkg-*", "@pkg/*"], ["@pkg-other/a"]] },
         expected: {
           ...defaultConfig,
-          linked: [["pkg-*", "@pkg/*"], ["@pkg-other/a"]],
+          linked: [["pkg-a", "pkg-b", "@pkg/a", "@pkg/b"], ["@pkg-other/a"]],
         },
       },
       {
@@ -300,7 +299,7 @@ describe("validateConfig", () => {
         config: { linked: [["pkg-*", "!pkg-b", "@pkg/*"], ["@pkg-other/a"]] },
         expected: {
           ...defaultConfig,
-          linked: [["pkg-*", "!pkg-b", "@pkg/*"], ["@pkg-other/a"]],
+          linked: [["pkg-a", "@pkg/a", "@pkg/b"], ["@pkg-other/a"]],
         },
       },
       {
@@ -324,11 +323,38 @@ describe("validateConfig", () => {
         expected: { ...defaultConfig, ignore: ["pkg-a", "@pkg/a", "@pkg/b"] },
       },
       {
+        name: "ignore: allows unmatched globs",
+        pkgs: ["pkg-a", "pkg-b"],
+        config: { ignore: ["not-a-valid-package"] },
+        expected: { ...defaultConfig, ignore: [] },
+      },
+      {
         name: "privatePackages: false",
         config: { privatePackages: false },
         expected: {
           ...defaultConfig,
           privatePackages: { version: false, tag: false },
+        },
+      },
+      {
+        name: "privatePackages: true",
+        config: { privatePackages: true },
+        expected: {
+          ...defaultConfig,
+          privatePackages: { version: true, tag: true },
+        },
+      },
+      {
+        name: "privatePackages: empty object",
+        config: { privatePackages: {} },
+        expected: defaultConfig,
+      },
+      {
+        name: "privatePackages: version",
+        config: { privatePackages: { version: true } },
+        expected: {
+          ...defaultConfig,
+          privatePackages: { version: true, tag: false },
         },
       },
       {
@@ -453,11 +479,11 @@ describe("validateConfig", () => {
         ],
       },
       {
-        name: "rule: noDuplicateFixedPackages: globs",
+        name: "rule: noDuplicateFixedPackages: overlapping glob",
         pkgs: ["pkg-a", "pkg-b"],
-        config: { fixed: [["pkg-*"], ["pkg-*"]] },
+        config: { fixed: [["pkg-*"], ["pkg-a"]] },
         errors: [
-          'Invalid group: The package or glob "pkg-*" is defined in multiple groups',
+          'Invalid group: The package or glob "pkg-a" is defined in multiple groups',
         ],
       },
       // linked
@@ -498,11 +524,11 @@ describe("validateConfig", () => {
         ],
       },
       {
-        name: "rule: noDuplicateLinkedPackages: globs",
+        name: "rule: noDuplicateLinkedPackages: overlapping glob",
         pkgs: ["pkg-a", "pkg-b"],
-        config: { linked: [["pkg-*"], ["pkg-*"]] },
+        config: { linked: [["pkg-*"], ["pkg-a"]] },
         errors: [
-          'Invalid group: The package or glob "pkg-*" is defined in multiple groups',
+          'Invalid group: The package or glob "pkg-a" is defined in multiple groups',
         ],
       },
       // updateInternalDependencies
@@ -522,22 +548,15 @@ describe("validateConfig", () => {
         config: { ignore: [123, "pkg-a"] },
         errors: ["Expected string"],
       },
-      {
-        name: "rule: ignoredPatternsExist",
-        pkgs: [],
-        config: { ignore: ["pkg-a"] },
-        errors: ['Invalid path: The package or glob "pkg-a" does not match'],
-      },
-      {
-        name: "rule: ignoredPatternsExist: glob",
-        pkgs: [],
-        config: { ignore: ["pkg-*"] },
-        errors: ['Invalid path: The package or glob "pkg-*" does not match'],
-      },
       // privatePackages
       {
         name: "privatePackages: should error when a public package depends on a private package skipped via privatePackages.version: false",
         config: { privatePackages: { version: false, tag: false } },
+      },
+      {
+        name: "privatePackages: tag requires version",
+        config: { privatePackages: { tag: true } },
+        errors: ['"tag" is set to "true" but "version" is set to "false"'],
       },
       {
         name: "experimental: onlyUpdatePeerDependentsWhenOutOfRange: non-boolean",

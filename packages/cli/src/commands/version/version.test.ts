@@ -4,11 +4,7 @@ import { stripVTControlCharacters } from "node:util";
 import { defaultConfig } from "@changesets/config";
 import { ExitError } from "@changesets/errors";
 import * as git from "@changesets/git";
-import {
-  linkNodeModules,
-  silenceLogsInBlock,
-  testdir,
-} from "@changesets/test-utils";
+import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import type { Changeset, Config } from "@changesets/types";
 import { writeChangeset } from "@changesets/write";
 import { log } from "@clack/prompts";
@@ -396,8 +392,6 @@ describe("running version in a simple project", () => {
       }),
     });
 
-    await linkNodeModules(cwd);
-
     const ids = await writeChangesets(
       [
         {
@@ -466,8 +460,6 @@ describe("running version in a simple project", () => {
         commit: ["@changesets/cli/commit", null],
       }),
     });
-
-    await linkNodeModules(cwd);
 
     await writeChangesets(
       [
@@ -640,6 +632,7 @@ Awesome feature, hidden behind a feature flag
       "# pkg-a
 
       ## 2.0.0
+
       ### Major Changes
 
       - g1th4sh: a summary with special replacement patterns \`react$\` $'
@@ -848,6 +841,47 @@ describe("fixed", () => {
     );
   });
 
+  it("should expand globs in fixed groups", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "root-pkg",
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify({
+        ...modifiedDefaultConfig,
+        fixed: [["pkg-*"]],
+      }),
+    });
+    await writeChangesets(
+      [
+        {
+          summary: "This is a summary",
+          releases: [{ name: "pkg-a", type: "minor" }],
+        },
+      ],
+      cwd,
+    );
+
+    await version({ cwd });
+
+    expect(await getPkgJSON("pkg-a", cwd)).toEqual(
+      expect.objectContaining({ version: "1.1.0" }),
+    );
+    expect(await getPkgJSON("pkg-b", cwd)).toEqual(
+      expect.objectContaining({ version: "1.1.0" }),
+    );
+  });
+
   it("should not bump an ignored fixed package that depends on a package from the group that is being released", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
@@ -944,13 +978,14 @@ describe("fixed", () => {
       "# pkg-a
 
       ## 1.1.0
+
       ### Minor Changes
 
       - g1th4sh: This is a summary
 
       ### Patch Changes
 
-        - pkg-b@1.1.0
+      - pkg-b@1.1.0
       "
     `);
     expect(await getChangelog("pkg-b", cwd)).toMatchInlineSnapshot(`
@@ -976,22 +1011,24 @@ describe("fixed", () => {
       "# pkg-a
 
       ## 1.2.0
+
       ### Minor Changes
 
       - g1th4sh: This is a summary
 
       ### Patch Changes
 
-        - pkg-b@1.2.0
+      - pkg-b@1.2.0
 
       ## 1.1.0
+
       ### Minor Changes
 
       - g1th4sh: This is a summary
 
       ### Patch Changes
 
-        - pkg-b@1.1.0
+      - pkg-b@1.1.0
       "
     `);
     expect(await getChangelog("pkg-b", cwd)).toMatchInlineSnapshot(`
@@ -1050,6 +1087,50 @@ describe("linked", () => {
     );
     expect(await getPkgJSON("pkg-b", cwd)).toEqual(
       expect.objectContaining({ name: "pkg-b", version: "1.1.0" }),
+    );
+  });
+
+  it("should expand globs in linked groups", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "root-pkg",
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "0.1.0",
+      }),
+      ".changeset/config.json": JSON.stringify({
+        ...modifiedDefaultConfig,
+        linked: [["pkg-*"]],
+      }),
+    });
+    await writeChangesets(
+      [
+        {
+          summary: "This is a summary",
+          releases: [
+            { name: "pkg-a", type: "minor" },
+            { name: "pkg-b", type: "patch" },
+          ],
+        },
+      ],
+      cwd,
+    );
+
+    await version({ cwd });
+
+    expect(await getPkgJSON("pkg-a", cwd)).toEqual(
+      expect.objectContaining({ version: "1.1.0" }),
+    );
+    expect(await getPkgJSON("pkg-b", cwd)).toEqual(
+      expect.objectContaining({ version: "1.1.0" }),
     );
   });
 
@@ -1198,6 +1279,46 @@ describe("workspace range", () => {
     ]);
   });
 
+  it("should update root package.json references to bumped workspace packages", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "root-pkg",
+        workspaces: ["packages/*"],
+        devDependencies: {
+          "pkg-b": "workspace:^1.0.0",
+        },
+      }),
+      "package-lock.json": "",
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
+    });
+
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-b", type: "minor" }],
+        summary: "a very useful summary for the change",
+      },
+      cwd,
+    );
+    await version({ cwd });
+
+    const rootPackageJson = JSON.parse(
+      await fs.readFile(path.join(cwd, "package.json"), "utf8"),
+    );
+    expect(rootPackageJson).toEqual({
+      private: true,
+      name: "root-pkg",
+      workspaces: ["packages/*"],
+      devDependencies: {
+        "pkg-b": "workspace:^1.1.0",
+      },
+    });
+  });
+
   it("should not bump dependent package when patch bumping a `workspace:^` dependency", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
@@ -1331,6 +1452,7 @@ describe("workspace range", () => {
       "# pkg-a
 
       ## 1.1.0
+
       ### Minor Changes
 
       - g1th4sh: This is a summary
@@ -1341,6 +1463,7 @@ describe("workspace range", () => {
       "# pkg-b
 
       ## 1.0.1
+
       ### Patch Changes
 
       - Updated dependencies [g1th4sh]
@@ -1349,7 +1472,7 @@ describe("workspace range", () => {
     `);
   });
 
-  it("should bump major bump peer-dependent when workspace:~ dependency gets a minor bump (without onlyUpdatePeerDependentsWhenOutOfRange)", async () => {
+  it("should patch bump peer-dependent when workspace:~ dependency gets a minor bump (without onlyUpdatePeerDependentsWhenOutOfRange)", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -1364,7 +1487,7 @@ describe("workspace range", () => {
       "packages/pkg-b/package.json": JSON.stringify({
         name: "pkg-b",
         version: "1.0.0",
-        peerDependencies: { "pkg-a": "workspace:^" },
+        peerDependencies: { "pkg-a": "workspace:~" },
       }),
       ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
     });
@@ -1382,6 +1505,7 @@ describe("workspace range", () => {
       "# pkg-a
 
       ## 1.1.0
+
       ### Minor Changes
 
       - g1th4sh: This is a summary
@@ -1391,7 +1515,8 @@ describe("workspace range", () => {
     expect(await getChangelog("pkg-b", cwd)).toMatchInlineSnapshot(`
       "# pkg-b
 
-      ## 2.0.0
+      ## 1.0.1
+
       ### Patch Changes
 
       - Updated dependencies [g1th4sh]
@@ -1439,6 +1564,7 @@ describe("workspace range", () => {
       "# pkg-a
 
       ## 1.1.0
+
       ### Minor Changes
 
       - g1th4sh: This is a summary
@@ -2077,6 +2203,7 @@ describe("updateInternalDependents: always", () => {
       "# pkg-a
 
       ## 1.0.1
+
       ### Patch Changes
 
       - Updated dependencies [g1th4sh]
@@ -2087,6 +2214,7 @@ describe("updateInternalDependents: always", () => {
       "# pkg-b
 
       ## 1.0.1
+
       ### Patch Changes
 
       - g1th4sh: This is not a summary
@@ -2162,6 +2290,7 @@ describe("updateInternalDependents: always", () => {
       "# pkg-a
 
       ## 1.1.0
+
       ### Minor Changes
 
       - g1th4sh: This is a summary
@@ -2238,6 +2367,7 @@ describe("updateInternalDependents: always", () => {
       "# pkg-b
 
       ## 1.0.1
+
       ### Patch Changes
 
       - g1th4sh: This is some fix
@@ -2305,6 +2435,7 @@ describe("updateInternalDependents: always", () => {
       "# pkg-a
 
       ## 1.1.0
+
       ### Minor Changes
 
       - g1th4sh: This is a summary
@@ -2315,6 +2446,7 @@ describe("updateInternalDependents: always", () => {
       "# pkg-b
 
       ## 1.0.1
+
       ### Patch Changes
 
       - g1th4sh: This is some fix
@@ -2462,6 +2594,7 @@ describe("pre", () => {
       "# pkg-a
 
       ## 1.1.0
+
       ### Minor Changes
 
       - g1th4sh: a very useful summary for the third change
@@ -2474,21 +2607,25 @@ describe("pre", () => {
         - pkg-b@1.0.1
 
       ## 1.1.0-next.3
+
       ### Minor Changes
 
       - g1th4sh: a very useful summary for the third change
 
       ## 1.0.1-next.2
+
       ### Patch Changes
 
       - g1th4sh: a very useful summary for the second change
 
       ## 1.0.1-next.1
+
       ### Patch Changes
 
       - g1th4sh: a very useful summary
 
       ## 1.0.1-next.0
+
       ### Patch Changes
 
       - Updated dependencies [g1th4sh]
@@ -2504,11 +2641,13 @@ describe("pre", () => {
       "# pkg-b
 
       ## 1.0.1
+
       ### Patch Changes
 
       - g1th4sh: a very useful summary for the first change
 
       ## 1.0.1-next.0
+
       ### Patch Changes
 
       - g1th4sh: a very useful summary for the first change
@@ -3680,6 +3819,59 @@ Nice simple summary, much wow
       {
         name: "pkg-b",
         version: "1.1.0",
+      },
+    ]);
+  });
+
+  it("should update dependencies in a private package without a version field", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "root-pkg",
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        private: true,
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify({
+        ...modifiedDefaultConfig,
+        privatePackages: {
+          version: false,
+          tag: false,
+        },
+      }),
+    });
+
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-b", type: "patch" }],
+        summary: "a very useful summary",
+      },
+      cwd,
+    );
+    await version({ cwd });
+
+    const packages = await getPackages(cwd);
+    expect(packages.packages.map((x) => x.packageJson)).toEqual([
+      {
+        name: "pkg-a",
+        private: true,
+        dependencies: {
+          "pkg-b": "1.0.1",
+        },
+      },
+      {
+        name: "pkg-b",
+        version: "1.0.1",
       },
     ]);
   });

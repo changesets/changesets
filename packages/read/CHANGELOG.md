@@ -1,5 +1,59 @@
 # @changesets/read
 
+## 1.0.0-next.10
+
+### Major Changes
+
+- [#2190](https://github.com/changesets/changesets/pull/2190) [`96b65ee`](https://github.com/changesets/changesets/commit/96b65eec4af2c58301a11cd7dff42a6bde9c9f8a) Thanks [@bluwy](https://github.com/bluwy)! - Move versioned prerelease changesets to `.changeset/pre/` folder instead of accumulating in the root and tracking the versioned changeset ids in the `.changeset/pre.json` file. Existing `pre.json` will auto-migrate to this new structure on the next run of `changeset version` or when calling `changeset status`.
+
+  This change allows easier management of versioned prerelease changesets (for the final stable release) and current queued changesets (for the next prerelease). Changesets in `.changeset/pre/` can be edited or deleted depending if it's still relevant for the final stable release of a package. There's no need to synchronize the changeset ids in `pre.json` if certain changesets are deleted.
+
+### Patch Changes
+
+- Updated dependencies [[`96b65ee`](https://github.com/changesets/changesets/commit/96b65eec4af2c58301a11cd7dff42a6bde9c9f8a), [`96b65ee`](https://github.com/changesets/changesets/commit/96b65eec4af2c58301a11cd7dff42a6bde9c9f8a)]:
+  - @changesets/git@4.0.0-next.9
+  - @changesets/types@7.0.0-next.9
+  - @changesets/parse@1.0.0-next.10
+
+## 1.0.0-next.9
+
+### Patch Changes
+
+- Updated dependencies [[`a736a20`](https://github.com/changesets/changesets/commit/a736a20c230a89232a122fe12ffd612361e0eef9), [`b5e1762`](https://github.com/changesets/changesets/commit/b5e1762584718ec607ea79db0a00ae4238f8a784)]:
+  - @changesets/git@4.0.0-next.8
+  - @changesets/types@7.0.0-next.8
+  - @changesets/parse@1.0.0-next.9
+
+## 1.0.0-next.8
+
+### Patch Changes
+
+- [#2160](https://github.com/changesets/changesets/pull/2160) [`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640) Thanks [@beeequeue](https://github.com/beeequeue)! - Added or modified the `files` property in the manifest. This should not change any behavior.
+- Updated dependencies [[`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640)]:
+  - @changesets/git@4.0.0-next.7
+  - @changesets/parse@1.0.0-next.8
+  - @changesets/types@7.0.0-next.7
+
+## 1.0.0-next.7
+
+### Patch Changes
+
+- Updated dependencies [[`4c26f2f`](https://github.com/changesets/changesets/commit/4c26f2faac89b53d3305cf73c9e9cfca5aa88f5f), [`813bbf3`](https://github.com/changesets/changesets/commit/813bbf314d051bfee3b46a793f94b396ef2a4df1), [`6c79210`](https://github.com/changesets/changesets/commit/6c79210fabfe13d82ca4ac4dc92aab9b58fd58fd)]:
+  - @changesets/types@7.0.0-next.6
+  - @changesets/git@4.0.0-next.6
+  - @changesets/parse@1.0.0-next.7
+
+## 1.0.0-next.6
+
+### Minor Changes
+
+- [#2066](https://github.com/changesets/changesets/pull/2066) [`c2348fc`](https://github.com/changesets/changesets/commit/c2348fcb9eba443fde1460b595651ce040f40a08) Thanks [@bluwy](https://github.com/bluwy)! - Ignore more markdown files in the `.changeset` directory when reading changesets, including AGENTS.md, CLAUDE.md, and GEMINI.md
+
+### Patch Changes
+
+- Updated dependencies [[`1c1ded3`](https://github.com/changesets/changesets/commit/1c1ded38fe0a0e332baa124c4b89e0688a255ff2)]:
+  - @changesets/parse@1.0.0-next.6
+
 ## 1.0.0-next.5
 
 ### Patch Changes

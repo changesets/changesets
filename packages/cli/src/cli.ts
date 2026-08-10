@@ -17,7 +17,7 @@ cli.help((sections) => {
 cli.globalCommand.outputVersion = () => console.info(manifest.version);
 
 function normalizeOptions(
-  options: Record<string, any>,
+  options: Record<string, unknown>,
   { array }: { array?: string[] } = {},
 ) {
   // Do not allow positional arguments in options
@@ -31,9 +31,23 @@ function normalizeOptions(
     }
 
     // If the flag is expected to be an array, ensure it's an array.
+    // Also expand comma-separated values so that e.g. `--minor pkg1,pkg2`
+    // is treated the same as `--minor pkg1 --minor pkg2`.
     if (array?.includes(key)) {
       const v = options[key];
-      options[key] = Array.isArray(v) ? v.map(String) : [String(v)];
+      const values = Array.isArray(v)
+        ? v.map(String)
+        : [
+            // those won't actually be objects and we want to stringify other primitive types
+            // eslint-disable-next-line @typescript-eslint/no-base-to-string
+            String(v),
+          ];
+      options[key] = values.flatMap((value) =>
+        value
+          .split(",")
+          .map((part) => part.trim())
+          .filter(Boolean),
+      );
     }
     // If a flag is passed multiple times (becoming an array), only take the last value.
     else if (Array.isArray(options[key])) {
@@ -45,6 +59,14 @@ function normalizeOptions(
     if (typeof options[key] === "number") {
       options[key] = String(options[key]);
     }
+  }
+
+  return options;
+}
+
+function withEnvOptions(options: Record<string, unknown>) {
+  if (options.output == null && process.env.CHANGESETS_OUTPUT) {
+    options.output = process.env.CHANGESETS_OUTPUT;
   }
 }
 
@@ -69,8 +91,11 @@ cli
     "Detect changed packages since the provided git ref",
   )
   .option("-m, --message <text>", "Directly provide a message to the changeset")
+  .option("--major <pkg>", "Package(s) to major bump (comma-separated)")
+  .option("--minor <pkg>", "Package(s) to minor bump (comma-separated)")
+  .option("--patch <pkg>", "Package(s) to patch bump (comma-separated)")
   .action(async (options) => {
-    normalizeOptions(options);
+    normalizeOptions(options, { array: ["major", "minor", "patch"] });
     const { add } = await import("./commands/add/index.ts");
     await add(options);
   });
@@ -97,11 +122,41 @@ cli
   .example("  $ changeset publish --tag beta")
   .option("--otp <code>", "One time password for npm publish")
   .option("--tag <name>", "Publish with the given npm dist-tag")
+  .option("--from-pack-dir <dir>", "Publish from a packed output directory")
   .option("--git-tag", "Create a git tag for the release", { default: true })
   .action(async (options) => {
-    normalizeOptions(options);
+    withEnvOptions(normalizeOptions(options));
     const { publish } = await import("./commands/publish/index.ts");
     await publish(options);
+  });
+
+cli
+  .command("publish-plan", "Show packages that are ready to publish or tag")
+  .option(
+    "-o, --output <file>",
+    "Output the publish plan as JSON to a file [experimental]",
+  )
+  .action(async (options) => {
+    withEnvOptions(normalizeOptions(options));
+    const { publishPlan } = await import("./commands/publish-plan/index.ts");
+    await publishPlan(options);
+  });
+
+cli
+  .command("pack", "Pack publishable packages into tarballs")
+  .option(
+    "--from-publish-plan <file>",
+    "Read the publish plan from a JSON file",
+  )
+  .option("--out-dir <dir>", "Write pack output into this directory")
+  .action(async (options) => {
+    normalizeOptions(options);
+    if (!options.outDir) {
+      log.error("The --out-dir option is required.");
+      throw new ExitError(1);
+    }
+    const { pack } = await import("./commands/pack/index.ts");
+    await pack(options);
   });
 
 cli
@@ -111,17 +166,23 @@ cli
   .option("-v, --verbose", "Show more information about the changesets")
   .option("-o, --output <file>", "Output the status as JSON to a file")
   .action(async (options) => {
-    normalizeOptions(options);
+    withEnvOptions(normalizeOptions(options));
     const { status } = await import("./commands/status/index.ts");
     await status(options);
   });
 
 cli
-  .command("tag", "Create git tags for the current version of all packages")
+  .command("git-tag", "Create git tags for the current version of all packages")
+  .alias("tag")
   .action(async (options) => {
-    normalizeOptions(options);
-    const { tag } = await import("./commands/tag/index.ts");
-    await tag(options);
+    if (cli.matchedCommandName === "tag") {
+      log.warn(
+        "The 'tag' command is deprecated. Please use 'git-tag' instead.",
+      );
+    }
+    withEnvOptions(normalizeOptions(options));
+    const { gitTag } = await import("./commands/git-tag/index.ts");
+    await gitTag(options);
   });
 
 cli

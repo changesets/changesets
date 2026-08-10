@@ -1,3 +1,6 @@
+> [!WARNING]
+> This documentation is outdated. View the up-to-date version at https://changesets.dev/guide/config
+
 # Configuring Changesets
 
 Changesets has a minimal amount of configuration options. Mostly these are for when you need to change the default workflows. These are stored in `.changeset/config.json`. Our default config is:
@@ -15,7 +18,7 @@ Changesets has a minimal amount of configuration options. Mostly these are for w
   "bumpVersionsWithWorkspaceProtocolOnly": false,
   "changedFilePatterns": ["**"],
   "format": "auto",
-  "privatePackages": { "version": true, "tag": false }
+  "privatePackages": { "version": false, "tag": false }
 }
 ```
 
@@ -73,7 +76,7 @@ This option allows you to specify some packages that will not be published, even
 There are two caveats to this.
 
 1. If the package is mentioned in a changeset that also includes a package that is not ignored, publishing will fail.
-2. If the package requires one of its dependencies to be updated as part of a publish.
+2. If the package requires one of its dependencies to be updated as part of a publish, publishing will also fail.
 
 These restrictions exist to ensure your repository or published code do not end up in a broken state. For a more detailed intricacies of publishing, check out our guide on [problems publishing in monorepos](./problems-publishing-in-monorepos.md).
 
@@ -158,11 +161,21 @@ You would specify our github changelog generator with:
 
 ```json
 {
+  "changelog": "@changesets/changelog-github"
+}
+```
+
+Alternatively, you can provide the repo name via options:
+
+```json
+{
   "changelog": ["@changesets/changelog-github", { "repo": "<org>/<repo>" }]
 }
 ```
 
-If you want to disable thank you messages, add `"disableThanks": true` to the options.
+When running in GitHub Actions, `repo` is optional because it defaults to the `GITHUB_REPOSITORY` environment variable.
+
+If you want to disable thank you messages, add `"disableThanks": true` to the options. For the full set of `@changesets/changelog-github` options (including the experimental `template` option), see its [README](../packages/changelog-github/README.md).
 
 For more details on these functions and information on how to write your own see [changelog-functions](./modifying-changelog-format.md)
 
@@ -217,13 +230,13 @@ Default value: `true`
 }
 ```
 
-## `privatePackages` (object or false)
+## `privatePackages` (object or boolean)
 
-This option is for setting how private packages should be handled. By default, Changesets will update the changelog for private packages and update their version, but will not create a tag. You can configure this option to change the default behavior.
+This option is for setting how private packages should be handled. By default, Changesets will not version or tag private packages. Set it to `true` to version and tag private packages, or use the object form to configure each behavior separately.
 
 ### `version` (optional boolean)
 
-Default value: `true`
+Default value: `false`
 
 When `version` is set to `true`, Changesets will update the version for private packages. If set to `false`, Changesets will not update the version for private packages.
 
@@ -237,9 +250,17 @@ When `tag` is set to `true`, Changesets will create a tag for private packages. 
 
 ```json
 {
+  "privatePackages": true
+}
+```
+
+This is equivalent to:
+
+```json
+{
   "privatePackages": {
     "version": true,
-    "tag": false
+    "tag": true
   }
 }
 ```

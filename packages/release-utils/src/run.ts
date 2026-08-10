@@ -2,7 +2,6 @@ import { createRequire } from "node:module";
 import path from "node:path";
 import type { Package } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
-import semverLt from "semver/functions/lt.js";
 import { exec } from "tinyexec";
 import * as gitUtils from "./gitUtils.ts";
 import { readChangesetState } from "./readChangesetState.ts";
@@ -127,14 +126,11 @@ export async function runVersion({
         paths: [cwd],
       },
     );
-    const args = [];
-    args.push(path.join(path.dirname(changesetsCliPkgJsonPath), "bin.js"));
-    args.push(
-      semverLt(require(changesetsCliPkgJsonPath).version, "2.0.0")
-        ? "bump"
-        : "version",
-    );
-    await exec("node", args, { nodeOptions: { cwd } });
+    const args = [
+      path.join(path.dirname(changesetsCliPkgJsonPath), "bin.js"),
+      "version",
+    ];
+    await exec("node", args, { throwOnError: true, nodeOptions: { cwd } });
   }
 
   const changedPackages = await getChangedPackages(cwd, versionsByDirectory);

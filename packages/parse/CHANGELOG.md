@@ -1,5 +1,40 @@
 # @changesets/parse
 
+## 1.0.0-next.10
+
+### Patch Changes
+
+- Updated dependencies [[`96b65ee`](https://github.com/changesets/changesets/commit/96b65eec4af2c58301a11cd7dff42a6bde9c9f8a)]:
+  - @changesets/types@7.0.0-next.9
+
+## 1.0.0-next.9
+
+### Patch Changes
+
+- Updated dependencies [[`b5e1762`](https://github.com/changesets/changesets/commit/b5e1762584718ec607ea79db0a00ae4238f8a784)]:
+  - @changesets/types@7.0.0-next.8
+
+## 1.0.0-next.8
+
+### Patch Changes
+
+- [#2160](https://github.com/changesets/changesets/pull/2160) [`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640) Thanks [@beeequeue](https://github.com/beeequeue)! - Added or modified the `files` property in the manifest. This should not change any behavior.
+- Updated dependencies [[`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640)]:
+  - @changesets/types@7.0.0-next.7
+
+## 1.0.0-next.7
+
+### Patch Changes
+
+- Updated dependencies [[`4c26f2f`](https://github.com/changesets/changesets/commit/4c26f2faac89b53d3305cf73c9e9cfca5aa88f5f), [`813bbf3`](https://github.com/changesets/changesets/commit/813bbf314d051bfee3b46a793f94b396ef2a4df1)]:
+  - @changesets/types@7.0.0-next.6
+
+## 1.0.0-next.6
+
+### Patch Changes
+
+- [#2083](https://github.com/changesets/changesets/pull/2083) [`1c1ded3`](https://github.com/changesets/changesets/commit/1c1ded38fe0a0e332baa124c4b89e0688a255ff2) Thanks [@bluwy](https://github.com/bluwy)! - Refactor yaml parsing to use the `yaml` package
+
 ## 1.0.0-next.5
 
 ### Patch Changes

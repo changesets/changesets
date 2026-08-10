@@ -1,6 +1,6 @@
+import fs from "node:fs/promises";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
-import { gitdir, outputFile, testdir } from "@changesets/test-utils";
+import { gitdir, outputFile, shallowClone } from "@changesets/test-utils";
 import { writeChangeset } from "@changesets/write";
 import { exec } from "tinyexec";
 import { describe, expect, it } from "vitest";
@@ -25,7 +25,7 @@ async function getCommitCount(cwd: string) {
   return parseInt(cmd.stdout.toString(), 10);
 }
 
-describe("git", () => {
+describe("git", { tags: ["slow"] }, () => {
   describe("getDivergedCommit", () => {
     it("should return same commit when branches have not diverged", async () => {
       const cwd = await gitdir({
@@ -291,28 +291,15 @@ describe("git", () => {
         return commitSha;
       }
 
-      async function createShallowClone(
-        depth: number,
+      async function renameFileAndCommit(
+        fileA: string,
+        fileB: string,
         cwd: string,
-      ): Promise<string> {
-        // Make a 1-commit-deep shallow clone of this repo
-        const cloneDir = await testdir();
-        await exec(
-          "git",
-          // Note: a file:// URL is needed in order to make a shallow clone of
-          // a local repo
-          [
-            "clone",
-            "--depth",
-            depth.toString(),
-            pathToFileURL(cwd).toString(),
-            ".",
-          ],
-          {
-            nodeOptions: { cwd: cloneDir },
-          },
-        );
-        return cloneDir;
+      ) {
+        await fs.rename(path.join(cwd, fileA), path.join(cwd, fileB));
+        await add(fileA, cwd);
+        await add(fileB, cwd);
+        await commit(`rename file ${fileA} to ${fileB}`, cwd);
       }
 
       it("reads the SHA of a file-add without deepening if commit already included in the shallow clone", async () => {
@@ -327,7 +314,7 @@ describe("git", () => {
         await outputFile(path.join(cwd, "b.js"), 'export default "b"');
         const originalCommit = await addFileAndCommit("b.js", cwd);
 
-        const clone = await createShallowClone(5, cwd);
+        const clone = await shallowClone(cwd, 5);
 
         // This file was added in the head commit, so will definitely be in our
         // 1-commit clone.
@@ -350,7 +337,7 @@ describe("git", () => {
         const originalCommit = await addFileAndCommit("b.js", cwd);
         await createDummyCommits((shallowCloneDeepeningAmount * 2) / 3, cwd);
 
-        const clone = await createShallowClone(5, cwd);
+        const clone = await shallowClone(cwd, 5);
 
         // Finding this commit will require deepening the clone until it appears.
         const commit = (
@@ -362,7 +349,7 @@ describe("git", () => {
         const originalRepoDepth = await getCommitCount(cwd);
         expect(await getCommitCount(clone)).toBeGreaterThan(5);
         expect(await getCommitCount(clone)).toBeLessThan(originalRepoDepth);
-      }, 10_000);
+      });
 
       it("reads the SHA of a file-add even if the first commit of a repo", async () => {
         const cwd = await gitdir({
@@ -373,7 +360,7 @@ describe("git", () => {
         // of the repo history, and coping with a commit that has no parent.
         const originalCommit = await getCurrentCommitId({ cwd });
         await createDummyCommits(shallowCloneDeepeningAmount * 2, cwd);
-        const clone = await createShallowClone(5, cwd);
+        const clone = await shallowClone(cwd, 5);
 
         // Finding this commit will require fully deepening the repo
         const commit = (
@@ -384,7 +371,7 @@ describe("git", () => {
         // We should have fully deepened
         const originalRepoDepth = await getCommitCount(cwd);
         expect(await getCommitCount(clone)).toEqual(originalRepoDepth);
-      }, 10_000);
+      });
 
       it("can return SHAs for multiple files including return blanks for missing files", async () => {
         const cwd = await gitdir({
@@ -403,7 +390,7 @@ describe("git", () => {
         await outputFile(path.join(cwd, "c.js"), 'export default "c"');
         const originalCommit2 = await addFileAndCommit("c.js", cwd);
 
-        const clone = await createShallowClone(5, cwd);
+        const clone = await shallowClone(cwd, 5);
 
         const commits = await getCommitsThatAddFiles(
           ["b.js", "this-file-does-not-exist", "c.js"],
@@ -411,7 +398,32 @@ describe("git", () => {
         );
 
         expect(commits).toEqual([originalCommit1, undefined, originalCommit2]);
-      }, 10_000);
+      });
+
+      it("reads the SHA of a file-add even if renamed", async () => {
+        const cwd = await gitdir({
+          "a.js": 'export default "a"',
+        });
+        const originalCommit = await getCurrentCommitId({ cwd });
+
+        await renameFileAndCommit("a.js", "b.js", cwd);
+
+        const clone = await shallowClone(cwd, 1);
+        const commits = await getCommitsThatAddFiles(["b.js"], { cwd: clone });
+        expect(commits).toEqual([originalCommit]);
+      });
+
+      it("reads the SHA of a file-add even if renamed in later commits", async () => {
+        const cwd = await gitdir({});
+        await outputFile(path.join(cwd, "a.js"), 'export default "a"');
+        const originalCommit = await addFileAndCommit("a.js", cwd);
+
+        await renameFileAndCommit("a.js", "b.js", cwd);
+
+        const clone = await shallowClone(cwd, 1);
+        const commits = await getCommitsThatAddFiles(["b.js"], { cwd: clone });
+        expect(commits).toEqual([originalCommit]);
+      });
     });
   });
 

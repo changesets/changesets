@@ -47,7 +47,7 @@ describe("assembleReleasePlan", () => {
     );
 
     expect(releases.length).toBe(1);
-    expect(/0\.0\.0-\d{14}/.test(releases[0].newVersion)).toBeTruthy();
+    expect(releases[0].newVersion).toMatch(/0\.0\.0-\d{14}/);
   });
 
   it("should assemble plan for basic setup with snapshot and tag", () => {
@@ -62,7 +62,7 @@ describe("assembleReleasePlan", () => {
     );
 
     expect(releases.length).toBe(1);
-    expect(/0\.0\.0-foo-\d{14}/.test(releases[0].newVersion)).toBeTruthy();
+    expect(releases[0].newVersion).toMatch(/0\.0\.0-foo-\d{14}/);
   });
 
   it("should assemble plan with multiple packages", () => {
@@ -595,7 +595,7 @@ describe("assembleReleasePlan", () => {
         },
         {
           name: "pkg-b",
-          newVersion: "2.0.0",
+          newVersion: "1.0.1",
         },
       ]);
     });
@@ -734,9 +734,57 @@ describe("assembleReleasePlan", () => {
         },
         {
           name: "pkg-b",
-          newVersion: "2.0.0",
+          newVersion: "1.0.1",
         },
       ]);
+    });
+
+    // https://github.com/changesets/changesets/issues/963
+    // https://github.com/changesets/changesets/issues/1759
+    it("should not bump fixed packages due to peer dependents", () => {
+      const setup = new FakeFullState({ changesets: [] });
+
+      setup.addPackage("@ex/core", "0.1.0");
+      setup.addPackage("@ex/errors", "0.1.0");
+      setup.addPackage("@ex/api", "0.1.0");
+      setup.addPackage("some-peer", "0.1.0"); // optional peer
+      setup.addPackage("@ex/components", "0.1.0");
+
+      setup.updateDependencies("@ex/api", [
+        { name: "@ex/core", range: "0.1.0" },
+        { name: "@ex/errors", range: "0.1.0" },
+        { name: "some-peer", range: "0.1.0", type: "peer" },
+      ]);
+      setup.updateDependencies("@ex/components", [
+        { name: "@ex/api", range: "0.1.0" },
+        { name: "some-peer", range: "0.1.0" },
+      ]);
+
+      setup.addChangeset({ releases: [{ name: "@ex/core", type: "minor" }] });
+
+      const result = assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        {
+          ...defaultConfig,
+          fixed: [
+            [
+              "@ex/core",
+              "@ex/errors",
+              "@ex/api",
+              "some-peer",
+              "@ex/components",
+            ],
+          ],
+        },
+        undefined,
+      );
+
+      expect(result.releases).toHaveLength(5);
+      expect(
+        result.releases.every((release) => release.newVersion === "0.2.0"),
+        "every bump should be to 0.2.0",
+      ).toBe(true);
     });
   });
 
@@ -749,9 +797,7 @@ describe("assembleReleasePlan", () => {
           ...defaultConfig,
         },
         {
-          changesets: [],
           tag: "next",
-          initialVersions: {},
           mode: "exit",
         },
       );
@@ -766,6 +812,12 @@ describe("assembleReleasePlan", () => {
       setup.updatePackage("pkg-b", "1.0.1-next.0");
       setup.updateDevDependency("pkg-b", "pkg-a", "1.0.1-next.0");
 
+      setup.changesets = [];
+      setup.addChangeset({
+        id: "pre/strange-words-combine",
+        releases: [{ name: "pkg-a", type: "patch" }],
+      });
+
       const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
@@ -773,12 +825,7 @@ describe("assembleReleasePlan", () => {
           ...defaultConfig,
         },
         {
-          changesets: ["strange-words-combine"],
           tag: "next",
-          initialVersions: {
-            "pkg-a": "1.0.0",
-            "pkg-b": "1.0.0",
-          },
           mode: "exit",
         },
       );
@@ -795,6 +842,12 @@ describe("assembleReleasePlan", () => {
       setup.updatePackage("pkg-b", "1.0.1-next.0");
       setup.updateDevDependency("pkg-b", "pkg-a", "1.0.1-next.0");
 
+      setup.changesets = [];
+      setup.addChangeset({
+        id: "pre/strange-words-combine",
+        releases: [{ name: "pkg-a", type: "patch" }],
+      });
+
       const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
@@ -803,12 +856,7 @@ describe("assembleReleasePlan", () => {
           ignore: ["pkg-b"],
         },
         {
-          changesets: ["strange-words-combine"],
           tag: "next",
-          initialVersions: {
-            "pkg-a": "1.0.0",
-            "pkg-b": "1.0.0",
-          },
           mode: "exit",
         },
       );
@@ -850,7 +898,7 @@ describe("assembleReleasePlan", () => {
     it("should return a release with the highest bump type within the current release despite of having a higher release among previous prereleases", () => {
       // previous release
       setup.addChangeset({
-        id: "major-bumping-one",
+        id: "pre/major-bumping-one",
         releases: [
           {
             name: "pkg-a",
@@ -877,13 +925,7 @@ describe("assembleReleasePlan", () => {
           ...defaultConfig,
         },
         {
-          changesets: ["major-bumping-one"],
           tag: "next",
-          initialVersions: {
-            "pkg-a": "1.0.0",
-            "pkg-b": "1.0.0",
-            "pkg-c": "1.0.0",
-          },
           mode: "pre",
         },
       );
@@ -1065,28 +1107,25 @@ describe("dependent bumping", () => {
     Record<VersionType, Record<Range, string>>
   >;
 
+  const defaultBumps: ExpectationTable[DepKind] = {
+    none: { "^": "1.0.0", "~": "1.0.0", "=": "1.0.0" },
+    patch: { "^": "1.0.0", "~": "1.0.0", "=": "1.0.1" },
+    minor: { "^": "1.0.0", "~": "1.0.1", "=": "1.0.1" },
+    major: { "^": "1.0.1", "~": "1.0.1", "=": "1.0.1" },
+  };
+
   // oxfmt-ignore
   const baseExpectations: ExpectationTable = {
-    // direct dependent has to be bumped only when dependency falls out of allowed range
+    // direct and peer dependents have to be bumped only when dependency falls out of allowed range
     // otherwise, installing the latest versions of dependent and dependency would result in duplicate dependency package in the tree
-    dep: {
-      none:  { "^": "1.0.0", "~": "1.0.0", "=": "1.0.0" },
-      patch: { "^": "1.0.0", "~": "1.0.0", "=": "1.0.1" },
-      minor: { "^": "1.0.0", "~": "1.0.1", "=": "1.0.1" },
-      major: { "^": "1.0.1", "~": "1.0.1", "=": "1.0.1" },
-    },
+    dep: defaultBumps,
+    peer: defaultBumps,
     // devDependent should stay untouched, given the dev dependency doesn't affect production installations
     dev: {
       none:  { "^": "1.0.0", "~": "1.0.0", "=": "1.0.0" },
       patch: { "^": "1.0.0", "~": "1.0.0", "=": "1.0.0" },
       minor: { "^": "1.0.0", "~": "1.0.0", "=": "1.0.0" },
       major: { "^": "1.0.0", "~": "1.0.0", "=": "1.0.0" },
-    },
-    peer: {
-      none:  { "^": "1.0.0", "~": "1.0.0", "=": "1.0.0" },
-      patch: { "^": "1.0.0", "~": "1.0.0", "=": "1.0.1" },
-      minor: { "^": "2.0.0", "~": "2.0.0", "=": "2.0.0" },
-      major: { "^": "2.0.0", "~": "2.0.0", "=": "2.0.0" },
     },
   };
 
@@ -1273,18 +1312,17 @@ describe("dependent bumping", () => {
       },
       peer: {
         patch: { "^": "1.0.1", "~": "1.0.1" },
+        minor: { "^": "1.0.1" },
       },
     },
   });
 
+  // should not affect dependent bumps
   describeDependentBumping("onlyUpdatePeerDependentsWhenOutOfRange: true", {
     config: {
       ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
         onlyUpdatePeerDependentsWhenOutOfRange: true,
       },
-    },
-    overrides: {
-      peer: { minor: { "^": "1.0.0" } },
     },
   });
 

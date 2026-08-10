@@ -93,13 +93,13 @@ describe("simple project", () => {
 
   it("should format if user doesn't opt out", async () => {
     const cwd = await testdir({
+      ".oxfmtrc.json": "{}",
       "package.json": JSON.stringify({
         private: true,
         name: "root-pkg",
-        workspaces: ["packages/*"],
-        prettier: {},
       }),
-      "package-lock.json": "",
+      "pnpm-workspace.yaml": "packages: ['packages/*']",
+      "pnpm-lock.yaml": "",
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
@@ -127,7 +127,7 @@ describe("simple project", () => {
     expect(detectFormatter).toHaveReturnedWith(Promise.resolve("prettier"));
     expect(format).toHaveBeenCalledWith([mdPath], {
       cwd,
-      formatter: "prettier",
+      formatter: "oxfmt",
     });
   });
 

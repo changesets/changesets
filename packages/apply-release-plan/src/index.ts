@@ -11,6 +11,7 @@ import * as git from "@changesets/git";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import type {
   ChangelogFunctions,
+  ComprehensiveRelease,
   Packages,
   Config,
   ModCompWithPackage,
@@ -18,11 +19,11 @@ import type {
   ReleasePlan,
 } from "@changesets/types";
 import { resolve } from "import-meta-resolve";
-import { editJson } from "./edit-json.ts";
+import { editJson, type EditJsonOperation } from "./edit-json.ts";
 import { getChangelogEntry } from "./get-changelog-entry.ts";
 import {
-  versionPackage,
-  type ModCompWithPackageAndChangelog,
+  getDependencyVersionEdits,
+  type DependencyUpdateOptions,
 } from "./version-package.ts";
 
 function importResolveFromDir(specifier: string, dir: string) {
@@ -58,6 +59,18 @@ async function getFormatter(
   return async (patterns: string[]) => {
     await format(patterns, { cwd, formatter });
   };
+}
+
+async function updatePackageJson(dir: string, edits: EditJsonOperation[]) {
+  if (edits.length === 0) {
+    return;
+  }
+
+  const pkgJsonPath = path.resolve(dir, "package.json");
+  const pkgRaw = await fs.readFile(pkgJsonPath, "utf8");
+  const pkgUpdated = editJson(pkgRaw, edits);
+  await fs.writeFile(pkgJsonPath, pkgUpdated);
+  return pkgJsonPath;
 }
 
 export async function applyReleasePlan(
@@ -98,54 +111,47 @@ export async function applyReleasePlan(
     contextDir,
   );
 
-  if (releasePlan.preState != null && snapshot == null) {
-    if (releasePlan.preState.mode === "exit") {
-      await fs.rm(path.join(cwd, ".changeset", "pre.json"), {
-        recursive: true,
-        force: true,
-      });
-    } else {
-      await fs.writeFile(
-        path.join(cwd, ".changeset", "pre.json"),
-        JSON.stringify(releasePlan.preState, null, 2) + "\n",
-      );
-    }
+  if (releasePlan.preState?.mode === "exit" && snapshot == null) {
+    await fs.rm(path.join(cwd, ".changeset", "pre.json"), {
+      recursive: true,
+      force: true,
+    });
     touchedFiles.push(path.join(cwd, ".changeset", "pre.json"));
   }
 
   const versionsToUpdate = releases.map(
-    ({ name, newVersion, oldVersion, type }) => ({
-      name,
-      version: newVersion,
-      oldVersion,
-      type,
-      dir: packagesByName.get(name)!.dir,
+    (release): ComprehensiveRelease & { dir: string } => ({
+      ...release,
+      dir: packagesByName.get(release.name)!.dir,
     }),
   );
 
-  // iterate over releases updating packages
-  const finalisedRelease = releaseWithChangelogs.map((release) => {
-    return versionPackage(release, versionsToUpdate, {
-      cwd,
-      updateInternalDependencies: config.updateInternalDependencies,
-      onlyUpdatePeerDependentsWhenOutOfRange:
-        config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
-          .onlyUpdatePeerDependentsWhenOutOfRange,
-      bumpVersionsWithWorkspaceProtocolOnly:
-        config.bumpVersionsWithWorkspaceProtocolOnly,
-      snapshot,
-    });
-  });
+  const dependencyUpdateOptions: DependencyUpdateOptions = {
+    cwd,
+    updateInternalDependencies: config.updateInternalDependencies,
+    onlyUpdatePeerDependentsWhenOutOfRange:
+      config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+        .onlyUpdatePeerDependentsWhenOutOfRange,
+    bumpVersionsWithWorkspaceProtocolOnly:
+      config.bumpVersionsWithWorkspaceProtocolOnly,
+    snapshot,
+  };
 
   const filesToFormat: string[] = [];
-  for (const release of finalisedRelease) {
-    const { changelog, pkgJsonEdits, dir, name } = release;
-
-    const pkgJsonPath = path.resolve(dir, "package.json");
-    const pkgRaw = await fs.readFile(pkgJsonPath, "utf8");
-    const pkgUpdated = editJson(pkgRaw, pkgJsonEdits);
-    await fs.writeFile(pkgJsonPath, pkgUpdated);
-    touchedFiles.push(pkgJsonPath);
+  for (const release of releaseWithChangelogs) {
+    const { changelog, dir, name, newVersion, packageJson } = release;
+    const pkgJsonEdits = getDependencyVersionEdits(
+      packageJson,
+      versionsToUpdate,
+      dependencyUpdateOptions,
+    );
+    if (newVersion != null) {
+      pkgJsonEdits.push({ keys: ["version"], value: newVersion });
+    }
+    const pkgJsonPath = await updatePackageJson(dir, pkgJsonEdits);
+    if (pkgJsonPath) {
+      touchedFiles.push(pkgJsonPath);
+    }
 
     if (changelog && changelog.length > 0) {
       const changelogPath = path.resolve(dir, "CHANGELOG.md");
@@ -155,45 +161,75 @@ export async function applyReleasePlan(
     }
   }
 
+  if (packages.rootPackage) {
+    const pkgJsonEdits = getDependencyVersionEdits(
+      packages.rootPackage.packageJson,
+      versionsToUpdate,
+      dependencyUpdateOptions,
+    );
+
+    const pkgJsonPath = await updatePackageJson(
+      packages.rootPackage.dir,
+      pkgJsonEdits,
+    );
+    if (pkgJsonPath) {
+      touchedFiles.push(pkgJsonPath);
+    }
+  }
+
   if (filesToFormat.length > 0) {
     const formatter = await getFormatter(config.format, cwd);
     await formatter(filesToFormat);
   }
 
-  if (releasePlan.preState == null || releasePlan.preState.mode === "exit") {
-    const changesetFolder = path.resolve(cwd, ".changeset");
-    await Promise.all(
-      changesets.map(async (changeset) => {
-        const changesetPath = path.resolve(
-          changesetFolder,
-          `${changeset.id}.md`,
-        );
+  const isPreChangesets = releasePlan.preState?.mode === "pre";
+  if (isPreChangesets && changesets.length > 0) {
+    await fs.mkdir(path.resolve(cwd, ".changeset", "pre"), { recursive: true });
+  }
+
+  await Promise.all(
+    changesets.map(async (changeset) => {
+      const changesetPath = path.resolve(
+        cwd,
+        ".changeset",
+        `${changeset.id}.md`,
+      );
+      if (
+        await fs.access(changesetPath).then(
+          () => true,
+          () => false,
+        )
+      ) {
+        // DO NOT remove changeset for skipped packages
+        // Mixed changeset that contains both skipped packages and not skipped packages are disallowed
+        // At this point, we know there is no such changeset, because otherwise the program would've already failed,
+        // so we just check if any skipped package exists in this changeset, and only remove it if none exists
+        // options to skip packages were added in v2, so we don't need to do it for v1 changesets
         if (
-          await fs.access(changesetPath).then(
-            () => true,
-            () => false,
+          !changeset.releases.some((release) =>
+            shouldSkipPackage(packagesByName.get(release.name)!, {
+              ignore: config.ignore,
+              allowPrivatePackages: config.privatePackages.version,
+            }),
           )
         ) {
-          // DO NOT remove changeset for skipped packages
-          // Mixed changeset that contains both skipped packages and not skipped packages are disallowed
-          // At this point, we know there is no such changeset, because otherwise the program would've already failed,
-          // so we just check if any skipped package exists in this changeset, and only remove it if none exists
-          // options to skip packages were added in v2, so we don't need to do it for v1 changesets
-          if (
-            !changeset.releases.some((release) =>
-              shouldSkipPackage(packagesByName.get(release.name)!, {
-                ignore: config.ignore,
-                allowPrivatePackages: config.privatePackages.version,
-              }),
-            )
-          ) {
-            touchedFiles.push(changesetPath);
+          if (isPreChangesets) {
+            const newChangesetPath = path.resolve(
+              cwd,
+              ".changeset",
+              "pre",
+              `${changeset.id}.md`,
+            );
+            await fs.rename(changesetPath, newChangesetPath);
+            touchedFiles.push(changesetPath, newChangesetPath);
+          } else {
             await fs.rm(changesetPath, { recursive: true, force: true });
+            touchedFiles.push(changesetPath);
           }
         }
-      }),
-    );
-  }
+      }
+    }),
+  );
 
   // We return the touched files to be committed in the cli
   return touchedFiles;
@@ -205,7 +241,7 @@ async function getNewChangelogEntry(
   config: Config,
   cwd: string,
   contextDir: string,
-): Promise<ModCompWithPackageAndChangelog[]> {
+) {
   if (!config.changelog) {
     return Promise.resolve(
       releasesWithPackage.map((release) => ({

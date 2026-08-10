@@ -114,20 +114,6 @@ const noFixedAndLinkedPackages: Rule = ({ config, errors }) => {
   }
 };
 
-const ignoredPatternsExist: Rule = ({
-  writtenConfig,
-  packageNames,
-  errors,
-}) => {
-  if (writtenConfig.ignore == null || writtenConfig.ignore.length === 0) return;
-
-  errors.push(
-    ...getUnmatchedPatterns(writtenConfig.ignore, packageNames).map(
-      (pkgOrGlob) => `ignore: ${invalidPathOrGlobMessage(pkgOrGlob)}`,
-    ),
-  );
-};
-
 // Validate that dependents of skipped packages are also skipped.
 // A package is "skipped" if it's in the ignore list, or if it's private
 // and privatePackages.version is false.
@@ -201,7 +187,6 @@ const rules: Rule[] = [
   linkedGroupsExist,
   noDuplicateLinkedPackages,
   noFixedAndLinkedPackages,
-  ignoredPatternsExist,
   alsoSkipDependentsOfSkipped,
   noPrivateTagWithoutPrivateVersion,
 ];

@@ -1,6 +1,7 @@
 import type fs from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { createFixture, type FileTree } from "fs-fixture";
 import { exec } from "tinyexec";
 import { afterEach, beforeEach, onTestFinished, vi } from "vitest";
@@ -76,16 +77,62 @@ export const temporarilySilenceLogs =
 
 export type Fixture = FileTree;
 
+export function stubIsTTY(value: boolean) {
+  const originalDescriptor = Object.getOwnPropertyDescriptor(
+    process.stdin,
+    "isTTY",
+  );
+  Object.defineProperty(process.stdin, "isTTY", {
+    configurable: true,
+    ...originalDescriptor,
+    value,
+  });
+  return {
+    [Symbol.dispose]() {
+      if (originalDescriptor) {
+        Object.defineProperty(process.stdin, "isTTY", originalDescriptor);
+      } else {
+        Reflect.deleteProperty(process.stdin, "isTTY");
+      }
+    },
+  };
+}
+
 export async function testdir(dir?: Fixture) {
-  const fixture = await createFixture(dir);
+  const fixture = await createFixture(dir, {
+    fs: {
+      ...fsp,
+      rm: (path, options) => {
+        return fsp.rm(path, {
+          // make it more forgiving to fs contention
+          // especially on Windows, given CI flakes we experienced caused by "EBUSY: resource busy or locked"
+          maxRetries: 3,
+          retryDelay: 100,
+          ...options,
+        });
+      },
+    },
+  });
   onTestFinished(() => fixture.rm());
   return fixture.path;
 }
 
+// Git's background maintenance can race in the background with fixture cleanup by touching pack files so we disable it.
+export async function disableGitBackgroundMaintenance(cwd: string) {
+  await exec("git", ["config", "gc.auto", "0"], { nodeOptions: { cwd } });
+  await exec("git", ["config", "maintenance.auto", "false"], {
+    nodeOptions: { cwd },
+  });
+}
+
 export async function gitdir(dir: Fixture) {
-  const cwd = await testdir(dir);
+  const cwd = await testdir({
+    ".gitattributes": "* text=auto eol=lf\n",
+    ...dir,
+  });
 
   await exec("git", ["init"], { nodeOptions: { cwd } });
+  await disableGitBackgroundMaintenance(cwd);
   // so that this works regardless of what the default branch of git init is and for git versions that don't support --initial-branch(like our CI)
   {
     const { stdout } = await exec(
@@ -116,6 +163,17 @@ export async function gitdir(dir: Fixture) {
   });
 
   return cwd;
+}
+
+export async function shallowClone(cwd: string, depth = 1) {
+  const cloneDir = await testdir();
+  await exec(
+    "git",
+    ["clone", "--depth", depth.toString(), pathToFileURL(cwd).toString(), "."],
+    { nodeOptions: { cwd: cloneDir } },
+  );
+  await disableGitBackgroundMaintenance(cloneDir);
+  return cloneDir;
 }
 
 export async function outputFile(

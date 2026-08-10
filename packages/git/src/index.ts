@@ -85,6 +85,7 @@ export async function getCommitsThatAddFiles(
             [
               "log",
               "--diff-filter=A",
+              "--follow",
               "--max-count=1",
               short ? "--pretty=format:%h:%p" : "--pretty=format:%H:%p",
               gitPath,
@@ -178,12 +179,17 @@ export async function isRepoShallow({ cwd }: { cwd: string }) {
 }
 
 export async function deepenCloneBy({ by, cwd }: { by: number; cwd: string }) {
-  await exec("git", ["fetch", `--deepen=${by}`], { nodeOptions: { cwd } });
+  const cmd = await exec("git", ["fetch", `--deepen=${by}`], {
+    nodeOptions: { cwd },
+  });
+  if (cmd.exitCode !== 0) {
+    throw new Error(cmd.stderr.toString());
+  }
 }
 async function getRepoRoot({ cwd }: { cwd: string }) {
   const { stdout, exitCode, stderr } = await exec(
     "git",
-    ["rev-parse", "--show-toplevel"],
+    ["rev-parse", "--show-cdup"],
     { nodeOptions: { cwd } },
   );
 
@@ -191,7 +197,7 @@ async function getRepoRoot({ cwd }: { cwd: string }) {
     throw new Error(stderr.toString());
   }
 
-  return stdout.toString().trim().replace(/\n|\r/g, "");
+  return path.resolve(cwd, stdout.toString().trim().replace(/\n|\r/g, ""));
 }
 
 export async function getChangedFilesSince({
@@ -246,13 +252,17 @@ export async function getChangedChangesetFilesSinceRef({
       },
     );
 
-    const tester = /.changeset\/[^/]+\.md$/;
+    const rootChangesetsRegex = /\.changeset\/[^/]+\.md$/;
+    const preChangesetsRegex = /\.changeset\/pre\/[^/]+\.md$/;
 
     const files = cmd.stdout
       .toString()
       .trim()
       .split("\n")
-      .filter((file) => tester.test(file));
+      .filter(
+        (file) =>
+          rootChangesetsRegex.test(file) || preChangesetsRegex.test(file),
+      );
     return files;
   } catch (err) {
     if (err instanceof GitError) return [];

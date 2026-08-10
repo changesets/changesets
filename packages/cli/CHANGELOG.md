@@ -1,5 +1,187 @@
 # @changesets/cli
 
+## 3.0.0-next.11
+
+### Major Changes
+
+- [#2190](https://github.com/changesets/changesets/pull/2190) [`96b65ee`](https://github.com/changesets/changesets/commit/96b65eec4af2c58301a11cd7dff42a6bde9c9f8a) Thanks [@bluwy](https://github.com/bluwy)! - Move versioned prerelease changesets to `.changeset/pre/` folder instead of accumulating in the root and tracking the versioned changeset ids in the `.changeset/pre.json` file. Existing `pre.json` will auto-migrate to this new structure on the next run of `changeset version` or when calling `changeset status`.
+
+  This change allows easier management of versioned prerelease changesets (for the final stable release) and current queued changesets (for the next prerelease). Changesets in `.changeset/pre/` can be edited or deleted depending if it's still relevant for the final stable release of a package. There's no need to synchronize the changeset ids in `pre.json` if certain changesets are deleted.
+
+- [#2186](https://github.com/changesets/changesets/pull/2186) [`3910adf`](https://github.com/changesets/changesets/commit/3910adf3ebaef14196093715228885c4819d0cbf) Thanks [@Andarist](https://github.com/Andarist)! - Private packages are no longer versioned by default. Set `privatePackages` to `true` to opt into versioning and tagging them, or set `privatePackages.version` to `true` to version them without tagging.
+
+### Minor Changes
+
+- [#2135](https://github.com/changesets/changesets/pull/2135) [`fd7724a`](https://github.com/changesets/changesets/commit/fd7724ad63cee56f6868d3e7f140d51cd8f88932) Thanks [@youdie006](https://github.com/youdie006)! - Allow comma-separated values in array-valued CLI flags: the `--major`, `--minor`, and `--patch` flags of the `add` command, and the `--ignore` flag of the `version` command. For example, `--minor pkg-a,pkg-b` is now equivalent to `--minor pkg-a --minor pkg-b`. Surrounding whitespace is trimmed and empty entries are ignored.
+
+### Patch Changes
+
+- Updated dependencies [[`96b65ee`](https://github.com/changesets/changesets/commit/96b65eec4af2c58301a11cd7dff42a6bde9c9f8a), [`3910adf`](https://github.com/changesets/changesets/commit/3910adf3ebaef14196093715228885c4819d0cbf), [`96b65ee`](https://github.com/changesets/changesets/commit/96b65eec4af2c58301a11cd7dff42a6bde9c9f8a)]:
+  - @changesets/apply-release-plan@8.0.0-next.10
+  - @changesets/assemble-release-plan@7.0.0-next.10
+  - @changesets/git@4.0.0-next.9
+  - @changesets/pre@3.0.0-next.9
+  - @changesets/read@1.0.0-next.10
+  - @changesets/types@7.0.0-next.9
+  - @changesets/config@4.0.0-next.9
+  - @changesets/changelog-git@1.0.0-next.9
+  - @changesets/get-dependents-graph@3.0.0-next.9
+  - @changesets/should-skip-package@1.0.0-next.9
+  - @changesets/write@1.0.0-next.9
+
+## 3.0.0-next.10
+
+### Minor Changes
+
+- [#2155](https://github.com/changesets/changesets/pull/2155) [`5a8119b`](https://github.com/changesets/changesets/commit/5a8119b99db13d82f2123250da6cf4de0ebcc769) Thanks [@beeequeue](https://github.com/beeequeue)! - Refactored the `changeset publish` flow.
+
+- [#2172](https://github.com/changesets/changesets/pull/2172) [`9349503`](https://github.com/changesets/changesets/commit/934950382e96eb32de223d8250d181a480a82438) Thanks [@beeequeue](https://github.com/beeequeue)! - Added version change preview when selecting a version type for a single package.
+
+### Patch Changes
+
+- [#2182](https://github.com/changesets/changesets/pull/2182) [`3816f4f`](https://github.com/changesets/changesets/commit/3816f4f9ec4a27d6620d0b8a9b309a9a47e51297) Thanks [@Andarist](https://github.com/Andarist)! - Detect the package manager when a monorepo tool does not map directly to a supported publish tool
+
+- [#2171](https://github.com/changesets/changesets/pull/2171) [`3257f57`](https://github.com/changesets/changesets/commit/3257f57a59e14540fd0009cc4f664262f629e6f2) Thanks [@beeequeue](https://github.com/beeequeue)! - Enabled Node's Compile Cache to improve CLI startup speed.
+
+- [#2177](https://github.com/changesets/changesets/pull/2177) [`b5e1762`](https://github.com/changesets/changesets/commit/b5e1762584718ec607ea79db0a00ae4238f8a784) Thanks [@Andarist](https://github.com/Andarist)! - Avoid writing an `undefined` version when updating dependencies in unversioned private packages.
+- Updated dependencies [[`a736a20`](https://github.com/changesets/changesets/commit/a736a20c230a89232a122fe12ffd612361e0eef9), [`b5e1762`](https://github.com/changesets/changesets/commit/b5e1762584718ec607ea79db0a00ae4238f8a784), [`b5e1762`](https://github.com/changesets/changesets/commit/b5e1762584718ec607ea79db0a00ae4238f8a784)]:
+  - @changesets/git@4.0.0-next.8
+  - @changesets/types@7.0.0-next.8
+  - @changesets/apply-release-plan@8.0.0-next.9
+  - @changesets/read@1.0.0-next.9
+  - @changesets/assemble-release-plan@7.0.0-next.9
+  - @changesets/changelog-git@1.0.0-next.8
+  - @changesets/config@4.0.0-next.8
+  - @changesets/get-dependents-graph@3.0.0-next.8
+  - @changesets/pre@3.0.0-next.8
+  - @changesets/should-skip-package@1.0.0-next.8
+  - @changesets/write@1.0.0-next.8
+
+## 3.0.0-next.9
+
+### Major Changes
+
+- [#2145](https://github.com/changesets/changesets/pull/2145) [`f5887ff`](https://github.com/changesets/changesets/commit/f5887ff54a6b78eae87ae85fdac3294c4464da78) Thanks [@Andarist](https://github.com/Andarist)! - Removed Yarn Classic support
+
+- [#2097](https://github.com/changesets/changesets/pull/2097) [`8c88f6a`](https://github.com/changesets/changesets/commit/8c88f6a3362628ca580835a1a1f2310056ee5743) Thanks [@Andarist](https://github.com/Andarist)! - Packages with only prerelease versions published will now be published with the prerelease tag in the prerelease mode _if_ the target registry doesn't auto-assign `latest` tag. npm registry itself does that and such packages will continue to be released with `latest` tag (and not with the configured prerelease tag).
+
+### Patch Changes
+
+- [#2097](https://github.com/changesets/changesets/pull/2097) [`8c88f6a`](https://github.com/changesets/changesets/commit/8c88f6a3362628ca580835a1a1f2310056ee5743) Thanks [@Andarist](https://github.com/Andarist)! - Route package manager calls through their respective CLIs during publish (npm, pnpm, yarn). Notably, Yarn Berry publishes now let Yarn update workspace protocol ranges as part of the publish process.
+
+- [#2132](https://github.com/changesets/changesets/pull/2132) [`d35bb77`](https://github.com/changesets/changesets/commit/d35bb77f031a24e7ca95aecc06e1043d0f9bfb24) Thanks [@cyphercodes](https://github.com/cyphercodes)! - Improve publish error handling for npm and pnpm JSON errors. Changesets now skips npm 11 already-published errors that omit `code`, correctly skips pnpm 11 already-published errors, and retries pnpm 11 `ERR_PNPM_OTP_NON_INTERACTIVE` publish failures in delegated interactive mode.
+
+- [#2160](https://github.com/changesets/changesets/pull/2160) [`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640) Thanks [@beeequeue](https://github.com/beeequeue)! - Added or modified the `files` property in the manifest. This should not change any behavior.
+
+- [#2163](https://github.com/changesets/changesets/pull/2163) [`5f8d925`](https://github.com/changesets/changesets/commit/5f8d9255088639c07b90910343752ae26b0a324f) Thanks [@Andarist](https://github.com/Andarist)! - Update dependency ranges in the workspace root `package.json`.
+- Updated dependencies [[`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640), [`5f8d925`](https://github.com/changesets/changesets/commit/5f8d9255088639c07b90910343752ae26b0a324f)]:
+  - @changesets/apply-release-plan@8.0.0-next.8
+  - @changesets/assemble-release-plan@7.0.0-next.8
+  - @changesets/changelog-git@1.0.0-next.7
+  - @changesets/errors@1.0.0-next.4
+  - @changesets/get-dependents-graph@3.0.0-next.7
+  - @changesets/git@4.0.0-next.7
+  - @changesets/pre@3.0.0-next.7
+  - @changesets/read@1.0.0-next.8
+  - @changesets/should-skip-package@1.0.0-next.7
+  - @changesets/types@7.0.0-next.7
+  - @changesets/write@1.0.0-next.7
+  - @changesets/config@4.0.0-next.7
+
+## 3.0.0-next.8
+
+### Patch Changes
+
+- [#2138](https://github.com/changesets/changesets/pull/2138) [`3588f18`](https://github.com/changesets/changesets/commit/3588f18f0884ef9f42339b2b9c92402d96009cd3) Thanks [@Andarist](https://github.com/Andarist)! - Ensure `changeset publish` and `changeset tag` create the `CHANGESETS_OUTPUT` file even when there is nothing to publish or tag.
+
+## 3.0.0-next.7
+
+### Major Changes
+
+- [#2128](https://github.com/changesets/changesets/pull/2128) [`7113c01`](https://github.com/changesets/changesets/commit/7113c014330b3f972e54ece8e67731613193958f) Thanks [@Andarist](https://github.com/Andarist)! - Renamed the `changeset tag` command to `changeset git-tag`.
+
+- [#2117](https://github.com/changesets/changesets/pull/2117) [`813bbf3`](https://github.com/changesets/changesets/commit/813bbf314d051bfee3b46a793f94b396ef2a4df1) Thanks [@bluwy](https://github.com/bluwy)! - Remove the `pre.json` `initialVersions` property and handling as it's unused internally
+
+- [#2090](https://github.com/changesets/changesets/pull/2090) [`3aae903`](https://github.com/changesets/changesets/commit/3aae903a668315c495ba09248bad2b9c63424449) Thanks [@beeequeue](https://github.com/beeequeue)! - Peer dependencies now bump packages that depend on them by `patch` instead of `major`.
+
+  This means a peer dependency update is no longer assumed (forced) to be a breaking change.
+
+  If the dependent package is not compatible with the peer's new release you should manually add a `major` changeset describing why and how to migrate.
+
+### Minor Changes
+
+- [#1121](https://github.com/changesets/changesets/pull/1121) [`ce2095d`](https://github.com/changesets/changesets/commit/ce2095d744ba03424641a8b7cf0a7cfee8bcc6f7) Thanks [@Sh031224](https://github.com/Sh031224)! - Added new `--major`, `--minor`, `--patch` flags to the `add` command.
+
+- [#2087](https://github.com/changesets/changesets/pull/2087) [`edc30c8`](https://github.com/changesets/changesets/commit/edc30c8914b1a451a5a7837adb9406957b74126f) Thanks [@trueberryless](https://github.com/trueberryless)! - Made the `init` command interactive. Running `changeset init` will now guide you through a set of intuitive prompts to configure your changelog generator, commit preferences, publish access, and base branch, rather than silently writing the default configuration file.
+
+- [#2129](https://github.com/changesets/changesets/pull/2129) [`369eb0b`](https://github.com/changesets/changesets/commit/369eb0bbf657e12ee4fc53e3ac362dd97802d5d2) Thanks [@Andarist](https://github.com/Andarist)! - Commands supporting `--output` (such as `status` and `publish-plan`) can now be invoked with `CHANGESETS_OUTPUT=path/to/file` environment variable. This has the same effect as calling them with `--output=path/to/file`
+
+- [#2136](https://github.com/changesets/changesets/pull/2136) [`2f9ca42`](https://github.com/changesets/changesets/commit/2f9ca42c11f55fd355fec666265cdfab6d41733b) Thanks [@bluwy](https://github.com/bluwy)! - Remove confirmation prompt when adding a changeset. It will always add a changeset instead, and if the changeset is not desired, the user can edit or delete the file directly.
+
+- [#2129](https://github.com/changesets/changesets/pull/2129) [`369eb0b`](https://github.com/changesets/changesets/commit/369eb0bbf657e12ee4fc53e3ac362dd97802d5d2) Thanks [@Andarist](https://github.com/Andarist)! - `changeset publish` and `changeset tag` can now be invoked with `CHANGESETS_OUTPUT=path/to/file` environment variable. They produce output in the NDJSON format.
+
+- [#2130](https://github.com/changesets/changesets/pull/2130) [`18bc470`](https://github.com/changesets/changesets/commit/18bc470ab550b2def6b52656b7b72f86c04429cb) Thanks [@beeequeue](https://github.com/beeequeue)! - Allow unmatched glob patterns in the `ignore` config option.
+
+### Patch Changes
+
+- [#2065](https://github.com/changesets/changesets/pull/2065) [`0598e83`](https://github.com/changesets/changesets/commit/0598e83327ca49fd3737f9f10371a3e6b711e3bf) Thanks [@Andarist](https://github.com/Andarist)! - Improved `changeset publish` auth handling by removing the preflight OTP requirement check and falling back to interactive auth when the package manager reports that authentication is required.
+
+- [#2065](https://github.com/changesets/changesets/pull/2065) [`0598e83`](https://github.com/changesets/changesets/commit/0598e83327ca49fd3737f9f10371a3e6b711e3bf) Thanks [@Andarist](https://github.com/Andarist)! - `changeset publish` now reads initial OTP values from npm and pnpm environment variables.
+
+- [#2065](https://github.com/changesets/changesets/pull/2065) [`0598e83`](https://github.com/changesets/changesets/commit/0598e83327ca49fd3737f9f10371a3e6b711e3bf) Thanks [@Andarist](https://github.com/Andarist)! - The generated `publish-plan.json` no longer includes a `registry` field on publish entries.
+
+- [#584](https://github.com/changesets/changesets/pull/584) [`6c79210`](https://github.com/changesets/changesets/commit/6c79210fabfe13d82ca4ac4dc92aab9b58fd58fd) Thanks [@Andarist](https://github.com/Andarist)! - Avoid an infinite loop when git commands fail to execute when Changesets try to retrieve commits that added files.
+- Updated dependencies [[`4c26f2f`](https://github.com/changesets/changesets/commit/4c26f2faac89b53d3305cf73c9e9cfca5aa88f5f), [`813bbf3`](https://github.com/changesets/changesets/commit/813bbf314d051bfee3b46a793f94b396ef2a4df1), [`6c79210`](https://github.com/changesets/changesets/commit/6c79210fabfe13d82ca4ac4dc92aab9b58fd58fd), [`18bc470`](https://github.com/changesets/changesets/commit/18bc470ab550b2def6b52656b7b72f86c04429cb), [`3aae903`](https://github.com/changesets/changesets/commit/3aae903a668315c495ba09248bad2b9c63424449)]:
+  - @changesets/types@7.0.0-next.6
+  - @changesets/assemble-release-plan@7.0.0-next.7
+  - @changesets/pre@3.0.0-next.6
+  - @changesets/git@4.0.0-next.6
+  - @changesets/config@4.0.0-next.6
+  - @changesets/apply-release-plan@8.0.0-next.7
+  - @changesets/changelog-git@1.0.0-next.6
+  - @changesets/get-dependents-graph@3.0.0-next.6
+  - @changesets/read@1.0.0-next.7
+  - @changesets/should-skip-package@1.0.0-next.6
+  - @changesets/write@1.0.0-next.6
+
+## 3.0.0-next.6
+
+### Major Changes
+
+- [#2074](https://github.com/changesets/changesets/pull/2074) [`3599e47`](https://github.com/changesets/changesets/commit/3599e47217d2ed2dd60da628fe4d1d3fc4b849c7) Thanks [@bluwy](https://github.com/bluwy)! - Set supported package manager versions in `"engines"` field, including npm >=10.9.0, pnpm >=10.0.0, and yarn >=4.5.2.
+
+### Minor Changes
+
+- [#2068](https://github.com/changesets/changesets/pull/2068) [`d03ffc1`](https://github.com/changesets/changesets/commit/d03ffc1d11fb486328734e52767379646062f5c1) Thanks [@bluwy](https://github.com/bluwy)! - Support `{commit-short}` placeholder for the `snapshot.prereleaseTemplate` config, which is a 7 character variant of `{commit}`
+
+- [#2061](https://github.com/changesets/changesets/pull/2061) [`c2db1dd`](https://github.com/changesets/changesets/commit/c2db1dd5d2da6c6eb514d86bbe05cbb7227b067f) Thanks [@Andarist](https://github.com/Andarist)! - Added a `changeset publish-plan` command to inspect which packages would be published or tagged, with optional JSON output.
+
+- [#2100](https://github.com/changesets/changesets/pull/2100) [`90b4ad0`](https://github.com/changesets/changesets/commit/90b4ad0d1e0c41fab982f065f9f9ab522838499b) Thanks [@Andarist](https://github.com/Andarist)! - Order releases into dependency-aware chunks so packages are grouped in publish order.
+
+- [#2063](https://github.com/changesets/changesets/pull/2063) [`ed77176`](https://github.com/changesets/changesets/commit/ed771766183df240ff1dbedc6eaf6c0064b0c850) Thanks [@Andarist](https://github.com/Andarist)! - Added `changeset publish --from-pack-dir <dir>` to publish packages from a previously created pack output directory.
+
+- [#2062](https://github.com/changesets/changesets/pull/2062) [`830443c`](https://github.com/changesets/changesets/commit/830443c757d2a685cc76f36ebebb081cb531b3c2) Thanks [@Andarist](https://github.com/Andarist)! - Added a `changeset pack` command that requires `--out-dir` and writes publishable package tarballs plus an enriched `publish-plan.json` into that directory, either from the current workspace or from a saved publish plan via `--from-plan`.
+
+- [#2073](https://github.com/changesets/changesets/pull/2073) [`b9cbd80`](https://github.com/changesets/changesets/commit/b9cbd804d68ac43af3b3ada32bed6217da0af81c) Thanks [@bluwy](https://github.com/bluwy)! - Show if a package is private when selecting packages in `changeset add`
+
+### Patch Changes
+
+- [#2060](https://github.com/changesets/changesets/pull/2060) [`11bded4`](https://github.com/changesets/changesets/commit/11bded4bd38e4ced3dfa4c428c50e2284c458ae3) Thanks [@Andarist](https://github.com/Andarist)! - Fixed `changeset publish` to respect ignored packages for both publishing and private package tagging.
+
+- [#2064](https://github.com/changesets/changesets/pull/2064) [`ffd65fc`](https://github.com/changesets/changesets/commit/ffd65fc6110a5ac6dfb27eac7a28a8b26751acc7) Thanks [@Andarist](https://github.com/Andarist)! - For pnpm projects, Changesets now match pnpm's native registry behavior more closely during unpublished package checks. Both scope-based `publishConfig` registry overrides and `publishConfig.registry` are now ignored.
+
+- [#2113](https://github.com/changesets/changesets/pull/2113) [`b8222e6`](https://github.com/changesets/changesets/commit/b8222e688b11e53c2e6b3fab811ccfb50038007b) Thanks [@Andarist](https://github.com/Andarist)! - Fixed publish error printing for pnpm 11.
+
+- [#2111](https://github.com/changesets/changesets/pull/2111) [`124ad07`](https://github.com/changesets/changesets/commit/124ad077c1361b00efa838c0400dc8a835645036) Thanks [@Andarist](https://github.com/Andarist)! - Auto-create the directory for the target publish plan file when executing `changeset publish-plan --output <file>`
+
+- [#2113](https://github.com/changesets/changesets/pull/2113) [`b8222e6`](https://github.com/changesets/changesets/commit/b8222e688b11e53c2e6b3fab811ccfb50038007b) Thanks [@Andarist](https://github.com/Andarist)! - Fixed accidental success logs on failed npm publishes
+
+- [#2091](https://github.com/changesets/changesets/pull/2091) [`3918fe5`](https://github.com/changesets/changesets/commit/3918fe56a32b13c00d76e21e96f6280527a1871c) Thanks [@bluwy](https://github.com/bluwy)! - Log "New tag: ..." messages when running `changeset publish` to fix compatibility with the Changesets release GitHub action to create GitHub releases and push the new tags
+- Updated dependencies [[`694396c`](https://github.com/changesets/changesets/commit/694396ce49f0d7e2200c119b360e60e6bd11265f), [`d03ffc1`](https://github.com/changesets/changesets/commit/d03ffc1d11fb486328734e52767379646062f5c1), [`01f4da4`](https://github.com/changesets/changesets/commit/01f4da4e30aa90391def46b84b986fa223a055f5), [`c2348fc`](https://github.com/changesets/changesets/commit/c2348fcb9eba443fde1460b595651ce040f40a08)]:
+  - @changesets/apply-release-plan@8.0.0-next.6
+  - @changesets/assemble-release-plan@7.0.0-next.6
+  - @changesets/read@1.0.0-next.6
+
 ## 3.0.0-next.5
 
 ### Patch Changes
@@ -1887,87 +2069,3 @@ meaning within the community, even though these commands do slightly more than t
   This should have no impact on use.
   - 51c8b0d6: Add 'select all' and 'select all changed' options, to make mass-bumping easier.
   - eeb4d5c6: Add new command: `status` - see Readme for more information
-
-# @atlaskit/build-releases - legacy changelog
-
-## 3.0.3
-
-- [patch][c87337f](https://bitbucket.org/changesets/atlaskit-mk-2/commits/c87337f):
-  - The version command now removes empty folders before it starts. This should prevent a race condition in CI
-
-## 3.0.2
-
-- [patch][f7b030a](https://bitbucket.org/changesets/atlaskit-mk-2/commits/f7b030a):
-  - Fixes potential infinite loop in parseChangesetCommit
-
-## 3.0.1
-
-- [patch][494c1fe](https://bitbucket.org/changesets/atlaskit-mk-2/commits/494c1fe):
-  - Update git commit message to match previous tooling.
-
-## 3.0.0
-
-- [major][44ec8bf" d](<https://bitbucket.org/changesets/atlaskit-mk-2/commits/44ec8bf>"
-  d):
-
-  Changesets now use local file system - this has several effects:
-  1. Changesets will no longer automatically create a commit. You will need to add and commit the files yourself.
-  2. Changesets are easier to modify. You should ONLY modify the changes.md file (_Not changes.json_).
-  3. There will be a new directory which is `.changeset`, which will hold all the changesets.
-
-  Apart from these changes, your process using this should not have changed.
-
-  Changeset now accepts skipCI flag, where previously release commits automatically skipped CI. i.e.
-
-  ```
-  yarn build-releases version --skipCI
-  ```
-
-  **Breaking**: Changeset and version commands now accept `--commit` flag which makes them commit automatically (previously this was the default behaviour). Otherwise, these commands simply make the file-system changes.
-
-  ```
-  yarn build-releases changeset --commit
-  ```
-
-  We also introduce the `intitialize` command. See the package [README.md](https://www.npmjs.com/package/@atlaskit/build-releases) for more details about this.
-
-## 2.1.3
-
-- [patch] Bumps bolt version to get some bug fixes around publishing [493f5f7](https://bitbucket.org/changesets/atlaskit-mk-2/commits/493f5f7)
-
-## 2.1.2
-
-- [patch] Pulls in fix in bolt causing publishing to fail when running a yarn subprocess (see boltpkg/bolt #189) [2b36121](https://bitbucket.org/changesets/atlaskit-mk-2/commits/2b36121)
-
-## 2.1.1
-
-- [patch] Fixes bug where empty summaries would cause a changeset to not get found [25b30bf](https://bitbucket.org/changesets/atlaskit-mk-2/commits/25b30bf)
-
-## 2.1.0
-
-- [minor] Allows passing --public flag for publishing scoped packages [159c28e](https://bitbucket.org/changesets/atlaskit-mk-2/commits/159c28e)
-- [minor] Changes changelogs to be opt out rather than opt in [f461788](https://bitbucket.org/changesets/atlaskit-mk-2/commits/f461788)
-
-## 2.0.0
-
-- [major] Completely refactors build-releases to be externally consumable 8458ef7](<https://bitbucket.org/changesets/atlaskit-mk-2/commits/8458ef7>)
-
-## 1.28.2
-
-- [patch] Bug fix and better error messages for changeset error [7f09b86](https://bitbucket.org/changesets/atlaskit-mk-2/commits/7f09b86)
-
-## 1.28.1
-
-- [patch] update flow dep, fix flow errors [722ad83](https://bitbucket.org/changesets/atlaskit-mk-2/commits/722ad83)
-
-## 1.28.0
-
-- [minor] Adds tagging to releases [34c64fd](https://bitbucket.org/changesets/atlaskit-mk-2/commits/34c64fd)
-
-## 1.27.0
-
-- [minor] Splits out and exposes flattenChangesets function [5ee5f74](https://bitbucket.org/changesets/atlaskit-mk-2/commits/5ee5f74)
-
-## 1.26.0
-
-- [minor] Lots of new features (consider this package unstable and only for use internally) [7cdf2e6](https://bitbucket.org/changesets/atlaskit-mk-2/commits/7cdf2e6)

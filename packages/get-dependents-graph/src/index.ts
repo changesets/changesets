@@ -7,7 +7,7 @@ export function getDependentsGraph(
     ignoreDevDependencies?: boolean;
     bumpVersionsWithWorkspaceProtocolOnly?: boolean;
   },
-) {
+): Map<string, Array<string>> {
   const graph: Map<string, { pkg: Package; dependents: string[] }> = new Map();
 
   const rootPackage = packages.rootPackage;
@@ -55,8 +55,8 @@ export function getDependentsGraph(
 
   const simplifiedDependentsGraph: Map<string, string[]> = new Map();
 
-  graph.forEach((pkgInfo, pkgName) => {
-    simplifiedDependentsGraph.set(pkgName, pkgInfo.dependents);
+  graph.forEach((info, pkgName) => {
+    simplifiedDependentsGraph.set(pkgName, info.dependents);
   });
 
   return simplifiedDependentsGraph;

@@ -1,3 +1,6 @@
+> [!WARNING]
+> This documentation is outdated. View the up-to-date version at https://changesets.dev/guide/automating
+
 # Automating Changesets
 
 While changesets are designed to work with a fully manual process, it also provides tools to help automate these releases. These can be broken into two major decisions:
@@ -32,7 +35,7 @@ In your CI process, add a step that runs:
 changeset status --since=main
 ```
 
-This will exit with exit code 1 if there have been no new changesets since main.
+This will exit with exit code 1 if there are changed packages but no new changesets since main. It will not fail if there are no changed packages.
 
 In some cases, you may _want_ to merge a change without doing any releases (such as when you only change tests or build tools). In this case, you can run `changeset --empty`. This will add a special changeset that does not release anything.
 

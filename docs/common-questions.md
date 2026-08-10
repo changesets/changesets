@@ -1,3 +1,6 @@
+> [!WARNING]
+> This documentation is outdated. View the up-to-date version at https://changesets.dev/faq
+
 # Common Questions
 
 A quick list of common questions you might want answered to understand what changesets is doing, without going into minutiae or workflow.

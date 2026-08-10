@@ -4,3 +4,4 @@ dist/
 node_modules/
 .env
 *error.log
+/site/.vitepress/cache/

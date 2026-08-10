@@ -1,3 +1,6 @@
+> [!WARNING]
+> This documentation is outdated. View the up-to-date version at https://changesets.dev/guide/customize-changelog-format
+
 # Modifying The Changelog Formats
 
 Changesets comes with a default format for the changelogs for packages which is relatively basic in what information it displays, however this is customisable. Here we will talk about how to modify the changelog, so that it contains extra meta-information.

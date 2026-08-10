@@ -35,7 +35,7 @@ function replaceHumanIds(releaseObj: ReleasePlan | undefined) {
   };
 }
 
-describe("status", () => {
+describe("status", { tags: ["slow"] }, () => {
   silenceLogsInBlock();
 
   afterEach(() => {

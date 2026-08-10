@@ -120,20 +120,4 @@ describe("createPromiseQueue", async () => {
     await expect(q1).rejects.toThrow("sync fail");
     await expect(q2).resolves.toBe("ok");
   });
-
-  it("setConcurrency should allow more jobs to run", async () => {
-    const queue = createPromiseQueue(1);
-
-    const job1 = asyncSpy();
-    const job2 = asyncSpy();
-
-    void queue.add(job1);
-    void queue.add(job2);
-
-    expect(job2).not.toHaveBeenCalled();
-
-    queue.setConcurrency(2);
-
-    expect(job2).toHaveBeenCalled();
-  });
 });

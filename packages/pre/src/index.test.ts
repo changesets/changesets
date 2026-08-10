@@ -37,11 +37,6 @@ describe("enterPre", () => {
       ),
     ).toMatchInlineSnapshot(`
       {
-        "changesets": [],
-        "initialVersions": {
-          "pkg-a": "1.0.0",
-          "pkg-b": "1.0.0",
-        },
         "mode": "pre",
         "tag": "next",
       }
@@ -67,11 +62,6 @@ describe("enterPre", () => {
         version: "1.0.0",
       }),
       ".changeset/pre.json": JSON.stringify({
-        changesets: [],
-        initialVersions: {
-          "pkg-a": "1.0.0",
-          "pkg-b": "1.0.0",
-        },
         mode: "pre",
         tag: "next",
       }),
@@ -100,11 +90,6 @@ describe("enterPre", () => {
         version: "1.0.0",
       }),
       ".changeset/pre.json": JSON.stringify({
-        changesets: ["slimy-dingos-whisper"],
-        initialVersions: {
-          "pkg-a": "1.0.0",
-          "pkg-b": "1.0.0",
-        },
         mode: "exit",
         tag: "beta",
       }),
@@ -116,13 +101,6 @@ describe("enterPre", () => {
       ),
     ).toMatchInlineSnapshot(`
       {
-        "changesets": [
-          "slimy-dingos-whisper",
-        ],
-        "initialVersions": {
-          "pkg-a": "1.0.0",
-          "pkg-b": "1.0.0",
-        },
         "mode": "pre",
         "tag": "next",
       }
@@ -151,11 +129,6 @@ describe("exitPre", () => {
         version: "1.0.0",
       }),
       ".changeset/pre.json": JSON.stringify({
-        changesets: [],
-        initialVersions: {
-          "pkg-a": "1.0.0",
-          "pkg-b": "1.0.0",
-        },
         mode: "pre",
         tag: "next",
       }),
@@ -168,11 +141,6 @@ describe("exitPre", () => {
       ),
     ).toMatchInlineSnapshot(`
       {
-        "changesets": [],
-        "initialVersions": {
-          "pkg-a": "1.0.0",
-          "pkg-b": "1.0.0",
-        },
         "mode": "exit",
         "tag": "next",
       }
@@ -223,22 +191,12 @@ test("readPreState reads the pre state", async () => {
       version: "1.0.0",
     }),
     ".changeset/pre.json": JSON.stringify({
-      changesets: [],
-      initialVersions: {
-        "pkg-a": "1.0.0",
-        "pkg-b": "1.0.0",
-      },
       mode: "pre",
       tag: "next",
     }),
   });
   expect(await readPreState(cwd)).toMatchInlineSnapshot(`
     {
-      "changesets": [],
-      "initialVersions": {
-        "pkg-a": "1.0.0",
-        "pkg-b": "1.0.0",
-      },
       "mode": "pre",
       "tag": "next",
     }

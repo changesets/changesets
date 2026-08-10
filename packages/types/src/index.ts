@@ -14,15 +14,46 @@ export type AccessType = "public" | "restricted";
 
 export type Release = { name: string; type: VersionType };
 
-// This is a release that has been modified to include all relevant information
-// about releasing - it is calculated and doesn't make sense as an artefact
-export type ComprehensiveRelease = {
+interface ComprehensiveReleaseBase {
   name: string;
-  type: VersionType;
+  type: "major" | "minor" | "patch" | "none";
+  changesets: string[];
+  oldVersion: string | undefined;
+  newVersion: string | undefined;
+}
+
+interface ComprehensiveMajorRelease extends ComprehensiveReleaseBase {
+  type: "major";
   oldVersion: string;
   newVersion: string;
-  changesets: string[];
-};
+}
+
+interface ComprehensiveMinorRelease extends ComprehensiveReleaseBase {
+  type: "minor";
+  oldVersion: string;
+  newVersion: string;
+}
+
+interface ComprehensivePatchRelease extends ComprehensiveReleaseBase {
+  type: "patch";
+  oldVersion: string;
+  newVersion: string;
+}
+
+interface ComprehensiveNoneRelease extends ComprehensiveReleaseBase {
+  type: "none";
+  // Unversioned private packages only enter a release plan to have their dependencies updated.
+  oldVersion: string | undefined;
+  newVersion: string | undefined;
+}
+
+// This is a release that has been modified to include all relevant information
+// about releasing - it is calculated and doesn't make sense as an artefact
+export type ComprehensiveRelease =
+  | ComprehensiveMajorRelease
+  | ComprehensiveMinorRelease
+  | ComprehensivePatchRelease
+  | ComprehensiveNoneRelease;
 
 export type Changeset = {
   summary: string;
@@ -101,13 +132,13 @@ export type WrittenConfig = {
   commit?: boolean | readonly [string, null | Record<string, unknown>] | string;
   fixed?: Fixed;
   linked?: Linked;
-  access?: AccessType | "private";
+  access?: AccessType;
   baseBranch?: string;
   changedFilePatterns?: readonly string[];
   format?: "auto" | "prettier" | "oxfmt" | "deno" | "dprint" | false;
   /** Opt in to tracking non-npm / private packages */
   privatePackages?:
-    | false
+    | boolean
     | {
         version?: boolean;
         tag?: boolean;
@@ -170,10 +201,6 @@ export type CommitFunctions = {
 export type PreState = {
   mode: "pre" | "exit";
   tag: string;
-  initialVersions: {
-    [pkgName: string]: string;
-  };
-  changesets: string[];
 };
 
 export interface Package {

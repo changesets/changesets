@@ -1,5 +1,45 @@
 # @changesets/pre
 
+## 3.0.0-next.9
+
+### Major Changes
+
+- [#2190](https://github.com/changesets/changesets/pull/2190) [`96b65ee`](https://github.com/changesets/changesets/commit/96b65eec4af2c58301a11cd7dff42a6bde9c9f8a) Thanks [@bluwy](https://github.com/bluwy)! - Move versioned prerelease changesets to `.changeset/pre/` folder instead of accumulating in the root and tracking the versioned changeset ids in the `.changeset/pre.json` file. Existing `pre.json` will auto-migrate to this new structure on the next run of `changeset version` or when calling `changeset status`.
+
+  This change allows easier management of versioned prerelease changesets (for the final stable release) and current queued changesets (for the next prerelease). Changesets in `.changeset/pre/` can be edited or deleted depending if it's still relevant for the final stable release of a package. There's no need to synchronize the changeset ids in `pre.json` if certain changesets are deleted.
+
+### Patch Changes
+
+- Updated dependencies [[`96b65ee`](https://github.com/changesets/changesets/commit/96b65eec4af2c58301a11cd7dff42a6bde9c9f8a)]:
+  - @changesets/types@7.0.0-next.9
+
+## 3.0.0-next.8
+
+### Patch Changes
+
+- Updated dependencies [[`b5e1762`](https://github.com/changesets/changesets/commit/b5e1762584718ec607ea79db0a00ae4238f8a784)]:
+  - @changesets/types@7.0.0-next.8
+
+## 3.0.0-next.7
+
+### Patch Changes
+
+- [#2160](https://github.com/changesets/changesets/pull/2160) [`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640) Thanks [@beeequeue](https://github.com/beeequeue)! - Added or modified the `files` property in the manifest. This should not change any behavior.
+- Updated dependencies [[`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640)]:
+  - @changesets/errors@1.0.0-next.4
+  - @changesets/types@7.0.0-next.7
+
+## 3.0.0-next.6
+
+### Major Changes
+
+- [#2117](https://github.com/changesets/changesets/pull/2117) [`813bbf3`](https://github.com/changesets/changesets/commit/813bbf314d051bfee3b46a793f94b396ef2a4df1) Thanks [@bluwy](https://github.com/bluwy)! - Remove the `pre.json` `initialVersions` property and handling as it's unused internally
+
+### Patch Changes
+
+- Updated dependencies [[`4c26f2f`](https://github.com/changesets/changesets/commit/4c26f2faac89b53d3305cf73c9e9cfca5aa88f5f), [`813bbf3`](https://github.com/changesets/changesets/commit/813bbf314d051bfee3b46a793f94b396ef2a4df1)]:
+  - @changesets/types@7.0.0-next.6
+
 ## 3.0.0-next.5
 
 ### Patch Changes
