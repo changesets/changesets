@@ -2654,6 +2654,63 @@ describe("pre", () => {
       "
     `);
   });
+
+  it("should update dependencies in ignored packages when exiting pre mode", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "root-pkg",
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-a": "1.0.0",
+        },
+      }),
+      ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
+    });
+
+    await pre({ cwd, command: "enter", tag: "next" });
+    await writeChangeset(
+      {
+        releases: [{ name: "pkg-a", type: "patch" }],
+        summary: "a very useful summary",
+      },
+      cwd,
+    );
+    await version({ cwd });
+
+    expect(await getPkgJSON("pkg-a", cwd)).toEqual(
+      expect.objectContaining({ version: "1.0.1-next.0" }),
+    );
+    expect(await getPkgJSON("pkg-b", cwd)).toEqual(
+      expect.objectContaining({
+        version: "1.0.1-next.0",
+        dependencies: { "pkg-a": "1.0.1-next.0" },
+      }),
+    );
+
+    await pre({ cwd, command: "exit" });
+    await version({ cwd, ignore: ["pkg-b"] });
+
+    expect(await getPkgJSON("pkg-a", cwd)).toEqual(
+      expect.objectContaining({ version: "1.0.1" }),
+    );
+    expect(await getPkgJSON("pkg-b", cwd)).toEqual(
+      expect.objectContaining({
+        version: "1.0.1-next.0",
+        dependencies: { "pkg-a": "1.0.1" },
+      }),
+    );
+  });
+
   it("should work with adding a package while in pre mode", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
