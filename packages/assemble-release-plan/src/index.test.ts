@@ -872,6 +872,12 @@ describe("assembleReleasePlan", () => {
       setup.updatePackage("pkg-a", "1.0.1-next.0");
       setup.updatePackage("pkg-b", "1.0.1-next.0");
 
+      setup.changesets = [];
+      setup.addChangeset({
+        id: "pre/strange-words-combine",
+        releases: [{ name: "pkg-a", type: "patch" }],
+      });
+
       const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
@@ -880,12 +886,7 @@ describe("assembleReleasePlan", () => {
           ignore: ["pkg-b"],
         },
         {
-          changesets: ["strange-words-combine"],
           tag: "next",
-          initialVersions: {
-            "pkg-a": "1.0.0",
-            "pkg-b": "1.0.0",
-          },
           mode: "exit",
         },
       );
