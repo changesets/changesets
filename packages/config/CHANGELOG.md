@@ -1,5 +1,18 @@
 # @changesets/config
 
+## 4.0.0-next.9
+
+### Major Changes
+
+- [#2186](https://github.com/changesets/changesets/pull/2186) [`3910adf`](https://github.com/changesets/changesets/commit/3910adf3ebaef14196093715228885c4819d0cbf) Thanks [@Andarist](https://github.com/Andarist)! - Private packages are no longer versioned by default. Set `privatePackages` to `true` to opt into versioning and tagging them, or set `privatePackages.version` to `true` to version them without tagging.
+
+### Patch Changes
+
+- Updated dependencies [[`96b65ee`](https://github.com/changesets/changesets/commit/96b65eec4af2c58301a11cd7dff42a6bde9c9f8a)]:
+  - @changesets/types@7.0.0-next.9
+  - @changesets/get-dependents-graph@3.0.0-next.9
+  - @changesets/should-skip-package@1.0.0-next.9
+
 ## 4.0.0-next.8
 
 ### Patch Changes

@@ -76,7 +76,7 @@ This option allows you to specify some packages that will not be published, even
 There are two caveats to this.
 
 1. If the package is mentioned in a changeset that also includes a package that is not ignored, publishing will fail.
-2. If the package requires one of its dependencies to be updated as part of a publish.
+2. If the package requires one of its dependencies to be updated as part of a publish, publishing will also fail.
 
 These restrictions exist to ensure your repository or published code do not end up in a broken state. For a more detailed intricacies of publishing, check out our guide on [problems publishing in monorepos](./problems-publishing-in-monorepos.md).
 

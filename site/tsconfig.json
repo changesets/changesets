@@ -8,7 +8,7 @@
     "libReplacement": false,
     "strict": true,
     "noEmit": true,
-    "types": ["vitepress/client"]
+    "types": ["vitepress/client", "unplugin-icons/types/vue"]
   },
   "include": ["**/*.ts", ".vitepress/**/*"]
 }

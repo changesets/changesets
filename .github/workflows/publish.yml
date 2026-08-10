@@ -27,11 +27,7 @@ jobs:
     permissions:
       contents: read # to check out repo (actions/checkout)
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-        with:
-          persist-credentials: false
-
-      - uses: ./.github/actions/ci-setup
+      - uses: $/.github/actions/ci-setup
         with:
           skip-cache: true # avoid cache poisoning attacks
 
@@ -41,7 +37,7 @@ jobs:
       - name: Select mode
         id: select-mode
         # https://github.com/changesets/action
-        uses: changesets/action/select-mode@8f7aee55a02899b4d6140157e482211eb49fcbee # v2.0.0-next.2
+        uses: changesets/action/select-mode@c47fa68bd43bb8ae0bae7e558622593deebf5955 # v2.0.0-next.3
 
   version:
     name: Version
@@ -53,11 +49,7 @@ jobs:
     permissions:
       contents: read # to check out repo (actions/checkout)
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-        with:
-          persist-credentials: false
-
-      - uses: ./.github/actions/ci-setup
+      - uses: $/.github/actions/ci-setup
         with:
           skip-cache: true # avoid cache poisoning attacks
 
@@ -75,7 +67,7 @@ jobs:
       - name: Create or update release pull request
         id: changesets
         # https://github.com/changesets/action
-        uses: changesets/action/version@8f7aee55a02899b4d6140157e482211eb49fcbee # v2.0.0-next.2
+        uses: changesets/action/version@c47fa68bd43bb8ae0bae7e558622593deebf5955 # v2.0.0-next.3
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           script: pnpm version-packages
@@ -91,12 +83,7 @@ jobs:
     permissions:
       contents: read # to check out repo (actions/checkout)
     steps:
-      - name: Check out repo
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-        with:
-          persist-credentials: false
-
-      - uses: ./.github/actions/ci-setup
+      - uses: $/.github/actions/ci-setup
         with:
           node-version: 24
           skip-cache: true # avoid cache poisoning attacks
@@ -107,7 +94,7 @@ jobs:
       - name: Pack
         id: pack
         # https://github.com/changesets/action
-        uses: changesets/action/pack@8f7aee55a02899b4d6140157e482211eb49fcbee # v2.0.0-next.2
+        uses: changesets/action/pack@c47fa68bd43bb8ae0bae7e558622593deebf5955 # v2.0.0-next.3
         with:
           publish-plan-artifact-id: ${{ needs.select-mode.outputs.publish-plan-artifact-id }}
 
@@ -121,12 +108,7 @@ jobs:
       contents: write # to create release (changesets/action)
       id-token: write # to use OpenID Connect token for trusted publishing (changesets/action)
     steps:
-      - name: Check out repo
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-        with:
-          persist-credentials: false
-
-      - uses: ./.github/actions/ci-setup
+      - uses: $/.github/actions/ci-setup
         with:
           node-version: 24
           skip-cache: true # avoid cache poisoning attacks
@@ -136,6 +118,6 @@ jobs:
 
       - name: Publish to npm
         # https://github.com/changesets/action
-        uses: changesets/action/publish@8f7aee55a02899b4d6140157e482211eb49fcbee # v2.0.0-next.2
+        uses: changesets/action/publish@c47fa68bd43bb8ae0bae7e558622593deebf5955 # v2.0.0-next.3
         with:
           pack-dir-artifact-id: ${{ needs.pack.outputs.pack-dir-artifact-id }}

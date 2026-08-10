@@ -60,8 +60,7 @@ export function syncCodeGroups() {
 }
 
 function getKeyFromLabels(labels: NodeListOf<HTMLLabelElement>) {
-  const id = [...labels]
-    .map((l) => l.dataset.title)
+  const id = Array.from(labels, (l) => l.dataset.title)
     .sort()
     .join("-");
   return `vitepress-sync-code-groups:${id}`;

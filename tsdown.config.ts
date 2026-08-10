@@ -14,7 +14,7 @@ export const baseConfig = defineConfig({
   },
 
   sourcemap: !isCi,
-  dts: { enabled: true, parallel: !isCi, sourcemap: !isCi },
+  dts: { enabled: true, sourcemap: !isCi },
   format: "esm",
   minify: "dce-only",
   platform: "node",
