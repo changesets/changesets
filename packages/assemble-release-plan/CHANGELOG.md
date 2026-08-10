@@ -1,5 +1,11 @@
 # @changesets/assemble-release-plan
 
+## 7.0.0-next.11
+
+### Patch Changes
+
+- [#2092](https://github.com/changesets/changesets/pull/2092) [`c98af4c`](https://github.com/changesets/changesets/commit/c98af4c33d8ee307c6229023ea6907fb0df4bf26) Thanks [@chatman-media](https://github.com/chatman-media)! - Fixed a bug where exiting prerelease mode could incorrectly patch-bump ignored or otherwise skipped packages.
+
 ## 7.0.0-next.10
 
 ### Major Changes

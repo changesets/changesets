@@ -1,5 +1,12 @@
 # @changesets/apply-release-plan
 
+## 8.0.0-next.11
+
+### Patch Changes
+
+- Updated dependencies [[`68ea6ec`](https://github.com/changesets/changesets/commit/68ea6ecc70f48dc4f5f0dbec7fd92ce30d8d2527)]:
+  - @changesets/config@4.0.0-next.10
+
 ## 8.0.0-next.10
 
 ### Major Changes
