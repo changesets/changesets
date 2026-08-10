@@ -1,5 +1,11 @@
 # @changesets/config
 
+## 4.0.0-next.10
+
+### Patch Changes
+
+- [#2222](https://github.com/changesets/changesets/pull/2222) [`68ea6ec`](https://github.com/changesets/changesets/commit/68ea6ecc70f48dc4f5f0dbec7fd92ce30d8d2527) Thanks [@itsjxck](https://github.com/itsjxck)! - Expand `linked` and `fixed` configuration glob patterns in the same way as `ignore`.
+
 ## 4.0.0-next.9
 
 ### Major Changes

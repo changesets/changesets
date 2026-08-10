@@ -1,5 +1,14 @@
 # @changesets/cli
 
+## 3.0.0-next.12
+
+### Patch Changes
+
+- Updated dependencies [[`68ea6ec`](https://github.com/changesets/changesets/commit/68ea6ecc70f48dc4f5f0dbec7fd92ce30d8d2527), [`c98af4c`](https://github.com/changesets/changesets/commit/c98af4c33d8ee307c6229023ea6907fb0df4bf26)]:
+  - @changesets/config@4.0.0-next.10
+  - @changesets/assemble-release-plan@7.0.0-next.11
+  - @changesets/apply-release-plan@8.0.0-next.11
+
 ## 3.0.0-next.11
 
 ### Major Changes
