@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { VPImage } from "vitepress/theme"
-import DiscordLogo from "~icons/logos/discord"
+import DiscordLogo from "~icons/logos/discord-icon"
 import OCLogo from "~icons/logos/opencollective"
-import Socials from "../components/socials.vue"
+import Socials from "../.vitepress/theme/components/Socials.vue"
 import cliExampleImage from "../assets/cli-example.webp"
 import packThenPublishImage from "../assets/pack-then-publish.excalidraw.svg"
 import packThenPublishLightImage from "../assets/pack-then-publish-light.excalidraw.svg"
@@ -28,23 +28,9 @@ Quick links:
 - [Changelog](https://github.com/changesets/changesets/blob/main/packages/cli/CHANGELOG.md#300)
 - [Chat on Discord](https://chat.changesets.dev)
 
-## Thanks
+If you or your company uses Changesets, you can help support our work to improve and evolve the project via our <OCLogo /> [Open Collective](https://opencollective.com/changesets) or 💖 [GitHub Sponsors](https://github.com/sponsors/changesets).
 
-This release was lead by the new Changesets team, including:
-
-- Mateusz Burzyński (<Socials bsky="andarist.bsky.social" github="Andarist" />)
-- Bjorn Lu (<Socials bsky="bluwy.me" github="bluwy" />)
-- Adam Haglund (<Socials bsky="haglund.dev" github="beeequeue" />)
-
-We'd also like to thank all contributors who have helped discuss, test, and improve Changesets v3 during its development.
-
-If you're interested in helping the future of Changesets, come join us on [<DiscordLogo style="margin-left: 5px" />](https://chat.changesets.dev)!
-
-As Changesets remains one of the most popular release tool in the npm ecosystem, with more than 3M weekly downloads, we'd like to thank everyone who has supported Changesets over the years.
-
-If you or your company uses Changesets, you can help support our work to improve and evolve the project via our <OCLogo /> [Open Collective](https://opencollective.com/changesets) or :heart: [GitHub Sponsors](https://github.com/sponsors/changesets).
-
-## The New Stuff:tm:
+## The New Stuff
 
 ::: danger Breaking changes
 Check out the [Migrate from v2 to v3](../guide/migration.md) guide for a full list of breaking changes.
@@ -67,20 +53,20 @@ Internally, we are now using [pnpm](https://pnpm.io), [tsdown](https://tsdown.de
 
 ### Less aggressive peer dependency bumping
 
-Previously, if Changesets saw a minor version bump it would bump peer dependents by a **major** version, even if dependent's usage of the package hasn't broken.
+Previously, if Changesets saw a minor version bump, it would bump peer dependents by a **major** version, even if dependent's usage of the package hasn't been broken.
 
-Now, all change types will bump peer dependents by a **patch** version, while authors can still mark the dependent as having a major change in the same changseset file if needed.
+Now, all change types will bump peer dependents by a **patch** version, while authors can still mark the dependent as having a major change in the same changeset file if needed.
 
 This has been the most requested change to Changesets for years (as can be seen in the [closed issues](https://github.com/changesets/changesets/pull/2090)), and we're happy to finally release it!
 
 <VPImage
   loading="lazy"
   class="no-shadow"
-  style="max-height: 600px"
+  style="max-width: 420px"
   alt="graph showing that peer dependents are bumped by patch versions instead of major"
   :image="{
-    dark: packThenPublishImage,
-    light: packThenPublishLightImage,
+    dark: peerBumpImage,
+    light: peerBumpLightImage,
   }"
 />
 
@@ -88,10 +74,10 @@ This has been the most requested change to Changesets for years (as can be seen 
 
 We have created new commands and GitHub Actions to improve automated publishing workflows.
 
-The goal is to allow users to implement the "build and pack then publish" flow,
+This allows users to implement a "build, pack, and publish" flow,
 [the recommended way to publish packages by the e18e community](https://e18e.dev/docs/publishing.html#standard-workflow).
 
-**For more information, check out the new [automation documentation!](/guide/automating#how-do-i-run-the-version-and-publish-commands)**
+Check out the new [Automating Changesets](../guide/automating#how-do-i-run-the-version-and-publish-commands) guide for more information.
 
 ::: info Regarding staged publishing
 We are working on it, and it will be included in the next feature update.
@@ -102,7 +88,7 @@ We are working on it, and it will be included in the next feature update.
 <VPImage
   loading="lazy"
   class="no-shadow"
-  style="max-height: 400px"
+  style="max-width: 500px"
   alt="Publishing flow diagram"
   :image="{
     dark: packThenPublishImage,
@@ -112,22 +98,34 @@ We are working on it, and it will be included in the next feature update.
 
 ### Improved CLI argument parsing and UX
 
-Changesets now uses [`cac`](https://npmx.dev/cac) for CLI arguments and help messages rather than our old custom implementation,
-and we use [`@clack/prompts`](https://npmx.dev/@clack/prompts) for CLI prompts and rendering, which should make the CLI prettier and easier to use.
+Changesets now uses [`cac`](https://npmx.dev/cac) for CLI arguments and help messages, and [`@clack/prompts`](https://npmx.dev/@clack/prompts) for CLI prompts and rendering, which should make the CLI prettier and easier to use.
 
 <!-- https://lexidraw.app/#atproto=did:plc:skqg5gindwkuzjmjub6db6yn,3mskqppq5nk2u -->
 
 <VPImage
   loading="lazy"
   alt="cli flow example"
-  style="max-height: 260px"
   :image="cliExampleImage"
 />
 
 ### Use installed formatters to format changelogs
 
-Changesets now defaults to using any supported formatters it finds installed in the project, instead of pulling in a (potentially duplicate) Prettier version!
+Changesets now defaults to using any supported formatters it finds installed in the project, instead of pulling in a (potentially duplicate) Prettier version.
 
-It uses our new package [`@changesets/format`](https://npmx.dev/@changesets/format) which so far supports `dprint`, `deno`, `oxfmt`, `biome`, and `prettier`.
+It supports detecting `prettier`, `oxfmt`, `deno`, and `dprint`, using our new [`@changesets/format`](https://npmx.dev/@changesets/format) package.
 
-You can see the [relevant section in the migration guide](../guide/migration.md#replace-prettier-with-format) for how to configure it.
+Check the [migration guide](../guide/migration.md#replace-prettier-with-format) for how to configure it.
+
+## Thanks
+
+This release was lead by the new Changesets team, including:
+
+- Mateusz Burzyński <Socials bsky="andarist.bsky.social" github="Andarist" />
+- Bjorn Lu <Socials bsky="bluwy.me" github="bluwy" />
+- Adam Haglund <Socials bsky="haglund.dev" github="beeequeue" />
+
+We'd also like to thank all contributors who have helped discuss, test, and improve Changesets v3 during its development.
+
+If you're interested in helping the future of Changesets, come join us on <DiscordLogo /> [Discord](https://chat.changesets.dev)!
+
+As Changesets remains one of the most popular release tool in the npm ecosystem, with more than 3M weekly downloads, we'd like to thank everyone who has supported Changesets over the years.

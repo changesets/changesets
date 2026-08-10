@@ -56,7 +56,6 @@ h5,
 h6 {
   color: var(--vp-c-heading-1);
   font-family: var(--vp-font-family-serif) !important;
-  letter-spacing: -0.02em !important;
 }
 
 code {
@@ -81,6 +80,12 @@ code {
   font-size: 48px;
 }
 
+/* Tighten text with different font */
+.VPHero .heading > .name,
+.VPHero .heading > .text {
+  letter-spacing: -0.6px;
+}
+
 /* Loosen heading in mobile view */
 @media (max-width: 768px) {
   .VPHero .heading > .name,
@@ -97,7 +102,7 @@ code {
 
 .VPNavBarTitle span {
   font-family: var(--vp-font-family-serif);
-  font-size: 1.5em;
+  font-size: 1.2em;
 }
 
 /* We do not need sponsor images for now */
@@ -119,4 +124,11 @@ code {
 
 .no-shadow {
   box-shadow: none !important;
+}
+
+.unplugin-icon {
+  display: inline;
+  font-size: 0.9em;
+  margin: 0 0.1rem;
+  transform: translateY(2px);
 }

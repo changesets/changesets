@@ -10,6 +10,9 @@
     "preview": "vitepress preview",
     "generate-og": "node scripts/generate-og.ts"
   },
+  "dependencies": {
+    "vue": "^3.5.40"
+  },
   "devDependencies": {
     "@iconify-json/logos": "^1.2.11",
     "takumi-js": "^2.5.2",

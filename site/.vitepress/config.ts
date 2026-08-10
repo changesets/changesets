@@ -57,6 +57,7 @@ export default defineConfig({
     [
       "link",
       {
+        rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:wght@400;700&family=Inter:ital,opsz,wght@0,14..32,400..700;1,14..32,400..700&display=swap",
       },
     ],
@@ -76,7 +77,7 @@ export default defineConfig({
   },
   vite: {
     plugins: [
-      icons({ defaultStyle: "display: inline; vertical-align: middle;" }),
+      icons({ defaultClass: "unplugin-icon" }),
       groupIconVitePlugin({
         customIcon: {
           typescript: "vscode-icons:file-type-typescript-official",
