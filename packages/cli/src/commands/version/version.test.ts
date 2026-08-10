@@ -841,6 +841,47 @@ describe("fixed", () => {
     );
   });
 
+  it("should expand globs in fixed groups", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "root-pkg",
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify({
+        ...modifiedDefaultConfig,
+        fixed: [["pkg-*"]],
+      }),
+    });
+    await writeChangesets(
+      [
+        {
+          summary: "This is a summary",
+          releases: [{ name: "pkg-a", type: "minor" }],
+        },
+      ],
+      cwd,
+    );
+
+    await version({ cwd });
+
+    expect(await getPkgJSON("pkg-a", cwd)).toEqual(
+      expect.objectContaining({ version: "1.1.0" }),
+    );
+    expect(await getPkgJSON("pkg-b", cwd)).toEqual(
+      expect.objectContaining({ version: "1.1.0" }),
+    );
+  });
+
   it("should not bump an ignored fixed package that depends on a package from the group that is being released", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
@@ -1046,6 +1087,50 @@ describe("linked", () => {
     );
     expect(await getPkgJSON("pkg-b", cwd)).toEqual(
       expect.objectContaining({ name: "pkg-b", version: "1.1.0" }),
+    );
+  });
+
+  it("should expand globs in linked groups", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "root-pkg",
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "0.1.0",
+      }),
+      ".changeset/config.json": JSON.stringify({
+        ...modifiedDefaultConfig,
+        linked: [["pkg-*"]],
+      }),
+    });
+    await writeChangesets(
+      [
+        {
+          summary: "This is a summary",
+          releases: [
+            { name: "pkg-a", type: "minor" },
+            { name: "pkg-b", type: "patch" },
+          ],
+        },
+      ],
+      cwd,
+    );
+
+    await version({ cwd });
+
+    expect(await getPkgJSON("pkg-a", cwd)).toEqual(
+      expect.objectContaining({ version: "1.1.0" }),
+    );
+    expect(await getPkgJSON("pkg-b", cwd)).toEqual(
+      expect.objectContaining({ version: "1.1.0" }),
     );
   });
 

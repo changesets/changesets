@@ -182,6 +182,18 @@ export function normalizeWrittenConfig({
     config.ignore = globMatch(packageNames, writtenConfig.ignore);
   }
 
+  if (writtenConfig.fixed != null) {
+    config.fixed = writtenConfig.fixed.map((item) =>
+      globMatch(packageNames, item),
+    );
+  }
+
+  if (writtenConfig.linked != null) {
+    config.linked = writtenConfig.linked.map((item) =>
+      globMatch(packageNames, item),
+    );
+  }
+
   if (typeof writtenConfig.privatePackages !== "object") {
     config.privatePackages = {
       version: writtenConfig.privatePackages ?? false,
