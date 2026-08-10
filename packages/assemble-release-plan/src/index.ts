@@ -184,6 +184,14 @@ export function assembleReleasePlan(
 
   if (preInfo?.state.mode === "exit") {
     for (const pkg of packages.packages) {
+      if (
+        shouldSkipPackage(pkg, {
+          ignore: config.ignore,
+          allowPrivatePackages: config.privatePackages.version,
+        })
+      ) {
+        continue;
+      }
       const preVersion = preInfo.preVersions.get(pkg.packageJson.name);
       // If a package had a prerelease, but didn't trigger a version bump in the regular release,
       // we want to give it a patch release.
