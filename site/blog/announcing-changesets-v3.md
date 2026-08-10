@@ -14,7 +14,7 @@ import peerBumpLightImage from "../assets/peer-bump-light.excalidraw.svg"
 
 # Announcing Changesets v3
 
-_10 August 2026_
+_11 August 2026_
 
 Today, we are excited to announce the release of Changesets v3!
 
