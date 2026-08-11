@@ -1,5 +1,54 @@
 # @changesets/apply-release-plan
 
+## 8.0.0
+
+### Major Changes
+
+- [#1482](https://github.com/changesets/changesets/pull/1482) [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7) Thanks [@Andarist](https://github.com/Andarist)! - Bumped supported Node versions to `^22.11 || ^24 || >=26`
+
+- [#2190](https://github.com/changesets/changesets/pull/2190) [`96b65ee`](https://github.com/changesets/changesets/commit/96b65eec4af2c58301a11cd7dff42a6bde9c9f8a) Thanks [@bluwy](https://github.com/bluwy)! - Move versioned prerelease changesets to `.changeset/pre/` folder instead of accumulating in the root and tracking the versioned changeset ids in the `.changeset/pre.json` file. Existing `pre.json` will auto-migrate to this new structure on the next run of `changeset version` or when calling `changeset status`.
+
+  This change allows easier management of versioned prerelease changesets (for the final stable release) and current queued changesets (for the next prerelease). Changesets in `.changeset/pre/` can be edited or deleted depending if it's still relevant for the final stable release of a package. There's no need to synchronize the changeset ids in `pre.json` if certain changesets are deleted.
+
+- [#1655](https://github.com/changesets/changesets/pull/1655) [`db46911`](https://github.com/changesets/changesets/commit/db46911e57603f20a158a47bbbebd112272c84e2) Thanks [@bluwy](https://github.com/bluwy)! - Update `@manypkg/get-packages` which drops support for detecting packages in Bolt monorepos and adds support for npm monorepos
+
+- [#1482](https://github.com/changesets/changesets/pull/1482) [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7) Thanks [@Andarist](https://github.com/Andarist)! - From now on this package is going to be published as ES module.
+
+- [#1994](https://github.com/changesets/changesets/pull/1994) [`062530b`](https://github.com/changesets/changesets/commit/062530b825d53abc9d8934f3a50cc61ff3ff82b8) Thanks [@bluwy](https://github.com/bluwy)! - Generated changelog entries and rewritten `package.json` files are now formatted with [@changesets/format](https://github.com/changesets/format) instead of depending on Prettier directly. Formatter selection can be auto-detected from the project configuration or controlled via the `format` config option.
+
+### Minor Changes
+
+- [#1989](https://github.com/changesets/changesets/pull/1989) [`ee10723`](https://github.com/changesets/changesets/commit/ee10723dde491ba6632da74d10876dfa2e67d0d2) Thanks [@43081j](https://github.com/43081j)! - Remove support for the legacy Changeset v1 format.
+
+- [#2070](https://github.com/changesets/changesets/pull/2070) [`694396c`](https://github.com/changesets/changesets/commit/694396ce49f0d7e2200c119b360e60e6bd11265f) Thanks [@bluwy](https://github.com/bluwy)! - Preserve the existing formatting of `package.json` when updating version and dependency ranges
+
+- [#1969](https://github.com/changesets/changesets/pull/1969) [`2c7c043`](https://github.com/changesets/changesets/commit/2c7c043d7071440009f8a69eff0b0c6746ac7625) Thanks [@marcalexiei](https://github.com/marcalexiei)! - Add a named export that mirrors the current `default` export
+
+  The `default` export is slated for removal in the next major release, so this ensures a smoother transition path.
+
+- [#2118](https://github.com/changesets/changesets/pull/2118) [`01f4da4`](https://github.com/changesets/changesets/commit/01f4da4e30aa90391def46b84b986fa223a055f5) Thanks [@bluwy](https://github.com/bluwy)! - Improve the default unformatted changelog new lines handling to ensure consistent spacing after the heading and the spacing between release lines
+
+### Patch Changes
+
+- [#1476](https://github.com/changesets/changesets/pull/1476) [`e0e1748`](https://github.com/changesets/changesets/commit/e0e1748369b1f936c665b62590a76a0d57d1545e) Thanks [@pralkarz](https://github.com/pralkarz)! - Replace `fs-extra` usage with `node:fs`
+
+- [#2160](https://github.com/changesets/changesets/pull/2160) [`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640) Thanks [@beeequeue](https://github.com/beeequeue)! - Added or modified the `files` property in the manifest. This should not change any behavior.
+
+- [#1617](https://github.com/changesets/changesets/pull/1617) [`8f7b607`](https://github.com/changesets/changesets/commit/8f7b607b486e299e038bf8e257d28f0193ac4412) Thanks [@bluwy](https://github.com/bluwy)! - Move `outdent` as a dev dependency
+
+- [#2006](https://github.com/changesets/changesets/pull/2006) [`fc42514`](https://github.com/changesets/changesets/commit/fc425143294e63ba254ddbe8c2ea026b55a05991) Thanks [@bluwy](https://github.com/bluwy)! - Remove `@changesets/get-version-range-type` dependency
+
+- [#1476](https://github.com/changesets/changesets/pull/1476) [`e0e1748`](https://github.com/changesets/changesets/commit/e0e1748369b1f936c665b62590a76a0d57d1545e) Thanks [@pralkarz](https://github.com/pralkarz)! - Replaced `spawndamnit` with `tinyexec`
+
+- [#2177](https://github.com/changesets/changesets/pull/2177) [`b5e1762`](https://github.com/changesets/changesets/commit/b5e1762584718ec607ea79db0a00ae4238f8a784) Thanks [@Andarist](https://github.com/Andarist)! - Avoid writing an `undefined` version when updating dependencies in unversioned private packages.
+
+- [#2163](https://github.com/changesets/changesets/pull/2163) [`5f8d925`](https://github.com/changesets/changesets/commit/5f8d9255088639c07b90910343752ae26b0a324f) Thanks [@Andarist](https://github.com/Andarist)! - Update dependency ranges in the workspace root `package.json`.
+- Updated dependencies [[`e0e1748`](https://github.com/changesets/changesets/commit/e0e1748369b1f936c665b62590a76a0d57d1545e), [`a736a20`](https://github.com/changesets/changesets/commit/a736a20c230a89232a122fe12ffd612361e0eef9), [`062530b`](https://github.com/changesets/changesets/commit/062530b825d53abc9d8934f3a50cc61ff3ff82b8), [`6a05002`](https://github.com/changesets/changesets/commit/6a05002228a06807b1a95da841d1809ae07441bf), [`88f2abb`](https://github.com/changesets/changesets/commit/88f2abb5e14748b08e3441fd871df60dd1c4737f), [`c76b232`](https://github.com/changesets/changesets/commit/c76b232abc76f73592a21f0d5df9cc89406a31dc), [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7), [`b5e1762`](https://github.com/changesets/changesets/commit/b5e1762584718ec607ea79db0a00ae4238f8a784), [`c19b112`](https://github.com/changesets/changesets/commit/c19b1123d27986da0e14e99d65b0f9a408def35c), [`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640), [`b9407b3`](https://github.com/changesets/changesets/commit/b9407b39a458bab106d0e23a3afab01d07d8482f), [`4c26f2f`](https://github.com/changesets/changesets/commit/4c26f2faac89b53d3305cf73c9e9cfca5aa88f5f), [`96b65ee`](https://github.com/changesets/changesets/commit/96b65eec4af2c58301a11cd7dff42a6bde9c9f8a), [`3628cab`](https://github.com/changesets/changesets/commit/3628cab6cbfd931b7f2a909b38b66c1aa794d4bf), [`db46911`](https://github.com/changesets/changesets/commit/db46911e57603f20a158a47bbbebd112272c84e2), [`b83787f`](https://github.com/changesets/changesets/commit/b83787fb090dc03ad566a7d8b7e286dbe93e2301), [`2c7c043`](https://github.com/changesets/changesets/commit/2c7c043d7071440009f8a69eff0b0c6746ac7625), [`813bbf3`](https://github.com/changesets/changesets/commit/813bbf314d051bfee3b46a793f94b396ef2a4df1), [`6a05002`](https://github.com/changesets/changesets/commit/6a05002228a06807b1a95da841d1809ae07441bf), [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7), [`a0b5326`](https://github.com/changesets/changesets/commit/a0b5326570e8e7bf5e35c1cefe8f70d9a51a5cd7), [`e0e1748`](https://github.com/changesets/changesets/commit/e0e1748369b1f936c665b62590a76a0d57d1545e), [`6c79210`](https://github.com/changesets/changesets/commit/6c79210fabfe13d82ca4ac4dc92aab9b58fd58fd), [`3910adf`](https://github.com/changesets/changesets/commit/3910adf3ebaef14196093715228885c4819d0cbf), [`18bc470`](https://github.com/changesets/changesets/commit/18bc470ab550b2def6b52656b7b72f86c04429cb), [`96b65ee`](https://github.com/changesets/changesets/commit/96b65eec4af2c58301a11cd7dff42a6bde9c9f8a)]:
+  - @changesets/config@4.0.0
+  - @changesets/git@4.0.0
+  - @changesets/types@7.0.0
+  - @changesets/should-skip-package@1.0.0
+
 ## 8.0.0-next.11
 
 ### Patch Changes

@@ -1,5 +1,54 @@
 # @changesets/get-github-info
 
+## 1.0.0
+
+### Major Changes
+
+- [#2121](https://github.com/changesets/changesets/pull/2121) [`dae394c`](https://github.com/changesets/changesets/commit/dae394c29952ce27dc34884c26dcd57a2756325f) Thanks [@bluwy](https://github.com/bluwy)! - Rename `getInfo` to `getCommitInfo`, and `getInfoFromPullRequest` to `getPullRequestInfo`. They may now return `undefined` if the commit or pull request is not found in the GitHub repository.
+
+  The return types are also slightly changed but should contain the same information as before. To migrate:
+
+  ```ts
+  const info = await getCommitInfo({ commit, repo });
+  if (info == null) return;
+
+  // Before:
+  const authorLogin = info.user;
+  const authorLink = info.links.author;
+
+  const pullNumber = info.pull;
+  const pullLink = info.links.pull;
+
+  const commitLink = info.links.commit;
+
+  // After:
+  const authorLogin = info.author.login;
+  const authorLink = info.author.markdownLink;
+
+  const pullNumber = info.pull.number;
+  const pullLink = info.pull.markdownLink;
+
+  const commitLink = info.commit.markdownLink;
+  ```
+
+  `getPullRequestInfo` also has a similar migration path.
+
+- [#1482](https://github.com/changesets/changesets/pull/1482) [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7) Thanks [@Andarist](https://github.com/Andarist)! - Bumped supported Node versions to `^22.11 || ^24 || >=26`
+
+- [#1482](https://github.com/changesets/changesets/pull/1482) [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7) Thanks [@Andarist](https://github.com/Andarist)! - From now on this package is going to be published as ES module.
+
+### Minor Changes
+
+- [#2121](https://github.com/changesets/changesets/pull/2121) [`dae394c`](https://github.com/changesets/changesets/commit/dae394c29952ce27dc34884c26dcd57a2756325f) Thanks [@bluwy](https://github.com/bluwy)! - Improve data fetching by using GraphQL fragments to reduce the query size, and set a maximum batch size of 50 to avoid hitting rate limits
+
+### Patch Changes
+
+- [#1613](https://github.com/changesets/changesets/pull/1613) [`5b02e2f`](https://github.com/changesets/changesets/commit/5b02e2f61d2a1335293016f81efb0386a0ed7967) Thanks [@bluwy](https://github.com/bluwy)! - Remove `node-fetch` dependency
+
+- [#2160](https://github.com/changesets/changesets/pull/2160) [`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640) Thanks [@beeequeue](https://github.com/beeequeue)! - Added or modified the `files` property in the manifest. This should not change any behavior.
+
+- [#1947](https://github.com/changesets/changesets/pull/1947) [`492b0ca`](https://github.com/changesets/changesets/commit/492b0caa1a076551cf4bdca13d83dee4c485c9c8) Thanks [@bluwy](https://github.com/bluwy)! - Automatically load `GITHUB_` environment variables from `.env` file
+
 ## 1.0.0-next.4
 
 ### Patch Changes

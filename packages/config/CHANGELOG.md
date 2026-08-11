@@ -1,5 +1,78 @@
 # @changesets/config
 
+## 4.0.0
+
+### Major Changes
+
+- [#1994](https://github.com/changesets/changesets/pull/1994) [`062530b`](https://github.com/changesets/changesets/commit/062530b825d53abc9d8934f3a50cc61ff3ff82b8) Thanks [@bluwy](https://github.com/bluwy)! - Replaced the `prettier` config option with `format`. `format` supports `"auto"`, `"prettier"`, `"oxfmt"`, `"deno"`, `"dprint"`, and `false`. If you previously used `prettier: false`, migrate to `format: false`.
+
+- [#2015](https://github.com/changesets/changesets/pull/2015) [`6a05002`](https://github.com/changesets/changesets/commit/6a05002228a06807b1a95da841d1809ae07441bf) Thanks [@beeequeue](https://github.com/beeequeue)! - Removed `read` and `parse` functions in favor of `readConfig`, which returns `{ config, warnings, errors }` instead of throwing on issues.
+
+  ```ts
+  // before.ts
+  import { parse } from "@changesets/config";
+  import { getPackages } from "@manypkg/get-packages";
+
+  const config = parse({ commit: true }, await getPackages());
+
+  try {
+    return parse({ commit: true }, packages);
+  } catch (err) {
+    if (err instanceof ValidationError) {
+      console.error(`Invalid config: ${err.message}`);
+    } else {
+      throw err;
+    }
+  }
+
+  // after.ts
+  import { readConfig } from "@changesets/config";
+  import { getPackages } from "@manypkg/get-packages";
+
+  // both arguments are optional
+  const { config, warnings, errors } = readConfig(
+    process.cwd(),
+    await getPackages(),
+  );
+
+  if (warnings.length !== 0) {
+    console.warn(warnings.join("\n"));
+  }
+  if (config == null) {
+    console.error(errors.join("\n"));
+  }
+  ```
+
+- [#1482](https://github.com/changesets/changesets/pull/1482) [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7) Thanks [@Andarist](https://github.com/Andarist)! - Bumped supported Node versions to `^22.11 || ^24 || >=26`
+
+- [#1655](https://github.com/changesets/changesets/pull/1655) [`db46911`](https://github.com/changesets/changesets/commit/db46911e57603f20a158a47bbbebd112272c84e2) Thanks [@bluwy](https://github.com/bluwy)! - Update `@manypkg/get-packages` which drops support for detecting packages in Bolt monorepos and adds support for npm monorepos
+
+- [#1650](https://github.com/changesets/changesets/pull/1650) [`b83787f`](https://github.com/changesets/changesets/commit/b83787fb090dc03ad566a7d8b7e286dbe93e2301) Thanks [@bluwy](https://github.com/bluwy)! - Change the `defaultWrittenConfig` `baseBranch` value from `"master"` to `"main"`
+
+- [#1482](https://github.com/changesets/changesets/pull/1482) [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7) Thanks [@Andarist](https://github.com/Andarist)! - From now on this package is going to be published as ES module.
+
+- [#1652](https://github.com/changesets/changesets/pull/1652) [`a0b5326`](https://github.com/changesets/changesets/commit/a0b5326570e8e7bf5e35c1cefe8f70d9a51a5cd7) Thanks [@bluwy](https://github.com/bluwy)! - Remove support for the deprecated `___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH.useCalculatedVersionForSnapshots` config. The `snapshot.useCalculatedVersion` config should be used instead.
+
+- [#2186](https://github.com/changesets/changesets/pull/2186) [`3910adf`](https://github.com/changesets/changesets/commit/3910adf3ebaef14196093715228885c4819d0cbf) Thanks [@Andarist](https://github.com/Andarist)! - Private packages are no longer versioned by default. Set `privatePackages` to `true` to opt into versioning and tagging them, or set `privatePackages.version` to `true` to version them without tagging.
+
+### Minor Changes
+
+- [#2015](https://github.com/changesets/changesets/pull/2015) [`6a05002`](https://github.com/changesets/changesets/commit/6a05002228a06807b1a95da841d1809ae07441bf) Thanks [@beeequeue](https://github.com/beeequeue)! - Refactored config parsing to use Valibot and validation rules.
+
+- [#2130](https://github.com/changesets/changesets/pull/2130) [`18bc470`](https://github.com/changesets/changesets/commit/18bc470ab550b2def6b52656b7b72f86c04429cb) Thanks [@beeequeue](https://github.com/beeequeue)! - Allow unmatched glob patterns in the `ignore` config option.
+
+### Patch Changes
+
+- [#1476](https://github.com/changesets/changesets/pull/1476) [`e0e1748`](https://github.com/changesets/changesets/commit/e0e1748369b1f936c665b62590a76a0d57d1545e) Thanks [@pralkarz](https://github.com/pralkarz)! - Replace `fs-extra` usage with `node:fs`
+
+- [#1879](https://github.com/changesets/changesets/pull/1879) [`c76b232`](https://github.com/changesets/changesets/commit/c76b232abc76f73592a21f0d5df9cc89406a31dc) Thanks [@beeequeue](https://github.com/beeequeue)! - Removed `@changesets/logger`.
+
+- [#1953](https://github.com/changesets/changesets/pull/1953) [`b9407b3`](https://github.com/changesets/changesets/commit/b9407b39a458bab106d0e23a3afab01d07d8482f) Thanks [@beeequeue](https://github.com/beeequeue)! - Refactored from `micromatch` to `picomatch` for globbing patterns
+- Updated dependencies [[`062530b`](https://github.com/changesets/changesets/commit/062530b825d53abc9d8934f3a50cc61ff3ff82b8), [`88f2abb`](https://github.com/changesets/changesets/commit/88f2abb5e14748b08e3441fd871df60dd1c4737f), [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7), [`b5e1762`](https://github.com/changesets/changesets/commit/b5e1762584718ec607ea79db0a00ae4238f8a784), [`c19b112`](https://github.com/changesets/changesets/commit/c19b1123d27986da0e14e99d65b0f9a408def35c), [`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640), [`4c26f2f`](https://github.com/changesets/changesets/commit/4c26f2faac89b53d3305cf73c9e9cfca5aa88f5f), [`96b65ee`](https://github.com/changesets/changesets/commit/96b65eec4af2c58301a11cd7dff42a6bde9c9f8a), [`db46911`](https://github.com/changesets/changesets/commit/db46911e57603f20a158a47bbbebd112272c84e2), [`2c7c043`](https://github.com/changesets/changesets/commit/2c7c043d7071440009f8a69eff0b0c6746ac7625), [`813bbf3`](https://github.com/changesets/changesets/commit/813bbf314d051bfee3b46a793f94b396ef2a4df1), [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7), [`a0b5326`](https://github.com/changesets/changesets/commit/a0b5326570e8e7bf5e35c1cefe8f70d9a51a5cd7), [`169b128`](https://github.com/changesets/changesets/commit/169b128522f0e53ef228f3acd8118709b0f72156)]:
+  - @changesets/types@7.0.0
+  - @changesets/get-dependents-graph@3.0.0
+  - @changesets/should-skip-package@1.0.0
+
 ## 4.0.0-next.10
 
 ### Patch Changes

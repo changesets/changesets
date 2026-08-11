@@ -1,5 +1,34 @@
 # @changesets/changelog-github
 
+## 1.0.0
+
+### Major Changes
+
+- [#1482](https://github.com/changesets/changesets/pull/1482) [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7) Thanks [@Andarist](https://github.com/Andarist)! - Bumped supported Node versions to `^22.11 || ^24 || >=26`
+
+- [#1482](https://github.com/changesets/changesets/pull/1482) [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7) Thanks [@Andarist](https://github.com/Andarist)! - From now on this package is going to be published as ES module.
+
+### Minor Changes
+
+- [#2059](https://github.com/changesets/changesets/pull/2059) [`070f531`](https://github.com/changesets/changesets/commit/070f531c6b7ed3ec90fbcda8ce705b9bf476c1ef) Thanks [@jycouet](https://github.com/jycouet)! - Add an opt-in, experimental `template` option to render changelog lines from tokens (`{summary}`, `{ref}`, `{pull}`, `{commit}`, `{authors}`). Default output is unchanged. The token syntax may change in a patch release; pin the version if you rely on it.
+
+- [#1871](https://github.com/changesets/changesets/pull/1871) [`dfefc4e`](https://github.com/changesets/changesets/commit/dfefc4e71fc589df92e8328e9b66e0d7ae9b4699) Thanks [@mihkeleidast](https://github.com/mihkeleidast)! - Use `GITHUB_REPOSITORY` as the default repo when no `repo` option is configured
+
+- [#1969](https://github.com/changesets/changesets/pull/1969) [`2c7c043`](https://github.com/changesets/changesets/commit/2c7c043d7071440009f8a69eff0b0c6746ac7625) Thanks [@marcalexiei](https://github.com/marcalexiei)! - Add a named export that mirrors the current `default` export
+
+  The `default` export is slated for removal in the next major release, so this ensures a smoother transition path.
+
+### Patch Changes
+
+- [#2040](https://github.com/changesets/changesets/pull/2040) [`88f2abb`](https://github.com/changesets/changesets/commit/88f2abb5e14748b08e3441fd871df60dd1c4737f) Thanks [@bluwy](https://github.com/bluwy)! - Improve type-check for options object
+
+- [#2160](https://github.com/changesets/changesets/pull/2160) [`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640) Thanks [@beeequeue](https://github.com/beeequeue)! - Added or modified the `files` property in the manifest. This should not change any behavior.
+
+- [#1947](https://github.com/changesets/changesets/pull/1947) [`492b0ca`](https://github.com/changesets/changesets/commit/492b0caa1a076551cf4bdca13d83dee4c485c9c8) Thanks [@bluwy](https://github.com/bluwy)! - Use `parseEnv` instead of `dotenv` to load the `.env` file and avoid loading them to `process.env`
+- Updated dependencies [[`5b02e2f`](https://github.com/changesets/changesets/commit/5b02e2f61d2a1335293016f81efb0386a0ed7967), [`062530b`](https://github.com/changesets/changesets/commit/062530b825d53abc9d8934f3a50cc61ff3ff82b8), [`88f2abb`](https://github.com/changesets/changesets/commit/88f2abb5e14748b08e3441fd871df60dd1c4737f), [`dae394c`](https://github.com/changesets/changesets/commit/dae394c29952ce27dc34884c26dcd57a2756325f), [`dae394c`](https://github.com/changesets/changesets/commit/dae394c29952ce27dc34884c26dcd57a2756325f), [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7), [`b5e1762`](https://github.com/changesets/changesets/commit/b5e1762584718ec607ea79db0a00ae4238f8a784), [`c19b112`](https://github.com/changesets/changesets/commit/c19b1123d27986da0e14e99d65b0f9a408def35c), [`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640), [`4c26f2f`](https://github.com/changesets/changesets/commit/4c26f2faac89b53d3305cf73c9e9cfca5aa88f5f), [`96b65ee`](https://github.com/changesets/changesets/commit/96b65eec4af2c58301a11cd7dff42a6bde9c9f8a), [`813bbf3`](https://github.com/changesets/changesets/commit/813bbf314d051bfee3b46a793f94b396ef2a4df1), [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7), [`a0b5326`](https://github.com/changesets/changesets/commit/a0b5326570e8e7bf5e35c1cefe8f70d9a51a5cd7), [`492b0ca`](https://github.com/changesets/changesets/commit/492b0caa1a076551cf4bdca13d83dee4c485c9c8)]:
+  - @changesets/get-github-info@1.0.0
+  - @changesets/types@7.0.0
+
 ## 1.0.0-next.9
 
 ### Patch Changes
