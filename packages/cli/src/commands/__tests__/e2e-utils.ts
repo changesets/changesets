@@ -267,10 +267,20 @@ function execTty(
     let done = false;
     let output = "";
     const child = pty.spawn(command, args, {
+      // Declare the VT-compatible terminal so Unicode capability detection is
+      // consistent on Windows without relying on a fake CI environment.
+      name: "xterm-256color",
       cols: 80,
       rows: 30,
       cwd: options.nodeOptions.cwd,
-      env: options.nodeOptions.env,
+      // Unlike Node's child-process APIs, node-pty serializes `undefined`
+      // environment values as the string "undefined". Omit them so variables
+      // intentionally cleared by the test setup remain truly absent.
+      env: {
+        ...sanitizePtyEnv(options.nodeOptions.env),
+        // ConPTY does not derive TERM from the terminal name on Windows.
+        TERM: "xterm-256color",
+      },
     });
     const data = child.onData((chunk) => {
       output += chunk;
@@ -301,6 +311,15 @@ function execTty(
 
     options.signal?.addEventListener("abort", abort, { once: true });
   });
+}
+
+function sanitizePtyEnv(env: NodeJS.ProcessEnv | undefined) {
+  if (!env) {
+    return undefined;
+  }
+  return Object.fromEntries(
+    Object.entries(env).filter((entry) => entry[1] != null),
+  );
 }
 
 export async function runCliCommand(options: {
