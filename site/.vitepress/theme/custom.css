@@ -122,6 +122,13 @@ code {
   box-shadow: 2px 4px 15px rgba(0, 0, 0, 0.5);
 }
 
+html:not(.dark) .VPDoc img.dark {
+  display: none;
+}
+html.dark .VPDoc img.light {
+  display: none;
+}
+
 .no-shadow {
   box-shadow: none !important;
 }
