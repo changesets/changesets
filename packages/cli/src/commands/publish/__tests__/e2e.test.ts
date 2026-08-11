@@ -234,22 +234,41 @@ function normalizeOtpPrompts(message: string) {
         /Enter OTP:[^\n]*?(?:\?|✔) This operation requires a one-time password\.(?:\n|(?=Enter OTP:))/g,
         "",
       )
+      // ConPTY may materialize pnpm's cleared prompt rows as blank lines.
+      .replace(/\n+(?=\? This operation requires a one-time password\.)/g, "\n")
+      .replace(/(✅ Published package[^\n]*)\n+(?=│)/g, "$1\n")
+      // ConPTY may erase npm's echoed digits entirely before the captured redraw.
+      // This E2E always submits the same fixed OTP.
+      .replace(
+        /Enter OTP:(?:[ \t]*\n)+(?=\+ \S+@\S+)/g,
+        "Enter OTP: 654321\n\n",
+      )
       // npm may render the prompt and entered code on separate terminal lines.
       .replace(/Enter OTP:(?:\n[ \t]*)+(\d{6})/g, "Enter OTP: $1")
       // npm 10 may concatenate the following publish result onto the prompt.
       .replace(/(Enter OTP: \d{6})(?=\+ )/g, "$1\n\n")
+      // A PTY may omit the line break between the echoed code and the package
+      // manager's output. Ensure any result starts on its own line.
+      .replace(/(Enter OTP: \d{6})(?=[^\d\s])/g, "$1\n")
   );
 }
 
 function sanitizePublishLog(message: unknown, registryUrl: string) {
   const output = stripVTControlCharacters(
-    String(message).replace(
-      // Strip OSC sequences first because stripVTControlCharacters removes
-      // their introducer but leaves the title and terminator behind.
-      // eslint-disable-next-line no-control-regex -- OSC sequences are delimited by ESC and BEL control characters.
-      /\u001B\](?:[^\u0007\u001B]|\u001B(?!\\))*(?:\u0007|\u001B\\)/g,
-      "",
-    ),
+    String(message)
+      .replace(
+        // Strip OSC sequences first because stripVTControlCharacters removes
+        // their introducer but leaves the title and terminator behind.
+        // eslint-disable-next-line no-control-regex -- OSC sequences are delimited by ESC and BEL control characters.
+        /\u001B\](?:[^\u0007\u001B]|\u001B(?!\\))*(?:\u0007|\u001B\\)/g,
+        "",
+      )
+      .replace(
+        // Drop transient terminal content that is erased by the next redraw.
+        // eslint-disable-next-line no-control-regex -- CSI sequences are delimited by ESC control characters.
+        /(^|\u001B\[1G\u001B\[0[JK])[^\r\n]*(?=\u001B\[1G\u001B\[0[JK])/gm,
+        "$1",
+      ),
   )
     // Windows PTYs may duplicate the carriage return in CRLF.
     .replace(/\r+\n/g, "\n")
@@ -257,6 +276,14 @@ function sanitizePublishLog(message: unknown, registryUrl: string) {
     // a new one. Removing them lets the redraw normalizers below collapse
     // the concatenated terminal states.
     .replaceAll("\r", "")
+    // npm's Windows spinner frames may survive and accumulate across ConPTY redraws.
+    .replace(
+      /^(?:(?!\n)(?:\p{Cc}|[\\|/-]))+(?=(?:npm notice|This operation requires a one-time password\.|│))/gmu,
+      "",
+    )
+    // Normalize npm's success line as a whole because its redraw prefix can
+    // contain arbitrary interleaved spinner and cursor-control sequences.
+    .replace(/^[^\n]*(\+ \S+@\S+)$/gm, "$1")
     .replace(/^npm notice 📦[ \t]+/gm, "npm notice package: ")
     .replace(/changeset v\S+/g, "changeset v[version]")
     .replace(/(➤ YN0000: Done in )\d+s \d+ms/g, "$1[duration]")

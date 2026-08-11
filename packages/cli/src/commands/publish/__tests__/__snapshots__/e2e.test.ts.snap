@@ -614,7 +614,6 @@ exports[`Publish command e2e > 'pnpm 11' > retries interactively after an OTP au
 │  0 packages are already published.
 │
 ◒  Publishing packages◇  pkg-a requires 2FA verification to publish...
-[WARN] Skipped OIDC: ERR_PNPM_ID_TOKEN_GITHUB_WORKFLOW_INCORRECT_PERMISSIONS: Incorrect permissions for idToken within GitHub Workflows
 📦 pkg-a@1.0.0 → [registry-url]/
 ? This operation requires a one-time password.
 Enter OTP: 654321
