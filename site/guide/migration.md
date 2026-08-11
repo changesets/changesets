@@ -24,6 +24,30 @@ $ yarn up @changesets/cli@3
 
 :::
 
+The following `@changesets/*` packages should also be updated accordingly if used directly:
+
+| Package                              | Previous | Latest       |
+| ------------------------------------ | -------- | ------------ |
+| `@changesets/apply-release-plan`     | v7       | v8           |
+| `@changesets/assemble-release-plan`  | v6       | v7           |
+| `@changesets/changelog-git`          | v0.2     | v1           |
+| `@changesets/changelog-github`       | v0.7     | v1           |
+| `@changesets/config`                 | v3       | v4           |
+| `@changesets/errors`                 | v0.2     | v1           |
+| `@changesets/get-dependents-graph`   | v2       | v3           |
+| `@changesets/get-github-info`        | v0.7     | v1           |
+| `@changesets/get-release-plan`       | v4       | v5           |
+| `@changesets/get-version-range-type` | v0.4     | v1           |
+| `@changesets/git`                    | v3       | v4           |
+| `@changesets/logger`                 | v0.1     | _deprecated_ |
+| `@changesets/parse`                  | v0.4     | v1           |
+| `@changesets/pre`                    | v2       | v3           |
+| `@changesets/read`                   | v0.6     | v1           |
+| `@changesets/release-utils`          | v0.2     | v1           |
+| `@changesets/should-skip-package`    | v0.1     | v1           |
+| `@changesets/types`                  | v6       | v7           |
+| `@changesets/write`                  | v0.4     | v1           |
+
 Once updated, follow the remaining sections below and review the changes that apply to your project.
 
 ## Install Requirements
