@@ -1,15 +1,10 @@
 <script setup lang="ts">
-import { VPImage } from "vitepress/theme"
 import DiscordLogo from "~icons/logos/discord-icon"
 import OCLogo from "~icons/logos/opencollective"
 import Socials from "../.vitepress/theme/components/Socials.vue"
-import packThenPublishImage from "../assets/pack-then-publish.excalidraw.svg"
-import packThenPublishLightImage from "../assets/pack-then-publish-light.excalidraw.svg"
-import peerBumpImage from "../assets/peer-bump-dark.excalidraw.svg"
-import peerBumpLightImage from "../assets/peer-bump-light.excalidraw.svg"
 </script>
 
-![Banner](/blog/announcing-changesets-v3.png)
+![Banner](/blog/announcing-changesets-v3.png){loading="eager"}
 
 # Announcing Changesets v3
 
@@ -58,17 +53,8 @@ Now, all change types will bump peer dependents by a **patch** version, while au
 
 This has been the most requested change to Changesets for years (as can be seen in the [closed issues](https://github.com/changesets/changesets/pull/2090)), and we're happy to finally release it!
 
-<VPImage
-  loading="lazy"
-  class="no-shadow"
-  width="420"
-  height="511"
-  :image="{
-    alt: 'graph showing that peer dependents are bumped by patch versions instead of major',
-    dark: peerBumpImage,
-    light: peerBumpLightImage,
-  }"
-/>
+![graph showing that peer dependents are bumped by patch versions instead of major](../assets/peer-bump-dark.excalidraw.svg){.dark .no-shadow width="420"}
+![graph showing that peer dependents are bumped by patch versions instead of major](../assets/peer-bump-light.excalidraw.svg){.light .no-shadow width="420"}
 
 ### More robust and flexible version, pack, and publish flows
 
@@ -85,17 +71,8 @@ We are working on it, and it will be included in the next feature update.
 
 <!-- https://lexidraw.app/#atproto=did:plc:skqg5gindwkuzjmjub6db6yn,3msdmimnqlf2s -->
 
-<VPImage
-  loading="lazy"
-  class="no-shadow"
-  width="500"
-  height="402"
-  :image="{
-    alt: 'Publishing flow diagram',
-    dark: packThenPublishImage,
-    light: packThenPublishLightImage,
-  }"
-/>
+![Publishing flow diagram](../assets/pack-then-publish-dark.excalidraw.svg){.dark .no-shadow width="500"}
+![Publishing flow diagram](../assets/pack-then-publish-light.excalidraw.svg){.light .no-shadow width="500"}
 
 ### Improved CLI argument parsing and UX
 

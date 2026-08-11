@@ -65,6 +65,9 @@ export default defineConfig({
   lastUpdated: true,
   cleanUrls: true,
   markdown: {
+    image: {
+      lazyLoad: true,
+    },
     async config(md) {
       await graphvizMarkdownPlugin(md);
       md.use(groupIconMdPlugin, {
