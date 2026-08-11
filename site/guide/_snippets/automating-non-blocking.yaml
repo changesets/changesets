@@ -12,7 +12,7 @@ concurrency:
 jobs:
   pr-status:
     # recommended: skip the release pull request, as it never has changesets
-    if: ${{ !startsWith(github.event.pull_request.head.ref, 'changeset-release/') }}
+    if: ${{ !startsWith(github.head_ref, 'changeset-release/') }}
     runs-on: ubuntu-slim
     permissions:
       contents: read # to check out repo (actions/checkout)

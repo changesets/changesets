@@ -38,7 +38,7 @@ You can also use the `pull_request` event if you prefer to lock permissions down
 ```yaml
 jobs:
   pr-status:
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event.pull_request.head.repo.full_name == github.repository && !startsWith(github.head_ref, 'changeset-release/')
     # ...
 ```
 
