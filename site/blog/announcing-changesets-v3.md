@@ -3,7 +3,6 @@ import { VPImage } from "vitepress/theme"
 import DiscordLogo from "~icons/logos/discord-icon"
 import OCLogo from "~icons/logos/opencollective"
 import Socials from "../.vitepress/theme/components/Socials.vue"
-import cliExampleImage from "../assets/cli-example.webp"
 import packThenPublishImage from "../assets/pack-then-publish.excalidraw.svg"
 import packThenPublishLightImage from "../assets/pack-then-publish-light.excalidraw.svg"
 import peerBumpImage from "../assets/peer-bump-dark.excalidraw.svg"
@@ -62,9 +61,10 @@ This has been the most requested change to Changesets for years (as can be seen 
 <VPImage
   loading="lazy"
   class="no-shadow"
-  style="max-width: 420px"
-  alt="graph showing that peer dependents are bumped by patch versions instead of major"
+  width="420"
+  height="511"
   :image="{
+    alt: 'graph showing that peer dependents are bumped by patch versions instead of major',
     dark: peerBumpImage,
     light: peerBumpLightImage,
   }"
@@ -88,9 +88,10 @@ We are working on it, and it will be included in the next feature update.
 <VPImage
   loading="lazy"
   class="no-shadow"
-  style="max-width: 500px"
-  alt="Publishing flow diagram"
+  width="500"
+  height="402"
   :image="{
+    alt: 'Publishing flow diagram',
     dark: packThenPublishImage,
     light: packThenPublishLightImage,
   }"
@@ -102,11 +103,7 @@ Changesets now uses [`cac`](https://npmx.dev/cac) for CLI arguments and help mes
 
 <!-- https://lexidraw.app/#atproto=did:plc:skqg5gindwkuzjmjub6db6yn,3mskqppq5nk2u -->
 
-<VPImage
-  loading="lazy"
-  alt="cli flow example"
-  :image="cliExampleImage"
-/>
+![cli flow example](../assets/cli-example.webp)
 
 ### Use installed formatters to format changelogs
 
