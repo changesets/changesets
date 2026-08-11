@@ -1,5 +1,30 @@
 # @changesets/pre
 
+## 3.0.0
+
+### Major Changes
+
+- [#1482](https://github.com/changesets/changesets/pull/1482) [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7) Thanks [@Andarist](https://github.com/Andarist)! - Bumped supported Node versions to `^22.11 || ^24 || >=26`
+
+- [#2190](https://github.com/changesets/changesets/pull/2190) [`96b65ee`](https://github.com/changesets/changesets/commit/96b65eec4af2c58301a11cd7dff42a6bde9c9f8a) Thanks [@bluwy](https://github.com/bluwy)! - Move versioned prerelease changesets to `.changeset/pre/` folder instead of accumulating in the root and tracking the versioned changeset ids in the `.changeset/pre.json` file. Existing `pre.json` will auto-migrate to this new structure on the next run of `changeset version` or when calling `changeset status`.
+
+  This change allows easier management of versioned prerelease changesets (for the final stable release) and current queued changesets (for the next prerelease). Changesets in `.changeset/pre/` can be edited or deleted depending if it's still relevant for the final stable release of a package. There's no need to synchronize the changeset ids in `pre.json` if certain changesets are deleted.
+
+- [#1655](https://github.com/changesets/changesets/pull/1655) [`db46911`](https://github.com/changesets/changesets/commit/db46911e57603f20a158a47bbbebd112272c84e2) Thanks [@bluwy](https://github.com/bluwy)! - Update `@manypkg/get-packages` which drops support for detecting packages in Bolt monorepos and adds support for npm monorepos
+
+- [#2117](https://github.com/changesets/changesets/pull/2117) [`813bbf3`](https://github.com/changesets/changesets/commit/813bbf314d051bfee3b46a793f94b396ef2a4df1) Thanks [@bluwy](https://github.com/bluwy)! - Remove the `pre.json` `initialVersions` property and handling as it's unused internally
+
+- [#1482](https://github.com/changesets/changesets/pull/1482) [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7) Thanks [@Andarist](https://github.com/Andarist)! - From now on this package is going to be published as ES module.
+
+### Patch Changes
+
+- [#1476](https://github.com/changesets/changesets/pull/1476) [`e0e1748`](https://github.com/changesets/changesets/commit/e0e1748369b1f936c665b62590a76a0d57d1545e) Thanks [@pralkarz](https://github.com/pralkarz)! - Replace `fs-extra` usage with `node:fs`
+
+- [#2160](https://github.com/changesets/changesets/pull/2160) [`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640) Thanks [@beeequeue](https://github.com/beeequeue)! - Added or modified the `files` property in the manifest. This should not change any behavior.
+- Updated dependencies [[`062530b`](https://github.com/changesets/changesets/commit/062530b825d53abc9d8934f3a50cc61ff3ff82b8), [`88f2abb`](https://github.com/changesets/changesets/commit/88f2abb5e14748b08e3441fd871df60dd1c4737f), [`6a05002`](https://github.com/changesets/changesets/commit/6a05002228a06807b1a95da841d1809ae07441bf), [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7), [`b5e1762`](https://github.com/changesets/changesets/commit/b5e1762584718ec607ea79db0a00ae4238f8a784), [`c19b112`](https://github.com/changesets/changesets/commit/c19b1123d27986da0e14e99d65b0f9a408def35c), [`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640), [`4c26f2f`](https://github.com/changesets/changesets/commit/4c26f2faac89b53d3305cf73c9e9cfca5aa88f5f), [`96b65ee`](https://github.com/changesets/changesets/commit/96b65eec4af2c58301a11cd7dff42a6bde9c9f8a), [`813bbf3`](https://github.com/changesets/changesets/commit/813bbf314d051bfee3b46a793f94b396ef2a4df1), [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7), [`a0b5326`](https://github.com/changesets/changesets/commit/a0b5326570e8e7bf5e35c1cefe8f70d9a51a5cd7), [`6a05002`](https://github.com/changesets/changesets/commit/6a05002228a06807b1a95da841d1809ae07441bf)]:
+  - @changesets/types@7.0.0
+  - @changesets/errors@1.0.0
+
 ## 3.0.0-next.9
 
 ### Major Changes

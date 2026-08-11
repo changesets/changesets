@@ -1,5 +1,50 @@
 # @changesets/assemble-release-plan
 
+## 7.0.0
+
+### Major Changes
+
+- [#1482](https://github.com/changesets/changesets/pull/1482) [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7) Thanks [@Andarist](https://github.com/Andarist)! - Bumped supported Node versions to `^22.11 || ^24 || >=26`
+
+- [#1956](https://github.com/changesets/changesets/pull/1956) [`03d4479`](https://github.com/changesets/changesets/commit/03d44794fedd24ae9eb053b28624c1fd8fe6fe6f) Thanks [@Andarist](https://github.com/Andarist)! - Drop the legacy compatibility shim in `assembleReleasePlan` that accepted older `config` and `snapshot` argument shapes.
+
+- [#2190](https://github.com/changesets/changesets/pull/2190) [`96b65ee`](https://github.com/changesets/changesets/commit/96b65eec4af2c58301a11cd7dff42a6bde9c9f8a) Thanks [@bluwy](https://github.com/bluwy)! - Move versioned prerelease changesets to `.changeset/pre/` folder instead of accumulating in the root and tracking the versioned changeset ids in the `.changeset/pre.json` file. Existing `pre.json` will auto-migrate to this new structure on the next run of `changeset version` or when calling `changeset status`.
+
+  This change allows easier management of versioned prerelease changesets (for the final stable release) and current queued changesets (for the next prerelease). Changesets in `.changeset/pre/` can be edited or deleted depending if it's still relevant for the final stable release of a package. There's no need to synchronize the changeset ids in `pre.json` if certain changesets are deleted.
+
+- [#1655](https://github.com/changesets/changesets/pull/1655) [`db46911`](https://github.com/changesets/changesets/commit/db46911e57603f20a158a47bbbebd112272c84e2) Thanks [@bluwy](https://github.com/bluwy)! - Update `@manypkg/get-packages` which drops support for detecting packages in Bolt monorepos and adds support for npm monorepos
+
+- [#2117](https://github.com/changesets/changesets/pull/2117) [`813bbf3`](https://github.com/changesets/changesets/commit/813bbf314d051bfee3b46a793f94b396ef2a4df1) Thanks [@bluwy](https://github.com/bluwy)! - Remove the `pre.json` `initialVersions` property and handling as it's unused internally
+
+- [#1482](https://github.com/changesets/changesets/pull/1482) [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7) Thanks [@Andarist](https://github.com/Andarist)! - From now on this package is going to be published as ES module.
+
+- [#1652](https://github.com/changesets/changesets/pull/1652) [`a0b5326`](https://github.com/changesets/changesets/commit/a0b5326570e8e7bf5e35c1cefe8f70d9a51a5cd7) Thanks [@bluwy](https://github.com/bluwy)! - Remove support for the deprecated `___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH.useCalculatedVersionForSnapshots` config. The `snapshot.useCalculatedVersion` config should be used instead.
+
+- [#2090](https://github.com/changesets/changesets/pull/2090) [`3aae903`](https://github.com/changesets/changesets/commit/3aae903a668315c495ba09248bad2b9c63424449) Thanks [@beeequeue](https://github.com/beeequeue)! - Peer dependencies now bump packages that depend on them by `patch` instead of `major`.
+
+  This means a peer dependency update is no longer assumed (forced) to be a breaking change.
+
+  If the dependent package is not compatible with the peer's new release you should manually add a `major` changeset describing why and how to migrate.
+
+### Minor Changes
+
+- [#2068](https://github.com/changesets/changesets/pull/2068) [`d03ffc1`](https://github.com/changesets/changesets/commit/d03ffc1d11fb486328734e52767379646062f5c1) Thanks [@bluwy](https://github.com/bluwy)! - Support `{commit-short}` placeholder for the `snapshot.prereleaseTemplate` config, which is a 7 character variant of `{commit}`
+
+- [#1969](https://github.com/changesets/changesets/pull/1969) [`2c7c043`](https://github.com/changesets/changesets/commit/2c7c043d7071440009f8a69eff0b0c6746ac7625) Thanks [@marcalexiei](https://github.com/marcalexiei)! - Add a named export that mirrors the current `default` export
+
+  The `default` export is slated for removal in the next major release, so this ensures a smoother transition path.
+
+### Patch Changes
+
+- [#2160](https://github.com/changesets/changesets/pull/2160) [`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640) Thanks [@beeequeue](https://github.com/beeequeue)! - Added or modified the `files` property in the manifest. This should not change any behavior.
+
+- [#2092](https://github.com/changesets/changesets/pull/2092) [`c98af4c`](https://github.com/changesets/changesets/commit/c98af4c33d8ee307c6229023ea6907fb0df4bf26) Thanks [@chatman-media](https://github.com/chatman-media)! - Fixed a bug where exiting prerelease mode could incorrectly patch-bump ignored or otherwise skipped packages.
+- Updated dependencies [[`062530b`](https://github.com/changesets/changesets/commit/062530b825d53abc9d8934f3a50cc61ff3ff82b8), [`88f2abb`](https://github.com/changesets/changesets/commit/88f2abb5e14748b08e3441fd871df60dd1c4737f), [`6a05002`](https://github.com/changesets/changesets/commit/6a05002228a06807b1a95da841d1809ae07441bf), [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7), [`b5e1762`](https://github.com/changesets/changesets/commit/b5e1762584718ec607ea79db0a00ae4238f8a784), [`c19b112`](https://github.com/changesets/changesets/commit/c19b1123d27986da0e14e99d65b0f9a408def35c), [`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640), [`4c26f2f`](https://github.com/changesets/changesets/commit/4c26f2faac89b53d3305cf73c9e9cfca5aa88f5f), [`96b65ee`](https://github.com/changesets/changesets/commit/96b65eec4af2c58301a11cd7dff42a6bde9c9f8a), [`db46911`](https://github.com/changesets/changesets/commit/db46911e57603f20a158a47bbbebd112272c84e2), [`2c7c043`](https://github.com/changesets/changesets/commit/2c7c043d7071440009f8a69eff0b0c6746ac7625), [`813bbf3`](https://github.com/changesets/changesets/commit/813bbf314d051bfee3b46a793f94b396ef2a4df1), [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7), [`a0b5326`](https://github.com/changesets/changesets/commit/a0b5326570e8e7bf5e35c1cefe8f70d9a51a5cd7), [`169b128`](https://github.com/changesets/changesets/commit/169b128522f0e53ef228f3acd8118709b0f72156), [`6a05002`](https://github.com/changesets/changesets/commit/6a05002228a06807b1a95da841d1809ae07441bf)]:
+  - @changesets/types@7.0.0
+  - @changesets/errors@1.0.0
+  - @changesets/get-dependents-graph@3.0.0
+  - @changesets/should-skip-package@1.0.0
+
 ## 7.0.0-next.11
 
 ### Patch Changes
