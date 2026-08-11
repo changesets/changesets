@@ -226,7 +226,7 @@ Update to `changesets/action@v2` in your GitHub Actions workflows to support Cha
 # ...
 ```
 
-The v2 action contains some breaking changes that you should review in the [action's changelog](https://github.com/changesets/action/blob/main/CHANGELOG.md#200).
+The v2 action contains some breaking changes that you should review in the [v2.0.0 release notes](https://github.com/changesets/action/releases/tag/v2.0.0).
 
 ### Review your workflow setup
 
