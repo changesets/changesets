@@ -66,7 +66,6 @@ export default defineConfig({
   cleanUrls: true,
   markdown: {
     async config(md) {
-      // @ts-expect-error upstream type issue
       await graphvizMarkdownPlugin(md);
       md.use(groupIconMdPlugin, {
         titleBar: {
