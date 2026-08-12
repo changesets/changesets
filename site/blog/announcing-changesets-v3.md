@@ -45,6 +45,9 @@ All Changesets packages have been updated to ESM-only and require Node.js `^22.1
 
 Internally, we are now using [pnpm](https://pnpm.io), [tsdown](https://tsdown.dev), [rolldown](https://rolldown.rs), [vitest](https://vitest.dev), [oxfmt](https://oxc.rs/docs/guide/usage/formatter.html), and more to develop and build our packages.
 
+![Diagram showing install size shrinking by 88%](../assets/size-diff-dark.excalidraw.svg){.dark .no-shadow width="200"}
+![Diagram showing install size shrinking by 88%](../assets/size-diff-light.excalidraw.svg){.light .no-shadow width="200"}
+
 ### Less aggressive peer dependency bumping
 
 Previously, if Changesets saw a minor version bump, it would bump peer dependents by a **major** version, even if dependent's usage of the package hasn't been broken.
