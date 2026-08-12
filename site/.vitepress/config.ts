@@ -32,7 +32,7 @@ export default defineConfig({
       "link",
       {
         rel: "icon",
-        href: "logo-light.svg?v2",
+        href: "logo-light.svg?v=2",
         media: "(prefers-color-scheme: light)",
       },
     ],
@@ -40,7 +40,7 @@ export default defineConfig({
       "link",
       {
         rel: "icon",
-        href: "logo-dark.svg?v2",
+        href: "logo-dark.svg?v=2",
         media: "(prefers-color-scheme: dark)",
       },
     ],
@@ -95,8 +95,8 @@ export default defineConfig({
   },
   themeConfig: {
     logo: {
-      light: "/logo-light.svg?v2",
-      dark: "/logo-dark.svg?v2",
+      light: "/logo-light.svg?v=2",
+      dark: "/logo-dark.svg?v=2",
       alt: "Changesets logo",
     },
     editLink: {
