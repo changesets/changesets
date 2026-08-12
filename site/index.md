@@ -6,8 +6,8 @@ hero:
   text: Version and Changelogs
   tagline: A tool to manage versioning and changelogs
   image:
-    light: /logo-light.svg
-    dark: /logo-dark.svg
+    light: /logo-light.svg?v=2
+    dark: /logo-dark.svg?v=2
     alt: Changesets logo
   actions:
     - theme: brand
