@@ -234,7 +234,7 @@ Review these dependents when you add the changeset. If one really is incompatibl
 
 This only affects pnpm projects. When Changesets checks whether a package is unpublished, it now follows pnpm's registry behavior and ignores scope-based `publishConfig` registry overrides and `publishConfig.registry`.
 
-If you relied on either field for this check, make sure v3 selects the registry you expect from your pnpm and npm configuration.
+If you relied on either field for this check, migrate the config to an [`.npmrc` file](https://docs.npmjs.com/cli/configuring-npm/npmrc) instead.
 
 ## GitHub Actions Changes
 

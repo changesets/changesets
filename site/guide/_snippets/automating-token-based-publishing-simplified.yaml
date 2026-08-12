@@ -38,6 +38,6 @@ jobs:
       - name: Version or publish packages
         uses: changesets/action@v2
         with:
-          publish-script: npm @changesets/cli publish # set this option to any command that executes `changeset publish` to publish packages
+          publish-script: npx @changesets/cli publish # set this option to any command that executes `changeset publish` to publish packages
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # pass the token here
