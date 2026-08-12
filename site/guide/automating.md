@@ -46,8 +46,6 @@ jobs:
 
 <<< ./_snippets/automating-non-blocking.yaml [.github/workflows/comment-changesets-pr-status.yml]
 
-The `if` condition on the `pr-status` job skips the release pull request opened by the Changesets GitHub Action, which never has changesets.
-
 Both approaches comment on PRs of whether changesets are present and gives you link to add your own changeset as a maintainer to smooth over merging pull requests without waiting for the contributor to add a changeset.
 
 ### Blocking
