@@ -15,7 +15,7 @@ import type {
 import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import { graphSequencer } from "@pnpm/deps.graph-sequencer";
-import semverParse from "semver/functions/parse.js";
+import { parse } from "verkit";
 import { npmRequestQueue } from "../../lib/common.ts";
 import { splitByTagStatus } from "../../utils/gitTags.ts";
 import { getPublishTool } from "../publish/getPublishTool.ts";
@@ -145,7 +145,7 @@ ${response.error.message || "Unknown error"}
             response.info["dist-tags"].latest &&
             response.info.versions.every(
               (version: string) =>
-                semverParse(version)!.prerelease[0] === preState.tag,
+                parse(version).prerelease[0] === preState.tag,
             )
           ) {
             publishedState = "only-pre";

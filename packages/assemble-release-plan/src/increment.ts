@@ -1,16 +1,16 @@
-import semverInc from "semver/functions/inc.js";
+import { increment } from "verkit";
 import type { InternalRelease, PreInfo } from "./types.ts";
 import { mapGetOrThrowInternal } from "./utils.ts";
 
 export function incrementVersion(
   release: InternalRelease,
   preInfo: PreInfo | undefined,
-) {
+): string {
   if (release.type === "none") {
     return release.oldVersion;
   }
 
-  let version = semverInc(release.oldVersion, release.type)!;
+  let version = increment(release.oldVersion, release.type)!;
   if (preInfo != null && preInfo.state.mode !== "exit") {
     const preVersion = mapGetOrThrowInternal(
       preInfo.preVersions,
