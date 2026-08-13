@@ -1,6 +1,6 @@
 import { InternalError } from "@changesets/errors";
 import type { PackageGroup, VersionType, Package } from "@changesets/types";
-import semverGt from "semver/functions/gt.js";
+import { isGreater } from "verkit";
 import type { InternalRelease } from "./types.ts";
 
 export function getHighestReleaseType(
@@ -47,7 +47,7 @@ export function getCurrentHighestVersion(
 
     if (
       highestVersion == null ||
-      semverGt(pkg.packageJson.version, highestVersion)
+      isGreater(pkg.packageJson.version, highestVersion)
     ) {
       highestVersion = pkg.packageJson.version;
     }

@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@changesets/types": "workspace:^",
-    "semver": "^7.8.1"
+    "verkit": "^0.4.0"
   },
   "devDependencies": {
     "@changesets/color": "workspace:^",

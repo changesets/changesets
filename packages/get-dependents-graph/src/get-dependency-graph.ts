@@ -1,7 +1,7 @@
 import path from "node:path";
 import c from "@changesets/color";
 import type { Package, Packages, PackageJSON } from "@changesets/types";
-import Range from "semver/classes/range.js";
+import { satisfies, tryParseRange } from "verkit";
 
 const DEPENDENCY_TYPES = [
   "dependencies",
@@ -45,11 +45,7 @@ const getValidRange = (potentialRange: string) => {
     return null;
   }
 
-  try {
-    return new Range(potentialRange);
-  } catch {
-    return null;
-  }
+  return tryParseRange(potentialRange);
 };
 
 export function getDependencyGraph(
@@ -133,7 +129,7 @@ export function getDependencyGraph(
 
       const range = getValidRange(depRange);
 
-      if ((range && !range.test(expected)) || isProtocolRange(depRange)) {
+      if ((range && !satisfies(expected, range)) || isProtocolRange(depRange)) {
         valid = false;
         // TODO: replace with returning errors/warnings
         console.error(

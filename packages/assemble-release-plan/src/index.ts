@@ -10,7 +10,7 @@ import type {
   Package,
   Packages,
 } from "@changesets/types";
-import semverParse from "semver/functions/parse.js";
+import { parse } from "verkit";
 import { applyLinks } from "./apply-links.ts";
 import { determineDependents } from "./determine-dependents.ts";
 import { flattenReleases } from "./flatten-releases.ts";
@@ -25,8 +25,7 @@ type SnapshotReleaseParameters = {
 };
 
 function getPreVersion(version: string) {
-  const parsed = semverParse(version)!;
-  let preVersion = parsed.prerelease[1] ?? -1;
+  let preVersion = parse(version).prerelease?.[1] ?? -1;
   if (typeof preVersion !== "number") {
     throw new InternalError("preVersion is not a number");
   }
