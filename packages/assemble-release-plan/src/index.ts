@@ -25,8 +25,7 @@ type SnapshotReleaseParameters = {
 };
 
 function getPreVersion(version: string) {
-  const parsed = parse(version)!;
-  let preVersion = parsed.prerelease[1] ?? -1;
+  let preVersion = parse(version).prerelease?.[1] ?? -1;
   if (typeof preVersion !== "number") {
     throw new InternalError("preVersion is not a number");
   }

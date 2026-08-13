@@ -145,7 +145,7 @@ ${response.error.message || "Unknown error"}
             response.info["dist-tags"].latest &&
             response.info.versions.every(
               (version: string) =>
-                parse(version).prerelease[0] === preState.tag,
+                parse(version).prerelease?.[0] === preState.tag,
             )
           ) {
             publishedState = "only-pre";
