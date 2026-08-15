@@ -1,5 +1,13 @@
 # @changesets/cli
 
+## 3.0.1
+
+### Patch Changes
+
+- [#2239](https://github.com/changesets/changesets/pull/2239) [`fdfdc93`](https://github.com/changesets/changesets/commit/fdfdc93efeff2034a6211db13a69b3487d00a3dd) Thanks [@bluwy](https://github.com/bluwy)! - Update links in default generated `.changeset/README.md` file
+- Updated dependencies [[`d0386b6`](https://github.com/changesets/changesets/commit/d0386b69c8a8bd14a702e7636ab01c1e83b1914e)]:
+  - @changesets/write@1.0.1
+
 ## 3.0.0
 
 ### Major Changes
