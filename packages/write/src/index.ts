@@ -54,7 +54,7 @@ ${releases.map((release) => `"${release.name}": ${release.type}`).join("\n")}
 ---
 
 ${summary}
-  `;
+`;
 
   await fs.mkdir(path.dirname(newChangesetPath), { recursive: true });
   await fs.writeFile(newChangesetPath, changesetContents);
