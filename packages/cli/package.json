@@ -61,7 +61,7 @@
     "@pnpm/pnpr": "0.0.0-26070301",
     "@types/semver": "^7.8.0",
     "human-id": "^4.2.0",
-    "modern-tar": "^0.8.0",
+    "modern-tar": "^0.8.4",
     "npm-10": "npm:npm@^10.9.8",
     "npm-11": "npm:npm@^11.0.0",
     "npm-12": "npm:npm@^12.0.1",
