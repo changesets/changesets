@@ -1,5 +1,11 @@
 # @changesets/write
 
+## 1.0.1
+
+### Patch Changes
+
+- [#2251](https://github.com/changesets/changesets/pull/2251) [`d0386b6`](https://github.com/changesets/changesets/commit/d0386b69c8a8bd14a702e7636ab01c1e83b1914e) Thanks [@trueberryless](https://github.com/trueberryless)! - Remove two spaces from last line of generated changeset file.
+
 ## 1.0.0
 
 ### Major Changes

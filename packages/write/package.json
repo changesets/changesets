@@ -1,6 +1,6 @@
 {
   "name": "@changesets/write",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Writes a changeset to a file",
   "license": "MIT",
   "repository": {
