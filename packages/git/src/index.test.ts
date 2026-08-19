@@ -1,9 +1,14 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { gitdir, outputFile, shallowClone } from "@changesets/test-utils";
+import {
+  gitdir,
+  outputFile,
+  shallowClone,
+  testdir,
+} from "@changesets/test-utils";
 import { writeChangeset } from "@changesets/write";
 import { exec } from "tinyexec";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   add,
   commit,
@@ -891,6 +896,101 @@ describe("git", { tags: ["slow"] }, () => {
 
       const files = await getChangedChangesetFilesSinceRef({
         cwd: path.join(cwd, ".changeset"),
+        ref: "main",
+      });
+      expect(files).toEqual([`.changeset/${changesetId}.md`]);
+    });
+  });
+
+  describe("inherited git environment variables", () => {
+    afterEach(() => {
+      vi.unstubAllEnvs();
+    });
+
+    it("should resolve the repository from cwd even when GIT_DIR points at another repository", async () => {
+      const cwd = await gitdir({ "a.js": 'export default "a"' });
+      const otherRepo = await gitdir({ "b.js": 'export default "b"' });
+      const headOfCwd = await getCurrentCommitId({ cwd });
+
+      vi.stubEnv("GIT_DIR", path.join(otherRepo, ".git"));
+
+      expect(await getCurrentCommitId({ cwd })).toBe(headOfCwd);
+      expect(await getCurrentCommitId({ cwd: otherRepo })).not.toBe(headOfCwd);
+    });
+
+    it("should get the relative path to the changeset file when GIT_DIR is inherited and cwd is a subdirectory", async () => {
+      const cwd = await gitdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "package-lock.json": "",
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+        }),
+        ".changeset/config.json": JSON.stringify({}),
+      });
+
+      const changesetId = await writeChangeset(
+        {
+          releases: [{ name: "pkg-a", type: "minor" }],
+          summary: "Awesome summary",
+        },
+        cwd,
+      );
+      await add(".changeset", cwd);
+
+      // `GIT_DIR` without `GIT_WORK_TREE` makes git treat the directory it runs in as the root
+      // of the work tree, which is not where the repository actually starts here
+      vi.stubEnv("GIT_DIR", path.join(cwd, ".git"));
+
+      const files = await getChangedChangesetFilesSinceRef({
+        cwd: path.join(cwd, ".changeset"),
+        ref: "main",
+      });
+      expect(files).toEqual([`.changeset/${changesetId}.md`]);
+    });
+
+    it("should get the relative path to the changeset file in a worktree entered with the environment of a git hook", async () => {
+      const cwd = await gitdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "package-lock.json": "",
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+        }),
+        ".changeset/config.json": JSON.stringify({}),
+      });
+
+      const worktree = path.join(await testdir(), "feature-worktree");
+      await exec("git", ["worktree", "add", worktree, "-b", "feature"], {
+        nodeOptions: { cwd },
+      });
+
+      const changesetId = await writeChangeset(
+        {
+          releases: [{ name: "pkg-a", type: "minor" }],
+          summary: "Awesome summary",
+        },
+        worktree,
+      );
+      await add(".changeset", worktree);
+
+      // this is what git puts in the environment of a hook that runs in a worktree, it points at
+      // the worktree specific git directory and it comes without a matching `GIT_WORK_TREE`
+      const worktreeGitDir = (
+        await exec("git", ["rev-parse", "--git-dir"], {
+          nodeOptions: { cwd: worktree },
+        })
+      ).stdout
+        .toString()
+        .trim();
+      vi.stubEnv("GIT_DIR", path.resolve(worktree, worktreeGitDir));
+
+      const files = await getChangedChangesetFilesSinceRef({
+        cwd: path.join(worktree, ".changeset"),
         ref: "main",
       });
       expect(files).toEqual([`.changeset/${changesetId}.md`]);
