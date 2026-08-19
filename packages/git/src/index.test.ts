@@ -19,6 +19,7 @@ import {
   getCommitsThatAddFiles,
   getCurrentCommitId,
   getDivergedCommit,
+  remoteTagExists,
   tag,
   tagExists,
 } from "./index.ts";
@@ -994,6 +995,41 @@ describe("git", { tags: ["slow"] }, () => {
         ref: "main",
       });
       expect(files).toEqual([`.changeset/${changesetId}.md`]);
+    });
+
+    it("should read the remotes of the repository in the current working directory when GIT_DIR points at another repository", async () => {
+      // `remoteTagExists` doesn't take a `cwd`, so it runs in the one of the current process and
+      // an inherited `GIT_DIR` would otherwise make it resolve `origin` in another repository
+      const gitdirWithRemoteTag = async (tagStr: string) => {
+        const remote = await testdir();
+        await exec("git", ["init", "--bare"], { nodeOptions: { cwd: remote } });
+
+        const cwd = await gitdir({ "a.js": 'export default "a"' });
+        await exec("git", ["remote", "add", "origin", remote], {
+          nodeOptions: { cwd },
+        });
+        await tag(tagStr, cwd);
+        await exec("git", ["push", "origin", tagStr], {
+          nodeOptions: { cwd },
+        });
+
+        return cwd;
+      };
+
+      const cwd = await gitdirWithRemoteTag("v1.0.0");
+      const otherRepo = await gitdirWithRemoteTag("v2.0.0");
+
+      const originalCwd = process.cwd();
+      process.chdir(cwd);
+
+      try {
+        vi.stubEnv("GIT_DIR", path.join(otherRepo, ".git"));
+
+        expect(await remoteTagExists("v1.0.0")).toBe(true);
+        expect(await remoteTagExists("v2.0.0")).toBe(false);
+      } finally {
+        process.chdir(originalCwd);
+      }
     });
   });
 });
