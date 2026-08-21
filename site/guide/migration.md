@@ -250,7 +250,11 @@ Update to `changesets/action@v2` in your GitHub Actions workflows to support Cha
 # ...
 ```
 
-If you are using [npm trusted publishing (provenance)](https://docs.npmjs.com/trusted-publishers), it is recommended to use the new individual sub-actions instead of the combined action to tighten permissions. See the [Trusted Publishing guide](/guide/automating#trusted-publishing) for more details.
+### Review your workflow setup
+
+While the existing action should work as before, the v2 action exposes more sub-actions that allow you to better customize, compose, and secure your GitHub Actions workflows.
+
+For instance, if you are using [npm trusted publishing (provenance)](https://docs.npmjs.com/trusted-publishers), it is recommended to migrate to these sub-actions to tighten publish permissions. Check the new [Automating Changesets guide](./automating.md) for the new setup recommendations.
 
 ### Update parameters
 
@@ -278,9 +282,3 @@ If you passed any parameters or a GitHub token, make sure to update them accordi
 Note that `commit-mesage` had a typo, which was fixed in `v2.1.1`. Moreover, if you rely on the local Git state for subsequent steps, make sure to set `push-with-git-cli: true` as well.
 
 For the full list of breaking changes and available parameters, check out the [v2.0.0 release notes](https://github.com/changesets/action/releases/tag/v2.0.0) in the [action repository](https://github.com/changesets/action).
-
-### Review your workflow setup
-
-While the existing action should work as before, the v2 action exposes more sub-actions that allow you to better customize, compose, and secure your GitHub Actions workflows.
-
-Check the new [Automating Changesets](./automating.md) guide and consider adopting the new setup recommendations.
