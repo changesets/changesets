@@ -245,12 +245,39 @@ Update to `changesets/action@v2` in your GitHub Actions workflows to support Cha
 <!-- prettier-ignore -->
 ```yaml [.github/workflows/publish.yml]
 # ...
-        uses: changesets/action/publish@v1 # [!code --]
-        uses: changesets/action/publish@v2 # [!code ++]
+        uses: changesets/action@v1 # [!code --]
+        uses: changesets/action@v2 # [!code ++]
 # ...
 ```
 
-The v2 action contains some breaking changes that you should review in the [v2.0.0 release notes](https://github.com/changesets/action/releases/tag/v2.0.0).
+If you are using [npm trusted publishing (provenance)](https://docs.npmjs.com/trusted-publishers), it is recommended to use the new individual sub-actions instead of the combined action to tighten permissions. See the [Trusted Publishing guide](/guide/automating#trusted-publishing) for more details.
+
+### Update parameters
+
+If you passed any parameters or a GitHub token, make sure to update them accordingly:
+
+<!-- prettier-ignore -->
+```yaml [.github/workflows/publish.yml]
+# ...
+        uses: changesets/action@v1 # [!code --]
+        with: # [!code --]
+          version: pnpm run version # [!code --]
+          commit: "ci: release" # [!code --]
+          title: "ci: release" # [!code --]
+        env: # [!code --]
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # [!code --]
+        uses: changesets/action@v2 # [!code ++]
+        with: # [!code ++]
+          version-script: pnpm run version # [!code ++]
+          commit-message: "ci: release" # [!code ++]
+          pr-title: "ci: release" # [!code ++]
+          github-token: ${{ secrets.GITHUB_TOKEN }} # [!code ++]
+# ...
+```
+
+Note that `commit-mesage` had a typo, which was fixed in `v2.1.1`. Moreover, if you rely on the local Git state for subsequent steps, make sure to set `push-with-git-cli: true` as well.
+
+For the full list of breaking changes and available parameters, check out the [v2.0.0 release notes](https://github.com/changesets/action/releases/tag/v2.0.0) in the [action repository](https://github.com/changesets/action).
 
 ### Review your workflow setup
 
