@@ -282,3 +282,7 @@ If you passed any parameters or a GitHub token, make sure to update them accordi
 Note that `commit-mesage` had a typo, which was fixed in `v2.1.1`. Moreover, if you rely on the local Git state for subsequent steps, make sure to set `push-with-git-cli: true` as well.
 
 For the full list of breaking changes and available parameters, check out the [v2.0.0 release notes](https://github.com/changesets/action/releases/tag/v2.0.0) in the [action repository](https://github.com/changesets/action).
+
+## You're all set!
+
+That covers all the major updates. Good luck with your migration to v3, and happy releasing!
