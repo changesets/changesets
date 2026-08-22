@@ -6,10 +6,47 @@ import { getPackages } from "@manypkg/get-packages";
 import picomatch from "picomatch";
 import { exec } from "tinyexec";
 
-export async function add(pathToFile: string, cwd: string) {
-  const gitCmd = await exec("git", ["add", pathToFile], {
-    nodeOptions: { cwd },
+// `git` tells its child processes, including hooks, which repository it is working on through
+// environment variables like `GIT_DIR`. Those variables win over the lookup `git` would otherwise
+// do starting from the current directory, so a `changeset` process started by a hook inherits them
+// and reads a different repository, work tree or index than the `cwd` it was handed. A pre-push
+// hook running inside a `git worktree` is the case people hit, because `git` sets `GIT_DIR` to the
+// worktree specific directory there and leaves `GIT_WORK_TREE` unset, which makes `git` treat
+// whatever directory it is invoked in as the root of the work tree.
+//
+// Every function below identifies the repository by the directory the command runs in, so these
+// variables are removed from the environment of the `git` processes that get spawned.
+const REPOSITORY_ENV_VARS = new Set([
+  "GIT_ALTERNATE_OBJECT_DIRECTORIES",
+  "GIT_COMMON_DIR",
+  "GIT_DIR",
+  "GIT_INDEX_FILE",
+  "GIT_NAMESPACE",
+  "GIT_OBJECT_DIRECTORY",
+  "GIT_WORK_TREE",
+]);
+
+// The spawned process inherits `process.env`, so a variable is dropped by overriding it with
+// `undefined` rather than by leaving it out of the returned object.
+function getEnvOverrides(): NodeJS.ProcessEnv {
+  const overrides: NodeJS.ProcessEnv = {};
+  for (const key of Object.keys(process.env)) {
+    // environment variable names are case-insensitive on Windows
+    if (REPOSITORY_ENV_VARS.has(key.toUpperCase())) {
+      overrides[key] = undefined;
+    }
+  }
+  return overrides;
+}
+
+function execGit(args: string[], cwd?: string) {
+  return exec("git", args, {
+    nodeOptions: { cwd, env: getEnvOverrides() },
   });
+}
+
+export async function add(pathToFile: string, cwd: string) {
+  const gitCmd = await execGit(["add", pathToFile], cwd);
 
   if (gitCmd.exitCode !== 0) {
     console.log(pathToFile, gitCmd.stderr.toString());
@@ -18,14 +55,12 @@ export async function add(pathToFile: string, cwd: string) {
 }
 
 export async function commit(message: string, cwd: string) {
-  const gitCmd = await exec("git", ["commit", "-m", message, "--allow-empty"], {
-    nodeOptions: { cwd },
-  });
+  const gitCmd = await execGit(["commit", "-m", message, "--allow-empty"], cwd);
   return gitCmd.exitCode === 0;
 }
 
 export async function getAllTags(cwd: string): Promise<Set<string>> {
-  const gitCmd = await exec("git", ["tag"], { nodeOptions: { cwd } });
+  const gitCmd = await execGit(["tag"], cwd);
 
   if (gitCmd.exitCode !== 0) {
     throw new Error(gitCmd.stderr.toString());
@@ -40,17 +75,13 @@ export async function getAllTags(cwd: string): Promise<Set<string>> {
 export async function tag(tagStr: string, cwd: string) {
   // NOTE: it's important we use the -m flag to create annotated tag otherwise 'git push --follow-tags' won't actually push
   // the tags
-  const gitCmd = await exec("git", ["tag", tagStr, "-m", tagStr], {
-    nodeOptions: { cwd },
-  });
+  const gitCmd = await execGit(["tag", tagStr, "-m", tagStr], cwd);
   return gitCmd.exitCode === 0;
 }
 
 // Find the commit where we diverged from `ref` at using `git merge-base`
 export async function getDivergedCommit(cwd: string, ref: string) {
-  const cmd = await exec("git", ["merge-base", ref, "HEAD"], {
-    nodeOptions: { cwd },
-  });
+  const cmd = await execGit(["merge-base", ref, "HEAD"], cwd);
   if (cmd.exitCode !== 0) {
     throw new Error(
       `Failed to find where HEAD diverged from "${ref}". Does "${ref}" exist and it's synced with remote?`,
@@ -80,8 +111,7 @@ export async function getCommitsThatAddFiles(
     const commitInfos = await Promise.all(
       remaining.map(async (gitPath: string) => {
         const [commitSha, parentSha] = (
-          await exec(
-            "git",
+          await execGit(
             [
               "log",
               "--diff-filter=A",
@@ -90,7 +120,7 @@ export async function getCommitsThatAddFiles(
               short ? "--pretty=format:%h:%p" : "--pretty=format:%H:%p",
               gitPath,
             ],
-            { nodeOptions: { cwd } },
+            cwd,
           )
         ).stdout
           .toString()
@@ -144,9 +174,7 @@ export async function getCommitsThatAddFiles(
 
 export async function isRepoShallow({ cwd }: { cwd: string }) {
   const isShallowRepoOutput = (
-    await exec("git", ["rev-parse", "--is-shallow-repository"], {
-      nodeOptions: { cwd },
-    })
+    await execGit(["rev-parse", "--is-shallow-repository"], cwd)
   ).stdout
     .toString()
     .trim();
@@ -156,9 +184,7 @@ export async function isRepoShallow({ cwd }: { cwd: string }) {
     // In that case, we'll test for the existence of .git/shallow.
 
     // Firstly, find the .git folder for the repo; note that this will be relative to the repo dir
-    const gitDir = (
-      await exec("git", ["rev-parse", "--git-dir"], { nodeOptions: { cwd } })
-    ).stdout
+    const gitDir = (await execGit(["rev-parse", "--git-dir"], cwd)).stdout
       .toString()
       .trim();
 
@@ -179,18 +205,15 @@ export async function isRepoShallow({ cwd }: { cwd: string }) {
 }
 
 export async function deepenCloneBy({ by, cwd }: { by: number; cwd: string }) {
-  const cmd = await exec("git", ["fetch", `--deepen=${by}`], {
-    nodeOptions: { cwd },
-  });
+  const cmd = await execGit(["fetch", `--deepen=${by}`], cwd);
   if (cmd.exitCode !== 0) {
     throw new Error(cmd.stderr.toString());
   }
 }
 async function getRepoRoot({ cwd }: { cwd: string }) {
-  const { stdout, exitCode, stderr } = await exec(
-    "git",
+  const { stdout, exitCode, stderr } = await execGit(
     ["rev-parse", "--show-cdup"],
-    { nodeOptions: { cwd } },
+    cwd,
   );
 
   if (exitCode !== 0) {
@@ -211,10 +234,9 @@ export async function getChangedFilesSince({
 }): Promise<Array<string>> {
   const divergedAt = await getDivergedCommit(cwd, ref);
   // Now we can find which files we added
-  const cmd = await exec(
-    "git",
+  const cmd = await execGit(
     ["diff", "--name-only", "--no-relative", divergedAt],
-    { nodeOptions: { cwd } },
+    cwd,
   );
   if (cmd.exitCode !== 0) {
     throw new Error(
@@ -244,12 +266,9 @@ export async function getChangedChangesetFilesSinceRef({
   try {
     const divergedAt = await getDivergedCommit(cwd, ref);
     // Now we can find which files we added
-    const cmd = await exec(
-      "git",
+    const cmd = await execGit(
       ["diff", "--name-only", "--diff-filter=d", "--no-relative", divergedAt],
-      {
-        nodeOptions: { cwd },
-      },
+      cwd,
     );
 
     const rootChangesetsRegex = /\.changeset\/[^/]+\.md$/;
@@ -304,9 +323,7 @@ export async function getChangedPackagesSinceRef({
 }
 
 export async function tagExists(tagStr: string, cwd: string) {
-  const gitCmd = await exec("git", ["tag", "-l", tagStr], {
-    nodeOptions: { cwd },
-  });
+  const gitCmd = await execGit(["tag", "-l", tagStr], cwd);
   const output = gitCmd.stdout.toString().trim();
   const tagExists = !!output;
   return tagExists;
@@ -320,10 +337,9 @@ export async function getCurrentCommitId({
   short?: boolean;
 }): Promise<string> {
   return (
-    await exec(
-      "git",
+    await execGit(
       ["rev-parse", short && "--short", "HEAD"].filter<string>(Boolean as any),
-      { nodeOptions: { cwd } },
+      cwd,
     )
   ).stdout
     .toString()
@@ -331,13 +347,7 @@ export async function getCurrentCommitId({
 }
 
 export async function remoteTagExists(tagStr: string) {
-  const gitCmd = await exec("git", [
-    "ls-remote",
-    "--tags",
-    "origin",
-    "-l",
-    tagStr,
-  ]);
+  const gitCmd = await execGit(["ls-remote", "--tags", "origin", "-l", tagStr]);
   const output = gitCmd.stdout.toString().trim();
   const tagExists = !!output;
   return tagExists;
