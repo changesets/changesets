@@ -1,4 +1,5 @@
 import path, { resolve } from "node:path";
+import { withCatalogs } from "@changesets/catalogs";
 import c from "@changesets/color";
 import { ExitError } from "@changesets/errors";
 import { readPreState } from "@changesets/pre";
@@ -114,7 +115,7 @@ export async function publish(options?: PublishOptions) {
     ? path.resolve(cwd, options.fromPackDir)
     : undefined;
 
-  const packages = await getPackages(cwd);
+  const packages = await withCatalogs(await getPackages(cwd));
   const packagesByName = new Map(
     packages.packages.map((pkg) => [pkg.packageJson.name, pkg]),
   );
