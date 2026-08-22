@@ -108,6 +108,31 @@ export function parseChangesetFile(contents: string): {
   return { releases, summary };
 }
 
+export type Changeset = {
+  summary: string;
+  releases: Release[];
+};
+
+export type SafeParseSuccess = {
+  ok: true;
+  changeset: Changeset;
+};
+
+export type SafeParseFailure = {
+  ok: false;
+  error: string;
+};
+
+export type SafeParseResult = SafeParseSuccess | SafeParseFailure;
+
+export function safeParseChangesetFile(contents: string): SafeParseResult {
+  try {
+    return { ok: true, changeset: parseChangesetFile(contents) };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
+}
+
 /** @deprecated Use named export `parseChangesetFile` instead */
 const parseChangesetFileDefault = parseChangesetFile;
 export default parseChangesetFileDefault;

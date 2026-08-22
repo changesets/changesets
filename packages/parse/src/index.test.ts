@@ -1,6 +1,9 @@
 import { outdent } from "outdent";
 import { describe, expect, it } from "vitest";
-import { parseChangesetFile as parse } from "./index.ts";
+import {
+  parseChangesetFile as parse,
+  safeParseChangesetFile as safeParse,
+} from "./index.ts";
 
 describe("parsing a changeset", () => {
   it("should parse a changeset", () => {
@@ -360,5 +363,136 @@ describe("parsing a changeset", () => {
 
       Nice simple summary]
     `);
+  });
+});
+
+describe("safeParseChangesetFile", () => {
+  const validChangeset = outdent`---
+  "cool-package": minor
+  ---
+
+  Nice simple summary
+  `;
+
+  const invalidPackageName = outdent`---
+  "": minor
+  ---
+
+  Nice simple summary
+  `;
+
+  const invalidReleaseType = outdent`---
+  "cool-package": invalid-type
+  ---
+
+  Nice simple summary
+  `;
+
+  const noFrontmatter = "Just some content without frontmatter";
+
+  it("returns { ok: true, changeset } for a normal changeset", () => {
+    const result = safeParse(validChangeset);
+    expect(result).toEqual({
+      ok: true,
+      changeset: {
+        releases: [{ name: "cool-package", type: "minor" }],
+        summary: "Nice simple summary",
+      },
+    });
+  });
+
+  it("returns { ok: false, error } for an invalid package name", () => {
+    const result = safeParse(invalidPackageName);
+    expect(result.ok).toBe(false);
+    expect(result).toEqual({
+      ok: false,
+      error: expect.stringContaining(
+        "could not parse changeset - invalid package name in frontmatter.",
+      ),
+    });
+  });
+
+  it("returns { ok: false, error } for an invalid release type", () => {
+    const result = safeParse(invalidReleaseType);
+    expect(result.ok).toBe(false);
+    expect(result).toEqual({
+      ok: false,
+      error: expect.stringContaining(
+        'could not parse changeset - invalid version type "invalid-type" for package "cool-package".',
+      ),
+    });
+  });
+
+  it("returns { ok: false, error } for contents with no parsable frontmatter", () => {
+    const result = safeParse(noFrontmatter);
+    expect(result).toEqual({
+      ok: false,
+      error: expect.stringContaining(
+        "could not parse changeset - missing or invalid frontmatter.",
+      ),
+    });
+  });
+
+  it("never throws for any input string", () => {
+    const inputs = [
+      "",
+      "   ",
+      "\n\n",
+      validChangeset,
+      invalidPackageName,
+      invalidReleaseType,
+      noFrontmatter,
+      "---\n: minor\n---",
+      "---\n---",
+      "random ---\n garbage : : :",
+    ];
+    for (const input of inputs) {
+      expect(() => safeParse(input)).not.toThrow();
+    }
+  });
+
+  it("error message equals the message thrown by parseChangesetFile for the same input (R-1.2)", () => {
+    const failingInputs = [
+      "",
+      invalidPackageName,
+      invalidReleaseType,
+      noFrontmatter,
+      "---\n: minor\n---",
+    ];
+    for (const input of failingInputs) {
+      let thrownMessage: string | undefined;
+      try {
+        parse(input);
+      } catch (e) {
+        thrownMessage = e instanceof Error ? e.message : String(e);
+      }
+      expect(thrownMessage).toBeDefined();
+      const result = safeParse(input);
+      expect(result).toEqual({ ok: false, error: thrownMessage });
+    }
+  });
+
+  it("deep-equals parseChangesetFile's output for valid inputs", () => {
+    const validInputs = [
+      validChangeset,
+      outdent`---
+      "cool-package": minor
+      "best-package": patch
+      ---
+
+      Multi package summary
+      `,
+      outdent`---
+      "@cool/package": major
+      ---
+
+      Scoped
+      `,
+      "---\n---",
+    ];
+    for (const input of validInputs) {
+      const result = safeParse(input);
+      expect(result).toEqual({ ok: true, changeset: parse(input) });
+    }
   });
 });
