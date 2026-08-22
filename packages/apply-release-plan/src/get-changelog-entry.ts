@@ -3,7 +3,7 @@ import type {
   ModCompWithPackage,
   NewChangesetWithCommit,
 } from "@changesets/types";
-import validRange from "semver/ranges/valid.js";
+import { isValidRange } from "verkit";
 import { capitalize, shouldUpdateDependencyBasedOnConfig } from "./utils.ts";
 
 type ChangelogLines = {
@@ -59,7 +59,7 @@ export async function getChangelogEntry(
     const usesWorkspaceRange = versionRange?.startsWith("workspace:");
     return (
       versionRange &&
-      (usesWorkspaceRange || validRange(versionRange) != null) &&
+      (usesWorkspaceRange || isValidRange(versionRange)) &&
       shouldUpdateDependencyBasedOnConfig(
         cwd,
         rel,

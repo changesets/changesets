@@ -3,8 +3,7 @@ import type { ComprehensiveRelease, VersionType } from "@changesets/types";
 /**
  * Shared utility functions and business logic
  */
-import semverSatisfies from "semver/functions/satisfies.js";
-import validRange from "semver/ranges/valid.js";
+import { isValidRange, satisfies } from "verkit";
 
 const bumpTypes = ["none", "patch", "minor", "major"];
 
@@ -54,7 +53,7 @@ export function shouldUpdateDependencyBasedOnConfig(
         depVersionRange = `${depVersionRange}${release.oldVersion}`;
         break;
       default: {
-        if (!validRange(depVersionRange)) {
+        if (!isValidRange(depVersionRange)) {
           return (
             path.posix.normalize(depVersionRange) ===
             path.relative(cwd, release.dir).replace(/\\/g, "/")
@@ -64,7 +63,7 @@ export function shouldUpdateDependencyBasedOnConfig(
       }
     }
   }
-  if (!semverSatisfies(release.newVersion, depVersionRange)) {
+  if (!satisfies(release.newVersion, depVersionRange)) {
     // Dependencies leaving semver range should always be updated
     return true;
   }

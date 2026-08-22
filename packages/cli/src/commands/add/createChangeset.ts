@@ -7,13 +7,13 @@ import type {
   VersionType,
 } from "@changesets/types";
 import { log, type Option } from "@clack/prompts";
-import semverLt from "semver/functions/lt.js";
+import { isLess } from "verkit";
 import { askWithEditor } from "../../utils/askWithEditor.ts";
 import * as cli from "../../utils/cli-utilities.ts";
 import { importantWarning } from "../../utils/cli-utilities.ts";
 
 async function confirmMajorRelease({ name, version }: PackageJSON) {
-  if (semverLt(version, "1.0.0")) {
+  if (isLess(version, "1.0.0")) {
     importantWarning(
       `
 The ${c.red("major")} version of ${c.blue(name)} will be its ${c.red("first major release")} (1.0.0).

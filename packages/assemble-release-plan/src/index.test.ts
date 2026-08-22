@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { defaultConfig } from "@changesets/config";
 import type { Config, VersionType } from "@changesets/types";
-import { inc } from "semver";
+import { increment } from "verkit";
 import { beforeEach, describe, expect, it } from "vitest";
 import { assembleReleasePlan } from "./index.ts";
 import { FakeFullState } from "./test-utils.ts";
@@ -1256,7 +1256,7 @@ describe("dependent bumping", () => {
     const dependency = releases.find((r) => r.name === "pkg-a-b");
     expect(dependency).toBeDefined();
     expect(dependency!.newVersion).toEqual(
-      c.bump !== "none" ? inc(BASE_VERSION, c.bump) : BASE_VERSION,
+      c.bump !== "none" ? increment(BASE_VERSION, c.bump) : BASE_VERSION,
     );
 
     // The dependent got bumped (or not) as expected.
