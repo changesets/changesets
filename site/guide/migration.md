@@ -256,9 +256,9 @@ While the existing action should work as before, the v2 action exposes more sub-
 
 For instance, if you are using [npm trusted publishing (provenance)](https://docs.npmjs.com/trusted-publishers), it is recommended to migrate to these sub-actions to tighten publish permissions. Check the new [Automating Changesets guide](./automating.md) for the new setup recommendations.
 
-### Update parameters
+### Update inputs
 
-If you passed any parameters or a GitHub token, make sure to update them accordingly:
+If you passed any inputs, make sure to update them accordingly:
 
 <!-- prettier-ignore -->
 ```yaml [.github/workflows/publish.yml]
@@ -266,22 +266,21 @@ If you passed any parameters or a GitHub token, make sure to update them accordi
         uses: changesets/action@v1 # [!code --]
         with: # [!code --]
           version: pnpm run version # [!code --]
+          publish: pnpm run publish # [!code --]
           commit: "ci: release" # [!code --]
           title: "ci: release" # [!code --]
-        env: # [!code --]
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # [!code --]
         uses: changesets/action@v2 # [!code ++]
         with: # [!code ++]
           version-script: pnpm run version # [!code ++]
+          publish-script: pnpm run publish # [!code ++]
           commit-message: "ci: release" # [!code ++]
           pr-title: "ci: release" # [!code ++]
-          github-token: ${{ secrets.GITHUB_TOKEN }} # [!code ++]
 # ...
 ```
 
-Note that `commit-mesage` had a typo, which was fixed in `v2.1.1`. Moreover, if you rely on the local Git state for subsequent steps, make sure to set `push-with-git-cli: true` as well.
+If you rely on the local Git state for subsequent steps, make sure to set `push-with-git-cli: true` as well.
 
-For the full list of breaking changes and available parameters, check out the [v2.0.0 release notes](https://github.com/changesets/action/releases/tag/v2.0.0) in the [action repository](https://github.com/changesets/action).
+For the full list of breaking changes, check out the [v2.0.0 release notes](https://github.com/changesets/action/releases/tag/v2.0.0) in the [action repository](https://github.com/changesets/action).
 
 ## You're all set!
 
