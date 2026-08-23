@@ -14,8 +14,8 @@
     "vue": "^3.5.41"
   },
   "devDependencies": {
-    "@iconify-json/logos": "^1.2.11",
-    "takumi-js": "^2.5.4",
+    "@iconify-json/logos": "^1.2.13",
+    "takumi-js": "^2.9.2",
     "unplugin-icons": "^23.0.1",
     "vitepress": "^2.0.0-alpha.19",
     "vitepress-plugin-graphviz": "^0.1.0",
