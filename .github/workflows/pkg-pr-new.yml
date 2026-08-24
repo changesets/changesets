@@ -26,6 +26,5 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - run:
-          | # zizmor: ignore[use-trusted-publishing] we're not publishing to npm here
-          pnpm exec pkg-pr-new publish --pnpm --packageManager=pnpm --commentWithDev --commentWithSha './packages/*'
+      # zizmor: ignore[use-trusted-publishing] we're not publishing to npm here
+      - run: pnpm exec pkg-pr-new publish --pnpm --packageManager=pnpm --commentWithDev --commentWithSha './packages/*'
