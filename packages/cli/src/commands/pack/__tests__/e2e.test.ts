@@ -31,7 +31,7 @@ function sanitizePackLog(message: unknown) {
 }
 
 // to avoid depending on pnpr here we only test the pack command with precomputed publish plans
-describe("Pack command e2e", { tags: ["slow"] }, () => {
+describe("Pack command e2e", { tags: ["slow", "e2e"] }, () => {
   describe.each(pmCases)("$name", (pm) => {
     it("packs from a publish plan", async ({ signal }) => {
       await using stack = new AbortableAsyncDisposableStack(signal);

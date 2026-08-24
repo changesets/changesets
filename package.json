@@ -26,6 +26,8 @@
     "lint": "eslint",
     "test": "vitest",
     "test:fast": "vitest --tags-filter=!slow",
+    "test:unit": "vitest --tags-filter=!e2e",
+    "test:e2e": "vitest --tags-filter=e2e",
     "types:check": "tsc",
     "check-all": "pnpm build && pnpm test run && pnpm types:check && pnpm lint && pnpm format",
     "site:dev": "pnpm --filter=./site dev",
