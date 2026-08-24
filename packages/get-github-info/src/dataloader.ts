@@ -58,8 +58,15 @@ interface PullOutput {
   } | null;
 }
 
-// Set maxBatchSize to 50 to prevent potentially sending a massive query and hitting rate limits
-const GHDataLoader = new DataLoader(batchLoad, { maxBatchSize: 50 });
+const GHDataLoader = new DataLoader(batchLoad, {
+  // Set maxBatchSize to 50 to prevent potentially sending a massive query and hitting rate limits
+  maxBatchSize: 50,
+  cacheKeyFn(request) {
+    return request.kind === "commit"
+      ? `commit:${request.repo}:${request.commit}`
+      : `pull:${request.repo}:${request.pull}`;
+  },
+});
 
 export async function loadCommitData(options: Omit<CommitInput, "kind">) {
   const result = await GHDataLoader.load({ ...options, kind: "commit" });
