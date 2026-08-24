@@ -18,6 +18,11 @@ export default defineConfig({
           "Slow tests, like ones that require lots of git operations",
         timeout: process.platform === "win32" ? 30_000 : 10_000,
       },
+      {
+        name: "e2e",
+        description: "End-to-end tests that runs very slow",
+        timeout: process.platform === "win32" ? 30_000 : 10_000,
+      },
     ],
   },
 });
