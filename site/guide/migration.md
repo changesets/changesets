@@ -278,8 +278,7 @@ If you passed any inputs, make sure to update them accordingly:
 # ...
 ```
 
-In case you had set a `GITHUB_TOKEN` environment variable, pass it via the `github-token` parameter now.
-If you rely on the local Git state for subsequent steps, make sure to set `push-with-git-cli: true` as well.
+In case you had set a custom `GITHUB_TOKEN` environment variable, pass it via the `github-token` input now. If you rely on the local Git state for subsequent steps, make sure to set `push-with-git-cli: true` as well.
 
 For the full list of breaking changes, check out the [v2.0.0 release notes](https://github.com/changesets/action/releases/tag/v2.0.0) in the [action repository](https://github.com/changesets/action).
 
