@@ -78,6 +78,11 @@ export async function loadPullData(options: Omit<PullInput, "kind">) {
   return result as PullOutput | null;
 }
 
+// Used by tests only
+export function clearCache() {
+  GHDataLoader.clearAll();
+}
+
 interface GraphqlFetchData {
   errors?: unknown;
   data?: Record<string, unknown>;
