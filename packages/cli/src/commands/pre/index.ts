@@ -57,7 +57,10 @@ If you're trying to exit pre mode, run ${c.cyan("changeset pre exit")}.
         `
 Exited pre mode!
 Run ${c.cyan("changeset version")} to version packages with normal versions.
-        `.trim(),
+        `.trim() +
+          `\n\nPlease also review the changesets in the ${c.blue(".changeset/pre")} folder as ` +
+          `they will be used as changelogs for the normal versions. Only include the changesets ` +
+          `that will be relevant for the normal versions.`,
       );
     } catch (err) {
       if (err instanceof PreExitButNotInPreModeError) {
