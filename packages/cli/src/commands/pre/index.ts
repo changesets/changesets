@@ -33,18 +33,14 @@ export async function pre(options: PreOptions) {
     try {
       await enterPre(packages.rootDir, options.tag);
       log.success(
-        `
-Entered pre mode with tag ${c.green(options.tag)}!
-Run ${c.cyan("changeset version")} to version packages with prerelease versions.
-        `.trim(),
+        `Entered pre mode with tag ${c.green(options.tag)}!\n` +
+          `Run ${c.cyan("changeset version")} to version packages with prerelease versions.`,
       );
     } catch (err) {
       if (err instanceof PreEnterButInPreModeError) {
         log.error(
-          `
-${c.cyan("changeset pre enter")} cannot be run when in pre mode.
-If you're trying to exit pre mode, run ${c.cyan("changeset pre exit")}.
-          `.trim(),
+          `${c.cyan("changeset pre enter")} cannot be run when in pre mode.\n` +
+            `If you're trying to exit pre mode, run ${c.cyan("changeset pre exit")}.`,
         );
         throw new ExitError(1);
       }
@@ -54,21 +50,17 @@ If you're trying to exit pre mode, run ${c.cyan("changeset pre exit")}.
     try {
       await exitPre(packages.rootDir);
       log.success(
-        `
-Exited pre mode!
-Run ${c.cyan("changeset version")} to version packages with normal versions.
-        `.trim() +
-          `\n\nPlease also review the changesets in the ${c.blue(".changeset/pre")} folder as ` +
+        `Exited pre mode!\n` +
+          `Run ${c.cyan("changeset version")} to version packages with normal versions.\n\n` +
+          `Please also review the changesets in the ${c.blue(".changeset/pre")} folder as ` +
           `they will be used as changelogs for the normal versions. Only include the changesets ` +
           `that will be relevant for the normal versions.`,
       );
     } catch (err) {
       if (err instanceof PreExitButNotInPreModeError) {
         log.error(
-          `
-${c.cyan("changeset pre exit")} can only be run when in pre mode!
-If you're trying to enter pre mode, run ${c.cyan("changeset pre enter")}.
-          `.trim(),
+          `${c.cyan("changeset pre exit")} can only be run when in pre mode!\n` +
+            `If you're trying to enter pre mode, run ${c.cyan("changeset pre enter")}.`,
         );
         throw new ExitError(1);
       }
