@@ -1,7 +1,5 @@
 import type { ComprehensiveRelease, PackageJSON } from "@changesets/types";
-import Range from "semver/classes/range.js";
-import semverPrerelease from "semver/functions/prerelease.js";
-import validRange from "semver/ranges/valid.js";
+import { isPrerelease, isValidRange, normalizeRange, parseRange } from "verkit";
 import type { EditJsonOperation } from "./edit-json.ts";
 import { shouldUpdateDependencyBasedOnConfig } from "./utils.ts";
 
@@ -69,7 +67,7 @@ export function getDependencyVersionEdits(
         if (
           !usesWorkspaceRange &&
           (bumpVersionsWithWorkspaceProtocolOnly ||
-            validRange(depCurrentVersion) == null)
+            !isValidRange(depCurrentVersion))
         ) {
           continue;
         }
@@ -83,7 +81,7 @@ export function getDependencyVersionEdits(
             workspaceDepVersion === "*" ||
             workspaceDepVersion === "^" ||
             workspaceDepVersion === "~" ||
-            validRange(workspaceDepVersion) == null
+            !isValidRange(workspaceDepVersion)
           ) {
             continue;
           }
@@ -94,10 +92,10 @@ export function getDependencyVersionEdits(
           // we don't want to change these versions because they will match
           // any version and if someone makes the range that
           // they probably want it to stay like that...
-          new Range(depCurrentVersion).range !== "" ||
+          normalizeRange(parseRange(depCurrentVersion)) !== "" ||
           // ...unless the current version of a dependency is a prerelease (which doesn't satisfy x/X/*)
           // leaving those as is would leave the package in a non-installable state (wrong dep versions would get installed)
-          semverPrerelease(newVersion) != null
+          isPrerelease(newVersion)
         ) {
           let newNewRange = snapshot
             ? newVersion

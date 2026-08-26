@@ -37,9 +37,6 @@ importers:
       '@types/node':
         specifier: ^26.2.0
         version: 26.2.0
-      '@types/semver':
-        specifier: ^7.8.0
-        version: 7.8.0
       '@vitest/coverage-v8':
         specifier: ^4.1.10
         version: 4.1.10(vitest@4.1.10)
@@ -106,9 +103,9 @@ importers:
       jsonc-parser:
         specifier: ^3.3.1
         version: 3.3.1
-      semver:
-        specifier: ^7.8.1
-        version: 7.8.5
+      verkit:
+        specifier: ^0.4.0
+        version: 0.4.0
     devDependencies:
       '@changesets/test-utils':
         specifier: workspace:*
@@ -134,9 +131,9 @@ importers:
       '@changesets/types':
         specifier: workspace:^
         version: link:../types
-      semver:
-        specifier: ^7.8.1
-        version: 7.8.5
+      verkit:
+        specifier: ^0.4.0
+        version: 0.4.0
     devDependencies:
       '@changesets/config':
         specifier: workspace:*
@@ -220,12 +217,12 @@ importers:
       package-manager-detector:
         specifier: ^1.6.0
         version: 1.8.0
-      semver:
-        specifier: ^7.8.1
-        version: 7.8.5
       tinyexec:
         specifier: ^1.3.0
         version: 1.3.0
+      verkit:
+        specifier: ^0.4.0
+        version: 0.4.0
     devDependencies:
       '@changesets/color':
         specifier: workspace:^
@@ -239,9 +236,6 @@ importers:
       '@pnpm/pnpr':
         specifier: 0.0.0-26070301
         version: 0.0.0-26070301
-      '@types/semver':
-        specifier: ^7.8.0
-        version: 7.8.0
       human-id:
         specifier: ^4.2.0
         version: 4.2.0
@@ -310,9 +304,9 @@ importers:
       '@changesets/types':
         specifier: workspace:^
         version: link:../types
-      semver:
-        specifier: ^7.8.1
-        version: 7.8.5
+      verkit:
+        specifier: ^0.4.0
+        version: 0.4.0
     devDependencies:
       '@changesets/color':
         specifier: workspace:^
@@ -1316,9 +1310,6 @@ packages:
 
   '@types/picomatch@4.0.3':
     resolution: {integrity: sha512-iG0T6+nYJ9FAPmx9SsUlnwcq1ZVRuCXcVEvWnntoPlrOpwtSTKNDC9uVAxTsC3PUvJ+99n4RpAcNgBbHX3JSnQ==}
-
-  '@types/semver@7.8.0':
-    resolution: {integrity: sha512-1mAINjtQCXXeLkJ9ehXkwOcBpqtLxiVtKhpUf83DdRNdQKV0iXZpaHYqRr7nj+wvxuJzoAmAwXI+sCNMv1CzLQ==}
 
   '@types/unist@3.0.3':
     resolution: {integrity: sha512-ko/gIFJRv177XgZsZcBwnqJN5x/Gien8qNOn0D5bQU/zAzVf9Zt3BlcUiLqhV9y4ARk0GbT3tnUiPNgnTXzc/Q==}
@@ -2888,6 +2879,10 @@ packages:
     resolution: {integrity: sha512-w2Eo8LSIIoW7qxNBzT7/17k+bh8plXo7G3dHjEIDqPlnluhzaxr9JX8F28VSYEtDvc1/a3WBDih6xNUZseebXg==}
     engines: {node: '>=18.12.0'}
 
+  verkit@0.4.0:
+    resolution: {integrity: sha512-sXMwN6DMHeouPfCxkxWkKAmxphWKEenHYY5H1nIBzU3PmDsmJp6kBXJdshjVdpMZuWCmL9SH7KFRx29AylpP6g==}
+    engines: {node: '>=18.12.0'}
+
   vfile-message@4.0.3:
     resolution: {integrity: sha512-QTHzsGd1EhbZs4AsQ20JX1rC3cOlt/IWJruk893DfLRr57lcnOeMaWG4K0JrRta4mIJZKth2Au3mM3u03/JWKw==}
 
@@ -3707,8 +3702,6 @@ snapshots:
       undici-types: 8.3.0
 
   '@types/picomatch@4.0.3': {}
-
-  '@types/semver@7.8.0': {}
 
   '@types/unist@3.0.3': {}
 
@@ -4954,6 +4947,8 @@ snapshots:
   validate-npm-package-name@6.0.2: {}
 
   verkit@0.3.1: {}
+
+  verkit@0.4.0: {}
 
   vfile-message@4.0.3:
     dependencies:

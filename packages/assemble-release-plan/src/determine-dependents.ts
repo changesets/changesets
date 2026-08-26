@@ -7,8 +7,7 @@ import type {
   VersionType,
   Package,
 } from "@changesets/types";
-import semverSatisfies from "semver/functions/satisfies.js";
-import validRange from "semver/ranges/valid.js";
+import { isValidRange, satisfies } from "verkit";
 import { incrementVersion } from "./increment.ts";
 import type { InternalRelease, PreInfo } from "./types.ts";
 import { mapGetOrThrowInternal } from "./utils.ts";
@@ -92,7 +91,7 @@ export function determineDependents({
                 releases.get(dependent)!.type === "none") &&
               (config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
                 .updateInternalDependents === "always" ||
-                !semverSatisfies(
+                !satisfies(
                   incrementVersion(nextRelease, preInfo),
                   versionRange,
                 ))
@@ -205,7 +204,7 @@ function getDependencyVersionRanges(
           versionRange = `${versionRange}${dependencyRelease.oldVersion}`;
           break;
         default: {
-          if (!validRange(versionRange)) {
+          if (!isValidRange(versionRange)) {
             if (
               path.posix.normalize(versionRange) ===
               path.relative(rootDir, dependencyPackage.dir).replace(/\\/g, "/")
