@@ -1,5 +1,5 @@
 import type { ComprehensiveRelease, PackageJSON } from "@changesets/types";
-import { isPrerelease, isValidRange, parseRange } from "verkit";
+import { isPrerelease, isValidRange, normalizeRange, parseRange } from "verkit";
 import type { EditJsonOperation } from "./edit-json.ts";
 import { shouldUpdateDependencyBasedOnConfig } from "./utils.ts";
 
@@ -92,7 +92,7 @@ export function getDependencyVersionEdits(
           // we don't want to change these versions because they will match
           // any version and if someone makes the range that
           // they probably want it to stay like that...
-          parseRange(depCurrentVersion).normalized !== "" ||
+          normalizeRange(parseRange(depCurrentVersion)) !== "" ||
           // ...unless the current version of a dependency is a prerelease (which doesn't satisfy x/X/*)
           // leaving those as is would leave the package in a non-installable state (wrong dep versions would get installed)
           isPrerelease(newVersion)
