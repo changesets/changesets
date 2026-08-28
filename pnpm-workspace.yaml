@@ -5,6 +5,7 @@ packages:
 
 allowBuilds:
   "@pnpm/pnpr": true
+  pnpm: true
 
 blockExoticSubdeps: true
 dedupePeers: true
@@ -12,6 +13,14 @@ dedupePeerDependents: true
 
 minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
+  - "@pnpm/exe.darwin-arm64@12.0.0"
+  - "@pnpm/exe.darwin-x64@12.0.0"
+  - "@pnpm/exe.linux-arm64@12.0.0"
+  - "@pnpm/exe.linux-arm64-musl@12.0.0"
+  - "@pnpm/exe.linux-x64@12.0.0"
+  - "@pnpm/exe.linux-x64-musl@12.0.0"
+  - "@pnpm/exe.win32-arm64@12.0.0"
+  - "@pnpm/exe.win32-x64@12.0.0"
   - "@pnpm/pnpr@0.1.0-alpha.8"
   - "@pnpm/pnpr.darwin-arm64@0.1.0-alpha.8"
   - "@pnpm/pnpr.darwin-x64@0.1.0-alpha.8"
@@ -21,6 +30,7 @@ minimumReleaseAgeExclude:
   - "@pnpm/pnpr.linux-x64-musl@0.1.0-alpha.8"
   - "@pnpm/pnpr.win32-arm64@0.1.0-alpha.8"
   - "@pnpm/pnpr.win32-x64@0.1.0-alpha.8"
+  - pnpm@12.0.0
   - vite@8.2.0
 
 overrides:

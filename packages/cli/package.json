@@ -68,6 +68,7 @@
     "outdent": "^0.8.0",
     "pnpm-10": "npm:pnpm@^10.34.5",
     "pnpm-11": "npm:pnpm@^11.13.1",
+    "pnpm-12": "npm:pnpm@^12.0.0",
     "yarn-4": "npm:@yarnpkg/cli-dist@^4.5.2"
   },
   "engines": {

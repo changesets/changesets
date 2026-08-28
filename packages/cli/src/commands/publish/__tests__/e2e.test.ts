@@ -1610,9 +1610,9 @@ describe("Publish command e2e", { tags: ["slow", "e2e"] }, () => {
           })),
         )
         .toEqual(
-          // Most package managers fail locally when no token is configured. pnpm 11
+          // Most package managers fail locally when no token is configured. pnpm 11+
           // still sends the publish request and lets the registry reject it.
-          pm.name === "pnpm 11"
+          pm.name === "pnpm 11" || pm.name === "pnpm 12"
             ? [{ authorization: undefined, statusCode: 401 }]
             : [],
         );
@@ -1890,7 +1890,7 @@ describe("Publish command e2e", { tags: ["slow", "e2e"] }, () => {
           command: "publish",
           cwd,
           env: {
-            [pm.name.startsWith("pnpm 11")
+            [pm.name === "pnpm 11" || pm.name === "pnpm 12"
               ? "PNPM_CONFIG_OTP"
               : "NPM_CONFIG_OTP"]: "654321",
           },

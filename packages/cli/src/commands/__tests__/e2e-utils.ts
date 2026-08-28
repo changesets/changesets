@@ -228,9 +228,16 @@ export async function getPmBinPath(signal: AbortSignal, bins: PmBins) {
       root.path,
       isWindows ? `${command}.cmd` : command,
     );
+    // pnpm 12 exposes a native executable; older package managers expose JS.
+    const args = /\.[cm]?js$/.test(target)
+      ? [process.execPath, target]
+      : [target];
+    const invocation = args
+      .map((arg) => (isWindows ? `"${arg}"` : JSON.stringify(arg)))
+      .join(" ");
     const shim = isWindows
-      ? `@echo off\r\n"${process.execPath}" "${target}" %*\r\n`
-      : `#!/bin/sh\nexec ${JSON.stringify(process.execPath)} ${JSON.stringify(target)} "$@"\n`;
+      ? `@echo off\r\n${invocation} %*\r\n`
+      : `#!/bin/sh\nexec ${invocation} "$@"\n`;
     await fs.writeFile(shimPath, shim);
     if (!isWindows) {
       await fs.chmod(shimPath, 0o755);
@@ -486,11 +493,11 @@ export const pmCases = [
     bins: { pnpm: "pnpm-11" },
     gitdir: createPnpmGitdir("pnpm-11"),
   },
-  // {
-  //   name: "pnpm 12",
-  //   bins: { pnpm: "pnpm-12" },
-  //   gitdir: createPnpmGitdir("pnpm-12"),
-  // },
+  {
+    name: "pnpm 12",
+    bins: { pnpm: "pnpm-12" },
+    gitdir: createPnpmGitdir("pnpm-12"),
+  },
   {
     name: "yarn 4",
     bins: { yarn: "yarn-4" },
