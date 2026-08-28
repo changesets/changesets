@@ -12,6 +12,15 @@ dedupePeerDependents: true
 
 minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
+  - "@pnpm/pnpr@0.1.0-alpha.8"
+  - "@pnpm/pnpr.darwin-arm64@0.1.0-alpha.8"
+  - "@pnpm/pnpr.darwin-x64@0.1.0-alpha.8"
+  - "@pnpm/pnpr.linux-arm64@0.1.0-alpha.8"
+  - "@pnpm/pnpr.linux-arm64-musl@0.1.0-alpha.8"
+  - "@pnpm/pnpr.linux-x64@0.1.0-alpha.8"
+  - "@pnpm/pnpr.linux-x64-musl@0.1.0-alpha.8"
+  - "@pnpm/pnpr.win32-arm64@0.1.0-alpha.8"
+  - "@pnpm/pnpr.win32-x64@0.1.0-alpha.8"
   - vite@8.2.0
 
 overrides:
