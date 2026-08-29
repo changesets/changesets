@@ -87,7 +87,10 @@ function formatJsonError(error: unknown): NpmCommandError | undefined {
   };
 }
 
-function getNpmError(stdout: string, stderr: string): NpmCommandError {
+export function getCommandError(
+  stdout: string,
+  stderr: string,
+): NpmCommandError {
   // NPM's --json output can be included alongside lifecycle scripts' output, like `prepublish` and `postpublish`, in terminal.
   // Lifecycle scripts can contain JSON but `--json` output is always printed at the end so this should work
   // historical notes:
@@ -107,7 +110,7 @@ function getNpmError(stdout: string, stderr: string): NpmCommandError {
 
 export const name = "npm" satisfies PublishTool["name"];
 
-function parseInfoResult({
+export function parseInfoResult({
   exitCode,
   stdout,
   stderr,
@@ -116,7 +119,7 @@ function parseInfoResult({
   | { error: NpmCommandError }
   | undefined {
   if (exitCode !== 0) {
-    return { error: getNpmError(stdout, stderr) };
+    return { error: getCommandError(stdout, stderr) };
   }
   if (!stdout) {
     // Successful empty stdout means the package manager found no matching data but the package does exist in the registry.
@@ -231,7 +234,7 @@ export const pack: PublishTool["pack"] = async ({
   packDir,
   outputDir,
 }) => {
-  const { exitCode, stdout, stderr } = await exec(
+  const result = await exec(
     "npm",
     ["pack", packDir, "--pack-destination", outputDir, "--json"],
     {
@@ -239,8 +242,19 @@ export const pack: PublishTool["pack"] = async ({
       nodeOptions: { cwd: pkg.dir },
     },
   );
+  return handlePackResult(result, { outputDir });
+};
+
+export function handlePackResult(
+  { exitCode, stdout, stderr }: import("tinyexec").Output,
+  options: { outputDir: string } | { tarballPath: string },
+): Awaited<ReturnType<PublishTool["pack"]>> {
   if (exitCode !== 0) {
-    return { error: getNpmError(stdout, stderr) };
+    return { error: getCommandError(stdout, stderr) };
+  }
+
+  if ("tarballPath" in options) {
+    return { tarballPath: options.tarballPath };
   }
 
   // npm is the only package manager that doesn't support an explicit output path for the tarball
@@ -261,8 +275,10 @@ export const pack: PublishTool["pack"] = async ({
       pkgOutput.filename;
   }
   assert(typeof filename === "string", "Failed to determine tarball filename");
-  return { tarballPath: path.join(outputDir, path.basename(filename)) };
-};
+  return {
+    tarballPath: path.join(options.outputDir, path.basename(filename)),
+  };
+}
 
 export function getOtpCode(otp?: string): string | null {
   return (
@@ -324,6 +340,29 @@ ${json.error.detail ?? ""}
   };
 }
 
+export function handlePublishResult(
+  resultBase: Pick<PublishResult, "name" | "version">,
+  { exitCode, stdout, stderr }: import("tinyexec").Output,
+): PublishResult {
+  if (exitCode === 0) {
+    return {
+      ...resultBase,
+      result: "published",
+    };
+  }
+
+  const json = getLastJsonObjectFromString(stdout);
+  if (!json) {
+    return {
+      ...resultBase,
+      result: "failed",
+      message: stderr || stdout || undefined,
+    };
+  }
+
+  return handlePublishError(resultBase, json, stderr || stdout);
+}
+
 export const publish: PublishTool["publish"] = async ({
   pkg,
   release,
@@ -362,7 +401,7 @@ export const publish: PublishTool["publish"] = async ({
     args.unshift(path.resolve(cwd, pkg.packageJson.publishConfig.directory));
   }
 
-  const { exitCode, stdout, stderr } = await exec("npm", ["publish", ...args], {
+  const result = await exec("npm", ["publish", ...args], {
     nodePath: false,
     nodeOptions: {
       stdio: interactive ? "inherit" : "pipe",
@@ -371,23 +410,5 @@ export const publish: PublishTool["publish"] = async ({
     },
   });
   const resultBase = { name: release.name, version: release.version };
-  if (exitCode === 0) {
-    return {
-      ...resultBase,
-      result: "published",
-    };
-  }
-
-  /* -- error handling -- */
-
-  const json = getLastJsonObjectFromString(stdout);
-  if (!json) {
-    return {
-      ...resultBase,
-      result: "failed",
-      message: stderr || stdout,
-    };
-  }
-
-  return handlePublishError(resultBase, json, stderr || stdout);
+  return handlePublishResult(resultBase, result);
 };
