@@ -50,6 +50,30 @@ describe("package info", () => {
       },
     );
   });
+
+  it("handles npm 12 info output delegated through pnpm 10", async () => {
+    const info = {
+      "dist-tags": { latest: "0.0.1" },
+      versions: ["0.0.1"],
+    };
+    const pkg = {
+      dir: "/workspace/packages/package",
+      packageJson: {
+        name: "@test/package",
+        version: "0.0.1",
+      },
+    } satisfies Package;
+    mockedExec.mockResolvedValue({
+      exitCode: 0,
+      stdout: JSON.stringify([info]),
+      stderr: "",
+    });
+
+    await expect(pnpm.info({ cwd: "/workspace", pkg })).resolves.toEqual({
+      published: true,
+      info,
+    });
+  });
 });
 
 describe("packing", () => {

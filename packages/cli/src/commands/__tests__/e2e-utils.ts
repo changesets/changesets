@@ -482,6 +482,11 @@ export const pmCases = [
     gitdir: createPnpmGitdir("pnpm-10"),
   },
   {
+    name: "pnpm 10 + npm 12",
+    bins: { npm: "npm-12", pnpm: "pnpm-10" },
+    gitdir: createPnpmGitdir("pnpm-10"),
+  },
+  {
     name: "pnpm 11",
     bins: { pnpm: "pnpm-11" },
     gitdir: createPnpmGitdir("pnpm-11"),
