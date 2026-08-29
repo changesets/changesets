@@ -6,16 +6,18 @@ import { defaultConfig } from "@changesets/config";
 import { gitdir, type Fixture } from "@changesets/test-utils";
 import * as pty from "@lydell/node-pty";
 import { exec } from "tinyexec";
-import { AsyncDisposableStack } from "../../ponyfills/async-disposable-stack.ts";
+import { AsyncDisposableStack } from "../../packages/cli/src/ponyfills/async-disposable-stack.ts";
 
 const isWindows = process.platform === "win32";
 
-export const cliPackageRoot = path.resolve(import.meta.dirname, "../../..");
+export const cliPackageRoot = path.resolve(
+  import.meta.dirname,
+  "../../packages/cli",
+);
+export const e2ePackageRoot = import.meta.dirname;
 const oxcRegister = pathToFileURL(
   path.resolve(
-    cliPackageRoot,
-    "..",
-    "..",
+    e2ePackageRoot,
     "node_modules",
     "@oxc-node",
     "core",
@@ -140,7 +142,7 @@ export async function createTempDir(prefix: string) {
 }
 
 async function readInstalledPackageJson(packageName: string) {
-  const packageRoot = path.join(cliPackageRoot, "node_modules", packageName);
+  const packageRoot = path.join(e2ePackageRoot, "node_modules", packageName);
   const packageJson: unknown = JSON.parse(
     await fs.readFile(path.join(packageRoot, "package.json"), "utf8"),
   );
@@ -154,7 +156,7 @@ async function readInstalledPackageJson(packageName: string) {
 
 async function resolvePackageBin(packageName: string, command: keyof PmBins) {
   const packageJson = await readInstalledPackageJson(packageName);
-  const packageRoot = path.join(cliPackageRoot, "node_modules", packageName);
+  const packageRoot = path.join(e2ePackageRoot, "node_modules", packageName);
 
   if (!("bin" in packageJson)) {
     throw new Error(`Could not resolve ${command} bin from ${packageName}`);
