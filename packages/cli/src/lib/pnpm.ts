@@ -3,7 +3,7 @@ import { exec } from "tinyexec";
 import { getLastJsonObjectFromString } from "../utils/getLastJsonObjectFromString.ts";
 import { isAlreadyPublishedError } from "./common.ts";
 import * as npm from "./npm.ts";
-import type { PublishResult, PublishTool } from "./types.ts";
+import type { PackageInfo, PublishResult, PublishTool } from "./types.ts";
 
 export type PnpmPublish2faRequiredError = {
   code: "ERR_PNPM_OTP_NON_INTERACTIVE";
@@ -44,9 +44,43 @@ function sanitizeEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   };
 }
 
+type PnpmCommandError = {
+  code?: string;
+  message?: string;
+};
+
+function parsePnpmCommandError(stdout: string): PnpmCommandError | undefined {
+  const json = getLastJsonObjectFromString(stdout);
+  const error = json?.error;
+  if (
+    error &&
+    typeof error === "object" &&
+    !Array.isArray(error) &&
+    typeof error.code === "string" &&
+    typeof error.message === "string"
+  ) {
+    return { code: error.code, message: error.message };
+  }
+}
+
 // -- PublishTool -- //
 
 export const name = "pnpm" satisfies PublishTool["name"];
+
+function parseInfoResult(
+  result: import("tinyexec").Output,
+): { info: PackageInfo } | { error: PnpmCommandError } | undefined {
+  if (result.exitCode !== 0) {
+    const pnpmError = parsePnpmCommandError(result.stdout);
+    return pnpmError ? { error: pnpmError } : npm.parseInfoResult(result);
+  }
+  if (!result.stdout) return;
+
+  const parsed: unknown = JSON.parse(result.stdout);
+  return Array.isArray(parsed)
+    ? npm.parseInfoResult(result)
+    : { info: parsed as PackageInfo };
+}
 
 export const info: PublishTool["info"] = async ({ cwd, pkg }) => {
   const { packageJson } = pkg;
@@ -63,7 +97,7 @@ export const info: PublishTool["info"] = async ({ cwd, pkg }) => {
       nodeOptions: { cwd },
     },
   );
-  let info = npm.parseInfoResult(latestResult);
+  let info = parseInfoResult(latestResult);
   if (
     !info ||
     ("error" in info && info.error.code === "ERR_PNPM_PACKAGE_NOT_FOUND")
@@ -76,7 +110,7 @@ export const info: PublishTool["info"] = async ({ cwd, pkg }) => {
         nodeOptions: { cwd },
       },
     );
-    info = npm.parseInfoResult(exactResult) ?? {
+    info = parseInfoResult(exactResult) ?? {
       error: { code: "E404" },
     };
   }
@@ -93,11 +127,21 @@ export const info: PublishTool["info"] = async ({ cwd, pkg }) => {
 export const pack: PublishTool["pack"] = async ({ pkg, tarballPath }) => {
   // note: pnpm emits an object when packing a single package and an array when packing multiple packages
   // but with pnpm we don't even have to extract it from stdout as we are relying on explicitly configured --out
-  const result = await exec("pnpm", ["pack", "--out", tarballPath, "--json"], {
-    nodePath: false,
-    nodeOptions: { cwd: pkg.dir },
-  });
-  return npm.handlePackResult(result, { tarballPath });
+  const { exitCode, stdout, stderr } = await exec(
+    "pnpm",
+    ["pack", "--out", tarballPath, "--json"],
+    {
+      nodePath: false,
+      nodeOptions: { cwd: pkg.dir },
+    },
+  );
+  if (exitCode !== 0) {
+    return {
+      error:
+        parsePnpmCommandError(stdout) ?? npm.getCommandError(stdout, stderr),
+    };
+  }
+  return { tarballPath };
 };
 
 export const getOtpCode: PublishTool["getOtpCode"] = (otp?: string) =>
@@ -130,22 +174,41 @@ export const publish: PublishTool["publish"] = async ({
   if (otpCode) args.push("--otp", otpCode);
   if (tarballPath) args.unshift(path.relative(cwd, tarballPath));
 
-  const result = await exec("pnpm", ["publish", ...args], {
-    nodePath: false,
-    nodeOptions: {
-      stdio: interactive ? "inherit" : "pipe",
-      env: sanitizeEnv(process.env),
-      cwd,
+  const { exitCode, stdout, stderr } = await exec(
+    "pnpm",
+    ["publish", ...args],
+    {
+      nodePath: false,
+      nodeOptions: {
+        stdio: interactive ? "inherit" : "pipe",
+        env: sanitizeEnv(process.env),
+        cwd,
+      },
     },
-  });
-  const { exitCode, stdout } = result;
+  );
   const resultBase = { name: release.name, version: release.version };
-  const json = getLastJsonObjectFromString(stdout);
+  if (exitCode === 0) {
+    return {
+      ...resultBase,
+      result: "published",
+    };
+  }
 
-  // pnpm 10 delegates publishing to npm, including successful output and errors.
+  /* -- error handling -- */
+
+  const json = getLastJsonObjectFromString(stdout);
+  if (!json) {
+    return {
+      ...resultBase,
+      result: "failed",
+      message: stderr || stdout || undefined,
+    };
+  }
+
+  // pnpm 10 delegates publishing to npm, including its error output.
   // TODO: after dropping pnpm 10 support stop delegating to npm and handle all errors here instead
-  if (exitCode === 0 || !isPnpmPublishError(json)) {
-    return npm.handlePublishResult(resultBase, result);
+  if (!isPnpmPublishError(json)) {
+    return npm.handlePublishError(resultBase, json, stderr || stdout);
   }
 
   if (isAlreadyPublishedError(json.error.message)) {

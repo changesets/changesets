@@ -74,6 +74,27 @@ describe("package info", () => {
       info,
     });
   });
+
+  it("handles npm error output delegated through pnpm 10", async () => {
+    const pkg = {
+      dir: "/workspace/packages/package",
+      packageJson: {
+        name: "@test/package",
+        version: "0.0.1",
+      },
+    } satisfies Package;
+    mockedExec.mockResolvedValue({
+      exitCode: 1,
+      stdout: JSON.stringify({
+        error: { code: "E404", summary: "Not found", detail: "" },
+      }),
+      stderr: "",
+    });
+
+    await expect(pnpm.info({ cwd: "/workspace", pkg })).resolves.toEqual({
+      published: false,
+    });
+  });
 });
 
 describe("packing", () => {
@@ -106,6 +127,56 @@ describe("packing", () => {
         nodeOptions: { cwd: pkg.dir },
       },
     );
+  });
+
+  it("preserves pnpm errors when packing", async () => {
+    const pkg = {
+      dir: "/workspace/packages/package",
+      packageJson: { name: "@test/package", version: "0.0.1" },
+    } satisfies Package;
+    mockedExec.mockResolvedValue({
+      exitCode: 1,
+      stdout: JSON.stringify({
+        error: { code: "ERR_PNPM_PACK", message: "Packing failed" },
+      }),
+      stderr: "",
+    });
+
+    await expect(
+      pnpm.pack({
+        pkg,
+        packDir: pkg.dir,
+        outputDir: "/workspace/.packed",
+        tarballPath: "/workspace/.packed/package.tgz",
+      }),
+    ).resolves.toEqual({
+      error: { code: "ERR_PNPM_PACK", message: "Packing failed" },
+    });
+  });
+
+  it("handles npm errors delegated through pnpm 10 when packing", async () => {
+    const pkg = {
+      dir: "/workspace/packages/package",
+      packageJson: { name: "@test/package", version: "0.0.1" },
+    } satisfies Package;
+    mockedExec.mockResolvedValue({
+      exitCode: 1,
+      stdout: JSON.stringify({
+        error: { code: "EFAIL", summary: "Packing failed", detail: "Details" },
+      }),
+      stderr: "",
+    });
+
+    await expect(
+      pnpm.pack({
+        pkg,
+        packDir: pkg.dir,
+        outputDir: "/workspace/.packed",
+        tarballPath: "/workspace/.packed/package.tgz",
+      }),
+    ).resolves.toEqual({
+      error: { code: "EFAIL", message: "Packing failed\nDetails" },
+    });
   });
 });
 
