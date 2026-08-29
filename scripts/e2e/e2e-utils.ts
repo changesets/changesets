@@ -1,27 +1,16 @@
 import fs from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 import { defaultConfig } from "@changesets/config";
 import { gitdir, type Fixture } from "@changesets/test-utils";
 import * as pty from "@lydell/node-pty";
 import { exec } from "tinyexec";
-import { AsyncDisposableStack } from "../../ponyfills/async-disposable-stack.ts";
 
 const isWindows = process.platform === "win32";
+const cliBinPath = fileURLToPath(import.meta.resolve("@changesets/cli/bin.js"));
 
-export const cliPackageRoot = path.resolve(import.meta.dirname, "../../..");
-const oxcRegister = pathToFileURL(
-  path.resolve(
-    cliPackageRoot,
-    "..",
-    "..",
-    "node_modules",
-    "@oxc-node",
-    "core",
-    "register.mjs",
-  ),
-).href;
+export const e2ePackageRoot = import.meta.dirname;
 
 export type ExecResult = {
   exitCode: number | undefined;
@@ -140,7 +129,7 @@ export async function createTempDir(prefix: string) {
 }
 
 async function readInstalledPackageJson(packageName: string) {
-  const packageRoot = path.join(cliPackageRoot, "node_modules", packageName);
+  const packageRoot = path.join(e2ePackageRoot, "node_modules", packageName);
   const packageJson: unknown = JSON.parse(
     await fs.readFile(path.join(packageRoot, "package.json"), "utf8"),
   );
@@ -154,7 +143,7 @@ async function readInstalledPackageJson(packageName: string) {
 
 async function resolvePackageBin(packageName: string, command: keyof PmBins) {
   const packageJson = await readInstalledPackageJson(packageName);
-  const packageRoot = path.join(cliPackageRoot, "node_modules", packageName);
+  const packageRoot = path.join(e2ePackageRoot, "node_modules", packageName);
 
   if (!("bin" in packageJson)) {
     throw new Error(`Could not resolve ${command} bin from ${packageName}`);
@@ -332,14 +321,7 @@ export async function runCliCommand(options: {
   signal?: AbortSignal;
   tty?: boolean;
 }): Promise<ExecResult> {
-  const args = [
-    path.join(cliPackageRoot, "src", "index.ts"),
-    options.command,
-    ...(options.args ?? []),
-  ];
-  if (!globalThis.AsyncDisposableStack) {
-    args.unshift("--import", oxcRegister);
-  }
+  const args = [cliBinPath, options.command, ...(options.args ?? [])];
   const env = await createPmBinEnv(options.cwd, options.pmBinPath, options.env);
   if (options.tty) {
     return execTty(process.execPath, args, {

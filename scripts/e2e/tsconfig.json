@@ -1,5 +1,5 @@
 {
-  "extends": "@tsconfig/node22/tsconfig.json",
+  "extends": "@tsconfig/node24/tsconfig.json",
   "compilerOptions": {
     "allowImportingTsExtensions": true,
     "erasableSyntaxOnly": true,
@@ -15,7 +15,6 @@
     ],
     "types": ["node"]
   },
-  "include": ["**/*"],
-  // E2e tests are typechecked separately after their on-demand dependencies are installed.
-  "exclude": ["scripts/e2e/**/*"]
+  "include": ["./"],
+  "exclude": []
 }

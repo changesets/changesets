@@ -111,6 +111,30 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
+  e2e:
+    name: E2E tests
+    needs: [build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: $/.github/actions/ci-setup
+        with:
+          node-version: 24
+          download-dist: true
+          install-e2e: true
+
+      - name: Check Git version
+        run: git --version
+
+      - name: Setup mock Git user
+        run: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
+
+      - name: Typecheck E2E tests
+        run: pnpm --filter=@changesets/e2e types:check
+
+      - name: Run E2E tests
+        run: pnpm test:e2e
+
   typecheck:
     name: Typecheck
     needs: [build]
@@ -144,7 +168,7 @@ jobs:
     name: CI OK
     runs-on: ubuntu-latest
     if: always()
-    needs: [lint-workflows, build, test, typecheck, lint]
+    needs: [lint-workflows, build, test, e2e, typecheck, lint]
     steps:
       - name: Exit with error if some jobs are not successful
         run: exit 1
