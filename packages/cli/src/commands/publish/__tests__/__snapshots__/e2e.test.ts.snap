@@ -566,6 +566,137 @@ it, or it timed out. Please try again.
 "
 `;
 
+exports[`Publish command e2e > 'pnpm 10 + npm 12' > handles lifecycle stdout while publishing 1`] = `
+"🦋 changeset v[version]
+
+Package pkg-a was not found in the registry.
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages◇  Successfully published:
+pkg-a@1.0.0
+◒  Creating git tags◇  Created git tags.
+"
+`;
+
+exports[`Publish command e2e > 'pnpm 10 + npm 12' > publishes a first version of a package 1`] = `
+"🦋 changeset v[version]
+
+Package pkg-a was not found in the registry.
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages◇  Successfully published:
+pkg-a@1.0.0
+◒  Creating git tags◇  Created git tags.
+"
+`;
+
+exports[`Publish command e2e > 'pnpm 10 + npm 12' > retries interactively after an OTP auth challenge 1`] = `
+"┌  🦋 changeset v[version]
+│
+●  These packages will be published as they were not found in the registry:
+│  pkg-a@1.0.0
+│  0 packages are already published.
+│
+◒  Publishing packages◇  pkg-a requires 2FA verification to publish...
+npm warn Unknown project config "npm-path". This will stop working in the next major version of npm. See \`npm help npmrc\` for supported config options.
+npm notice
+npm notice package: pkg-a@1.0.0
+npm notice Tarball Contents
+npm notice 24B index.js
+npm notice 137B package.json
+npm notice Tarball Details
+npm notice name: pkg-a
+npm notice version: 1.0.0
+npm notice filename: pkg-a-1.0.0.tgz
+npm notice package size: 257 B
+npm notice unpacked size: 161 B
+npm notice shasum: [shasum]
+npm notice integrity: [integrity]
+npm notice total files: 2
+npm notice
+npm notice Publishing to [registry-url]/ with tag latest and public access
+This operation requires a one-time password.
+Enter OTP: 654321
++ pkg-a@1.0.0
+│
+◆  Successfully published:
+│  pkg-a@1.0.0
+│
+◒  Creating git tags◇  Created git tags.
+"
+`;
+
+exports[`Publish command e2e > 'pnpm 10 + npm 12' > surfaces pre-publish errors 1`] = `
+"🦋 changeset v[version]
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ ELIFECYCLE: pkg-a@1.0.0 prepack: \`node -e "console.log(JSON.stringify({ lifecycle: 'output' })); console.error('prepack failed'); process.exit(1)"\`
+Exit status 1
+🦋 Exited with code 1
+
+"
+`;
+
+exports[`Publish command e2e > 'pnpm 10 + npm 12' > surfaces publish failures for bad credentials 1`] = `
+"🦋 changeset v[version]
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ E401: 401 Unauthorized - PUT [registry-url]/pkg-a
+🦋 Exited with code 1
+
+"
+`;
+
+exports[`Publish command e2e > 'pnpm 10 + npm 12' > surfaces publish failures when not logged in 1`] = `
+"🦋 changeset v[version]
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ ENEEDAUTH: This command requires you to be logged in to [registry-url]/
+You need to authorize this machine using \`npm login\`
+🦋 Exited with code 1
+
+"
+`;
+
+exports[`Publish command e2e > 'pnpm 10 + npm 12' > surfaces web-auth OTP publish failures in non-tty mode 1`] = `
+"🦋 changeset v[version]
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages
+Some packages failed to publish:
+pkg-a@1.0.0
+└ EOTP: This operation requires a one-time password.
+Open this URL in your browser to authenticate:
+  [registry-url]/-/auth/cli/[uuid]
+
+After authenticating, your token can be retrieved from:
+  [registry-url]/-/v1/done?authId=[uuid]
+🦋 Exited with code 1
+
+"
+`;
+
 exports[`Publish command e2e > 'pnpm 11' > handles lifecycle stdout while publishing 1`] = `
 "🦋 changeset v[version]
 

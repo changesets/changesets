@@ -1756,10 +1756,14 @@ describe("Publish command e2e", { tags: ["slow", "e2e"] }, () => {
       const publishRequests = registry.requests.filter(
         (request) => request.method === "PUT" && request.pathname === "/pkg-a",
       );
+      const npmPreflights =
+        "npm" in pm.bins &&
+        (pm.bins.npm === "npm-11" || pm.bins.npm === "npm-12");
       expect.soft(publishRequests.map((request) => request.statusCode)).toEqual(
         // npm 11+ rejects an already-published version during its local
-        // preflight. Other clients send the PUT and receive the registry's 403.
-        pm.name !== "npm 11" && pm.name !== "npm 12" ? [403] : [],
+        // preflight, including when pnpm 10 delegates publishing to it. Other
+        // clients send the PUT and receive the registry's 403.
+        npmPreflights ? [] : [403],
       );
     });
 

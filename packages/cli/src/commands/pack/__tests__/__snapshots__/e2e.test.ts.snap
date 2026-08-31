@@ -108,6 +108,33 @@ Exit status 1
 "
 `;
 
+exports[`Pack command e2e > 'pnpm 10 + npm 12' > handles lifecycle stdout while packing 1`] = `
+"🦋 changeset v[version]
+
+Packed packages:
+- pkg-a@1.0.0
+"
+`;
+
+exports[`Pack command e2e > 'pnpm 10 + npm 12' > packs from a publish plan 1`] = `
+"🦋 changeset v[version]
+
+Packed packages:
+- pkg-a@1.0.0
+"
+`;
+
+exports[`Pack command e2e > 'pnpm 10 + npm 12' > surfaces pack errors 1`] = `
+"🦋 changeset v[version]
+
+An error occurred while packing pkg-a: ELIFECYCLE
+pkg-a@1.0.0 prepack: \`node -e "console.log(JSON.stringify({ lifecycle: 'output' })); console.error('prepack failed'); process.exit(1)"\`
+Exit status 1
+🦋 Exited with code 1
+
+"
+`;
+
 exports[`Pack command e2e > 'pnpm 11' > handles lifecycle stdout while packing 1`] = `
 "🦋 changeset v[version]
 

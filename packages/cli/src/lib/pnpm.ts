@@ -49,34 +49,37 @@ type PnpmCommandError = {
   message?: string;
 };
 
-function getPnpmError(stderr: string, stdout: string): PnpmCommandError {
+function parsePnpmCommandError(stdout: string): PnpmCommandError | undefined {
   const json = getLastJsonObjectFromString(stdout);
   const error = json?.error;
-  if (error && typeof error === "object" && !Array.isArray(error)) {
-    return {
-      code: typeof error.code === "string" ? error.code : undefined,
-      message: typeof error.message === "string" ? error.message : undefined,
-    };
+  if (
+    error &&
+    typeof error === "object" &&
+    !Array.isArray(error) &&
+    typeof error.code === "string" &&
+    typeof error.message === "string"
+  ) {
+    return { code: error.code, message: error.message };
   }
-  return { message: stderr || stdout || undefined };
 }
 
 // -- PublishTool -- //
 
 export const name = "pnpm" satisfies PublishTool["name"];
 
-function parseInfoResult({
-  exitCode,
-  stdout,
-  stderr,
-}: import("tinyexec").Output):
-  | { info: PackageInfo }
-  | { error: PnpmCommandError }
-  | undefined {
-  if (exitCode !== 0) {
-    return { error: getPnpmError(stderr, stdout) };
+function parseInfoResult(
+  result: import("tinyexec").Output,
+): { info: PackageInfo } | { error: PnpmCommandError } | undefined {
+  if (result.exitCode !== 0) {
+    const pnpmError = parsePnpmCommandError(result.stdout);
+    return pnpmError ? { error: pnpmError } : npm.parseInfoResult(result);
   }
-  return stdout ? { info: JSON.parse(stdout) as PackageInfo } : undefined;
+  if (!result.stdout) return;
+
+  const parsed: unknown = JSON.parse(result.stdout);
+  return Array.isArray(parsed)
+    ? npm.parseInfoResult(result)
+    : { info: parsed as PackageInfo };
 }
 
 export const info: PublishTool["info"] = async ({ cwd, pkg }) => {
@@ -133,7 +136,10 @@ export const pack: PublishTool["pack"] = async ({ pkg, tarballPath }) => {
     },
   );
   if (exitCode !== 0) {
-    return { error: getPnpmError(stderr, stdout) };
+    return {
+      error:
+        parsePnpmCommandError(stdout) ?? npm.getCommandError(stdout, stderr),
+    };
   }
   return { tarballPath };
 };
@@ -199,7 +205,7 @@ export const publish: PublishTool["publish"] = async ({
     };
   }
 
-  // let the npm error handler take care of any other non-json error, as pnpm 10 delegates publishing to npm
+  // pnpm 10 delegates publishing to npm, including its error output.
   // TODO: after dropping pnpm 10 support stop delegating to npm and handle all errors here instead
   if (!isPnpmPublishError(json)) {
     return npm.handlePublishError(resultBase, json, stderr || stdout);
