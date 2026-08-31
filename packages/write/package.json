@@ -19,7 +19,7 @@
   "dependencies": {
     "@changesets/format": "^0.1.2",
     "@changesets/types": "workspace:^",
-    "human-id": "^4.2.0"
+    "human-id": "^4.2.1"
   },
   "devDependencies": {
     "@changesets/parse": "workspace:*",

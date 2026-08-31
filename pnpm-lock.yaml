@@ -243,8 +243,8 @@ importers:
         specifier: ^7.8.0
         version: 7.8.0
       human-id:
-        specifier: ^4.2.0
-        version: 4.2.0
+        specifier: ^4.2.1
+        version: 4.2.1
       modern-tar:
         specifier: ^0.8.4
         version: 0.8.4
@@ -481,8 +481,8 @@ importers:
         specifier: workspace:^
         version: link:../types
       human-id:
-        specifier: ^4.2.0
-        version: 4.2.0
+        specifier: ^4.2.1
+        version: 4.2.1
     devDependencies:
       '@changesets/parse':
         specifier: workspace:*
@@ -2000,8 +2000,8 @@ packages:
   html-void-elements@3.0.0:
     resolution: {integrity: sha512-bEqo66MRXsUGxWHV5IP0PUiAWwoEjba4VCzg0LjFJBpchPaTfyfCKTG6bc5F8ucKec3q5y6qOdGyYTSBEvhCrg==}
 
-  human-id@4.2.0:
-    resolution: {integrity: sha512-K3GbkIWqyvvlpfhBPlbEvD97TtqBpAYA4kt+cn2lD2x2HuohzZCibcA2nOlnJT6exqvJLggoB5nv2dNf192nEA==}
+  human-id@4.2.1:
+    resolution: {integrity: sha512-zPGsiS+dWoTZtZ4AtpA9Y+BdSFSNWvnouNlWNoUFyAM6xHOHmdCvqO3k8AIbdamCOv4gUFUVNPf6rJFfc4UiJw==}
     hasBin: true
 
   ignore@5.3.2:
@@ -4326,7 +4326,7 @@ snapshots:
 
   html-void-elements@3.0.0: {}
 
-  human-id@4.2.0: {}
+  human-id@4.2.1: {}
 
   ignore@5.3.2: {}
 
