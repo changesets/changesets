@@ -93,7 +93,6 @@ export async function getCommitsThatAddFiles(
               "--follow",
               "--max-count=1",
               short ? "--pretty=format:%h:%p" : "--pretty=format:%H:%p",
-              "--",
               gitPath,
             ],
             { nodeOptions: { cwd } },
