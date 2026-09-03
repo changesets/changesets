@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Pack command e2e > 'npm 10' > handles lifecycle stdout while packing 1`] = `
+exports[`Pack command e2e > npm 10 > handles lifecycle stdout while packing 1`] = `
 "🦋 changeset v[version]
 
 Packed packages:
@@ -8,7 +8,7 @@ Packed packages:
 "
 `;
 
-exports[`Pack command e2e > 'npm 10' > packs from a publish plan 1`] = `
+exports[`Pack command e2e > npm 10 > packs from a publish plan 1`] = `
 "🦋 changeset v[version]
 
 Packed packages:
@@ -16,7 +16,7 @@ Packed packages:
 "
 `;
 
-exports[`Pack command e2e > 'npm 10' > surfaces pack errors 1`] = `
+exports[`Pack command e2e > npm 10 > surfaces pack errors 1`] = `
 "🦋 changeset v[version]
 
 An error occurred while packing pkg-a
@@ -27,7 +27,7 @@ sh -c node -e "console.log(JSON.stringify({ lifecycle: 'output' })); console.err
 "
 `;
 
-exports[`Pack command e2e > 'npm 11' > handles lifecycle stdout while packing 1`] = `
+exports[`Pack command e2e > npm 11 > handles lifecycle stdout while packing 1`] = `
 "🦋 changeset v[version]
 
 Packed packages:
@@ -35,7 +35,7 @@ Packed packages:
 "
 `;
 
-exports[`Pack command e2e > 'npm 11' > packs from a publish plan 1`] = `
+exports[`Pack command e2e > npm 11 > packs from a publish plan 1`] = `
 "🦋 changeset v[version]
 
 Packed packages:
@@ -43,7 +43,7 @@ Packed packages:
 "
 `;
 
-exports[`Pack command e2e > 'npm 11' > surfaces pack errors 1`] = `
+exports[`Pack command e2e > npm 11 > surfaces pack errors 1`] = `
 "🦋 changeset v[version]
 
 An error occurred while packing pkg-a
@@ -54,7 +54,7 @@ sh -c node -e "console.log(JSON.stringify({ lifecycle: 'output' })); console.err
 "
 `;
 
-exports[`Pack command e2e > 'npm 12' > handles lifecycle stdout while packing 1`] = `
+exports[`Pack command e2e > npm 12 > handles lifecycle stdout while packing 1`] = `
 "🦋 changeset v[version]
 
 Packed packages:
@@ -62,7 +62,7 @@ Packed packages:
 "
 `;
 
-exports[`Pack command e2e > 'npm 12' > packs from a publish plan 1`] = `
+exports[`Pack command e2e > npm 12 > packs from a publish plan 1`] = `
 "🦋 changeset v[version]
 
 Packed packages:
@@ -70,7 +70,7 @@ Packed packages:
 "
 `;
 
-exports[`Pack command e2e > 'npm 12' > surfaces pack errors 1`] = `
+exports[`Pack command e2e > npm 12 > surfaces pack errors 1`] = `
 "🦋 changeset v[version]
 
 An error occurred while packing pkg-a
@@ -81,7 +81,7 @@ sh -c node -e "console.log(JSON.stringify({ lifecycle: 'output' })); console.err
 "
 `;
 
-exports[`Pack command e2e > 'pnpm 10 + npm 10' > handles lifecycle stdout while packing 1`] = `
+exports[`Pack command e2e > pnpm 10 + npm 10 > handles lifecycle stdout while packing 1`] = `
 "🦋 changeset v[version]
 
 Packed packages:
@@ -89,7 +89,7 @@ Packed packages:
 "
 `;
 
-exports[`Pack command e2e > 'pnpm 10 + npm 10' > packs from a publish plan 1`] = `
+exports[`Pack command e2e > pnpm 10 + npm 10 > packs from a publish plan 1`] = `
 "🦋 changeset v[version]
 
 Packed packages:
@@ -97,7 +97,7 @@ Packed packages:
 "
 `;
 
-exports[`Pack command e2e > 'pnpm 10 + npm 10' > surfaces pack errors 1`] = `
+exports[`Pack command e2e > pnpm 10 + npm 10 > surfaces pack errors 1`] = `
 "🦋 changeset v[version]
 
 An error occurred while packing pkg-a: ELIFECYCLE
@@ -108,7 +108,7 @@ Exit status 1
 "
 `;
 
-exports[`Pack command e2e > 'pnpm 11' > handles lifecycle stdout while packing 1`] = `
+exports[`Pack command e2e > pnpm 11 > handles lifecycle stdout while packing 1`] = `
 "🦋 changeset v[version]
 
 Packed packages:
@@ -116,7 +116,7 @@ Packed packages:
 "
 `;
 
-exports[`Pack command e2e > 'pnpm 11' > packs from a publish plan 1`] = `
+exports[`Pack command e2e > pnpm 11 > packs from a publish plan 1`] = `
 "🦋 changeset v[version]
 
 Packed packages:
@@ -124,7 +124,7 @@ Packed packages:
 "
 `;
 
-exports[`Pack command e2e > 'pnpm 11' > surfaces pack errors 1`] = `
+exports[`Pack command e2e > pnpm 11 > surfaces pack errors 1`] = `
 "🦋 changeset v[version]
 
 An error occurred while packing pkg-a: ELIFECYCLE
@@ -135,7 +135,7 @@ Exit status 1
 "
 `;
 
-exports[`Pack command e2e > 'yarn 4' > handles lifecycle stdout while packing 1`] = `
+exports[`Pack command e2e > yarn 4 > handles lifecycle stdout while packing 1`] = `
 "🦋 changeset v[version]
 
 Packed packages:
@@ -143,7 +143,7 @@ Packed packages:
 "
 `;
 
-exports[`Pack command e2e > 'yarn 4' > packs from a publish plan 1`] = `
+exports[`Pack command e2e > yarn 4 > packs from a publish plan 1`] = `
 "🦋 changeset v[version]
 
 Packed packages:
@@ -151,7 +151,7 @@ Packed packages:
 "
 `;
 
-exports[`Pack command e2e > 'yarn 4' > surfaces pack errors 1`] = `
+exports[`Pack command e2e > yarn 4 > surfaces pack errors 1`] = `
 "🦋 changeset v[version]
 
 An error occurred while packing pkg-a: YN0036

@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Publish command e2e > 'npm 10' > handles lifecycle stdout while publishing 1`] = `
+exports[`Publish command e2e > npm 10 > handles lifecycle stdout while publishing 1`] = `
 "🦋 changeset v[version]
 
 Package pkg-a was not found in the registry.
@@ -14,7 +14,7 @@ pkg-a@1.0.0
 "
 `;
 
-exports[`Publish command e2e > 'npm 10' > publishes a first version of a package 1`] = `
+exports[`Publish command e2e > npm 10 > publishes a first version of a package 1`] = `
 "🦋 changeset v[version]
 
 Package pkg-a was not found in the registry.
@@ -28,19 +28,7 @@ pkg-a@1.0.0
 "
 `;
 
-exports[`Publish command e2e > 'npm 10' > publishes a new version of a package 1`] = `
-"🦋 changeset v[version]
-
-These packages will be published as they were not found in the registry:
-pkg-a@1.0.0
-0 packages are already published.
-◒  Publishing packages◇  Successfully published:
-pkg-a@1.0.0
-◒  Creating git tags◇  Created git tags.
-"
-`;
-
-exports[`Publish command e2e > 'npm 10' > retries interactively after an OTP auth challenge 1`] = `
+exports[`Publish command e2e > npm 10 > retries interactively after an OTP auth challenge 1`] = `
 "┌  🦋 changeset v[version]
 │
 ●  These packages will be published as they were not found in the registry:
@@ -76,7 +64,7 @@ Enter OTP: 654321
 "
 `;
 
-exports[`Publish command e2e > 'npm 10' > surfaces pre-publish errors 1`] = `
+exports[`Publish command e2e > npm 10 > surfaces pre-publish errors 1`] = `
 "🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
@@ -92,7 +80,7 @@ sh -c node -e "console.log(JSON.stringify({ lifecycle: 'output' })); console.err
 "
 `;
 
-exports[`Publish command e2e > 'npm 10' > surfaces publish failures for bad credentials 1`] = `
+exports[`Publish command e2e > npm 10 > surfaces publish failures for bad credentials 1`] = `
 "🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
@@ -107,7 +95,7 @@ pkg-a@1.0.0
 "
 `;
 
-exports[`Publish command e2e > 'npm 10' > surfaces publish failures when not logged in 1`] = `
+exports[`Publish command e2e > npm 10 > surfaces publish failures when not logged in 1`] = `
 "🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
@@ -123,7 +111,7 @@ You need to authorize this machine using \`npm adduser\`
 "
 `;
 
-exports[`Publish command e2e > 'npm 10' > surfaces web-auth OTP publish failures in non-tty mode 1`] = `
+exports[`Publish command e2e > npm 10 > surfaces web-auth OTP publish failures in non-tty mode 1`] = `
 "🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
@@ -141,7 +129,7 @@ it, or it timed out. Please try again.
 "
 `;
 
-exports[`Publish command e2e > 'npm 11' > handles lifecycle stdout while publishing 1`] = `
+exports[`Publish command e2e > npm 11 > handles lifecycle stdout while publishing 1`] = `
 "🦋 changeset v[version]
 
 Package pkg-a was not found in the registry.
@@ -155,7 +143,7 @@ pkg-a@1.0.0
 "
 `;
 
-exports[`Publish command e2e > 'npm 11' > publishes a first version of a package 1`] = `
+exports[`Publish command e2e > npm 11 > publishes a first version of a package 1`] = `
 "🦋 changeset v[version]
 
 Package pkg-a was not found in the registry.
@@ -169,19 +157,7 @@ pkg-a@1.0.0
 "
 `;
 
-exports[`Publish command e2e > 'npm 11' > publishes a new version of a package 1`] = `
-"🦋 changeset v[version]
-
-These packages will be published as they were not found in the registry:
-pkg-a@1.0.0
-0 packages are already published.
-◒  Publishing packages◇  Successfully published:
-pkg-a@1.0.0
-◒  Creating git tags◇  Created git tags.
-"
-`;
-
-exports[`Publish command e2e > 'npm 11' > retries interactively after an OTP auth challenge 1`] = `
+exports[`Publish command e2e > npm 11 > retries interactively after an OTP auth challenge 1`] = `
 "┌  🦋 changeset v[version]
 │
 ●  These packages will be published as they were not found in the registry:
@@ -216,7 +192,7 @@ Enter OTP: 654321
 "
 `;
 
-exports[`Publish command e2e > 'npm 11' > surfaces pre-publish errors 1`] = `
+exports[`Publish command e2e > npm 11 > surfaces pre-publish errors 1`] = `
 "🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
@@ -232,7 +208,7 @@ sh -c node -e "console.log(JSON.stringify({ lifecycle: 'output' })); console.err
 "
 `;
 
-exports[`Publish command e2e > 'npm 11' > surfaces publish failures for bad credentials 1`] = `
+exports[`Publish command e2e > npm 11 > surfaces publish failures for bad credentials 1`] = `
 "🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
@@ -247,7 +223,7 @@ pkg-a@1.0.0
 "
 `;
 
-exports[`Publish command e2e > 'npm 11' > surfaces publish failures when not logged in 1`] = `
+exports[`Publish command e2e > npm 11 > surfaces publish failures when not logged in 1`] = `
 "🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
@@ -263,7 +239,7 @@ You need to authorize this machine using \`npm adduser\`
 "
 `;
 
-exports[`Publish command e2e > 'npm 11' > surfaces web-auth OTP publish failures in non-tty mode 1`] = `
+exports[`Publish command e2e > npm 11 > surfaces web-auth OTP publish failures in non-tty mode 1`] = `
 "🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
@@ -283,7 +259,7 @@ After authenticating, your token can be retrieved from:
 "
 `;
 
-exports[`Publish command e2e > 'npm 12' > handles lifecycle stdout while publishing 1`] = `
+exports[`Publish command e2e > npm 12 > handles lifecycle stdout while publishing 1`] = `
 "🦋 changeset v[version]
 
 Package pkg-a was not found in the registry.
@@ -297,7 +273,7 @@ pkg-a@1.0.0
 "
 `;
 
-exports[`Publish command e2e > 'npm 12' > publishes a first version of a package 1`] = `
+exports[`Publish command e2e > npm 12 > publishes a first version of a package 1`] = `
 "🦋 changeset v[version]
 
 Package pkg-a was not found in the registry.
@@ -311,19 +287,7 @@ pkg-a@1.0.0
 "
 `;
 
-exports[`Publish command e2e > 'npm 12' > publishes a new version of a package 1`] = `
-"🦋 changeset v[version]
-
-These packages will be published as they were not found in the registry:
-pkg-a@1.0.0
-0 packages are already published.
-◒  Publishing packages◇  Successfully published:
-pkg-a@1.0.0
-◒  Creating git tags◇  Created git tags.
-"
-`;
-
-exports[`Publish command e2e > 'npm 12' > retries interactively after an OTP auth challenge 1`] = `
+exports[`Publish command e2e > npm 12 > retries interactively after an OTP auth challenge 1`] = `
 "┌  🦋 changeset v[version]
 │
 ●  These packages will be published as they were not found in the registry:
@@ -358,7 +322,7 @@ Enter OTP: 654321
 "
 `;
 
-exports[`Publish command e2e > 'npm 12' > surfaces pre-publish errors 1`] = `
+exports[`Publish command e2e > npm 12 > surfaces pre-publish errors 1`] = `
 "🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
@@ -374,7 +338,7 @@ sh -c node -e "console.log(JSON.stringify({ lifecycle: 'output' })); console.err
 "
 `;
 
-exports[`Publish command e2e > 'npm 12' > surfaces publish failures for bad credentials 1`] = `
+exports[`Publish command e2e > npm 12 > surfaces publish failures for bad credentials 1`] = `
 "🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
@@ -389,7 +353,7 @@ pkg-a@1.0.0
 "
 `;
 
-exports[`Publish command e2e > 'npm 12' > surfaces publish failures when not logged in 1`] = `
+exports[`Publish command e2e > npm 12 > surfaces publish failures when not logged in 1`] = `
 "🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
@@ -405,7 +369,7 @@ You need to authorize this machine using \`npm login\`
 "
 `;
 
-exports[`Publish command e2e > 'npm 12' > surfaces web-auth OTP publish failures in non-tty mode 1`] = `
+exports[`Publish command e2e > npm 12 > surfaces web-auth OTP publish failures in non-tty mode 1`] = `
 "🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
@@ -425,7 +389,7 @@ After authenticating, your token can be retrieved from:
 "
 `;
 
-exports[`Publish command e2e > 'pnpm 10 + npm 10' > handles lifecycle stdout while publishing 1`] = `
+exports[`Publish command e2e > pnpm 10 + npm 10 > handles lifecycle stdout while publishing 1`] = `
 "🦋 changeset v[version]
 
 Package pkg-a was not found in the registry.
@@ -439,7 +403,7 @@ pkg-a@1.0.0
 "
 `;
 
-exports[`Publish command e2e > 'pnpm 10 + npm 10' > publishes a first version of a package 1`] = `
+exports[`Publish command e2e > pnpm 10 + npm 10 > publishes a first version of a package 1`] = `
 "🦋 changeset v[version]
 
 Package pkg-a was not found in the registry.
@@ -453,19 +417,7 @@ pkg-a@1.0.0
 "
 `;
 
-exports[`Publish command e2e > 'pnpm 10 + npm 10' > publishes a new version of a package 1`] = `
-"🦋 changeset v[version]
-
-These packages will be published as they were not found in the registry:
-pkg-a@1.0.0
-0 packages are already published.
-◒  Publishing packages◇  Successfully published:
-pkg-a@1.0.0
-◒  Creating git tags◇  Created git tags.
-"
-`;
-
-exports[`Publish command e2e > 'pnpm 10 + npm 10' > retries interactively after an OTP auth challenge 1`] = `
+exports[`Publish command e2e > pnpm 10 + npm 10 > retries interactively after an OTP auth challenge 1`] = `
 "┌  🦋 changeset v[version]
 │
 ●  These packages will be published as they were not found in the registry:
@@ -501,7 +453,7 @@ Enter OTP: 654321
 "
 `;
 
-exports[`Publish command e2e > 'pnpm 10 + npm 10' > surfaces pre-publish errors 1`] = `
+exports[`Publish command e2e > pnpm 10 + npm 10 > surfaces pre-publish errors 1`] = `
 "🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
@@ -517,7 +469,7 @@ Exit status 1
 "
 `;
 
-exports[`Publish command e2e > 'pnpm 10 + npm 10' > surfaces publish failures for bad credentials 1`] = `
+exports[`Publish command e2e > pnpm 10 + npm 10 > surfaces publish failures for bad credentials 1`] = `
 "🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
@@ -532,7 +484,7 @@ pkg-a@1.0.0
 "
 `;
 
-exports[`Publish command e2e > 'pnpm 10 + npm 10' > surfaces publish failures when not logged in 1`] = `
+exports[`Publish command e2e > pnpm 10 + npm 10 > surfaces publish failures when not logged in 1`] = `
 "🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
@@ -548,7 +500,7 @@ You need to authorize this machine using \`npm adduser\`
 "
 `;
 
-exports[`Publish command e2e > 'pnpm 10 + npm 10' > surfaces web-auth OTP publish failures in non-tty mode 1`] = `
+exports[`Publish command e2e > pnpm 10 + npm 10 > surfaces web-auth OTP publish failures in non-tty mode 1`] = `
 "🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
@@ -566,7 +518,7 @@ it, or it timed out. Please try again.
 "
 `;
 
-exports[`Publish command e2e > 'pnpm 11' > handles lifecycle stdout while publishing 1`] = `
+exports[`Publish command e2e > pnpm 11 > handles lifecycle stdout while publishing 1`] = `
 "🦋 changeset v[version]
 
 Package pkg-a was not found in the registry.
@@ -580,7 +532,7 @@ pkg-a@1.0.0
 "
 `;
 
-exports[`Publish command e2e > 'pnpm 11' > publishes a first version of a package 1`] = `
+exports[`Publish command e2e > pnpm 11 > publishes a first version of a package 1`] = `
 "🦋 changeset v[version]
 
 Package pkg-a was not found in the registry.
@@ -594,19 +546,7 @@ pkg-a@1.0.0
 "
 `;
 
-exports[`Publish command e2e > 'pnpm 11' > publishes a new version of a package 1`] = `
-"🦋 changeset v[version]
-
-These packages will be published as they were not found in the registry:
-pkg-a@1.0.0
-0 packages are already published.
-◒  Publishing packages◇  Successfully published:
-pkg-a@1.0.0
-◒  Creating git tags◇  Created git tags.
-"
-`;
-
-exports[`Publish command e2e > 'pnpm 11' > retries interactively after an OTP auth challenge 1`] = `
+exports[`Publish command e2e > pnpm 11 > retries interactively after an OTP auth challenge 1`] = `
 "┌  🦋 changeset v[version]
 │
 ●  These packages will be published as they were not found in the registry:
@@ -626,7 +566,7 @@ Enter OTP: 654321
 "
 `;
 
-exports[`Publish command e2e > 'pnpm 11' > surfaces pre-publish errors 1`] = `
+exports[`Publish command e2e > pnpm 11 > surfaces pre-publish errors 1`] = `
 "🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
@@ -642,7 +582,7 @@ Exit status 1
 "
 `;
 
-exports[`Publish command e2e > 'pnpm 11' > surfaces publish failures for bad credentials 1`] = `
+exports[`Publish command e2e > pnpm 11 > surfaces publish failures for bad credentials 1`] = `
 "🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
@@ -657,7 +597,7 @@ pkg-a@1.0.0
 "
 `;
 
-exports[`Publish command e2e > 'pnpm 11' > surfaces publish failures when not logged in 1`] = `
+exports[`Publish command e2e > pnpm 11 > surfaces publish failures when not logged in 1`] = `
 "🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
@@ -672,7 +612,7 @@ pkg-a@1.0.0
 "
 `;
 
-exports[`Publish command e2e > 'pnpm 11' > surfaces web-auth OTP publish failures in non-tty mode 1`] = `
+exports[`Publish command e2e > pnpm 11 > surfaces web-auth OTP publish failures in non-tty mode 1`] = `
 "🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
@@ -687,7 +627,7 @@ pkg-a@1.0.0
 "
 `;
 
-exports[`Publish command e2e > 'yarn 4' > handles lifecycle stdout while publishing 1`] = `
+exports[`Publish command e2e > yarn 4 > handles lifecycle stdout while publishing 1`] = `
 "🦋 changeset v[version]
 
 Package pkg-a was not found in the registry.
@@ -701,7 +641,7 @@ pkg-a@1.0.0
 "
 `;
 
-exports[`Publish command e2e > 'yarn 4' > publishes a first version of a package 1`] = `
+exports[`Publish command e2e > yarn 4 > publishes a first version of a package 1`] = `
 "🦋 changeset v[version]
 
 Package pkg-a was not found in the registry.
@@ -715,19 +655,7 @@ pkg-a@1.0.0
 "
 `;
 
-exports[`Publish command e2e > 'yarn 4' > publishes a new version of a package 1`] = `
-"🦋 changeset v[version]
-
-These packages will be published as they were not found in the registry:
-pkg-a@1.0.0
-0 packages are already published.
-◒  Publishing packages◇  Successfully published:
-pkg-a@1.0.0
-◒  Creating git tags◇  Created git tags.
-"
-`;
-
-exports[`Publish command e2e > 'yarn 4' > retries interactively after an OTP auth challenge 1`] = `
+exports[`Publish command e2e > yarn 4 > retries interactively after an OTP auth challenge 1`] = `
 "┌  🦋 changeset v[version]
 │
 ●  These packages will be published as they were not found in the registry:
@@ -750,7 +678,7 @@ exports[`Publish command e2e > 'yarn 4' > retries interactively after an OTP aut
 "
 `;
 
-exports[`Publish command e2e > 'yarn 4' > surfaces pre-publish errors 1`] = `
+exports[`Publish command e2e > yarn 4 > surfaces pre-publish errors 1`] = `
 "🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
@@ -765,7 +693,7 @@ pkg-a@1.0.0
 "
 `;
 
-exports[`Publish command e2e > 'yarn 4' > surfaces publish failures for bad credentials 1`] = `
+exports[`Publish command e2e > yarn 4 > surfaces publish failures for bad credentials 1`] = `
 "🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
@@ -780,7 +708,7 @@ pkg-a@1.0.0
 "
 `;
 
-exports[`Publish command e2e > 'yarn 4' > surfaces publish failures when not logged in 1`] = `
+exports[`Publish command e2e > yarn 4 > surfaces publish failures when not logged in 1`] = `
 "🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
@@ -795,7 +723,7 @@ pkg-a@1.0.0
 "
 `;
 
-exports[`Publish command e2e > 'yarn 4' > surfaces web-auth OTP publish failures in non-tty mode 1`] = `
+exports[`Publish command e2e > yarn 4 > surfaces web-auth OTP publish failures in non-tty mode 1`] = `
 "🦋 changeset v[version]
 
 These packages will be published as they were not found in the registry:
