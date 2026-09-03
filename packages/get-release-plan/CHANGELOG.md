@@ -1,5 +1,12 @@
 # @changesets/get-release-plan
 
+## 5.0.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @changesets/read@1.0.1
+
 ## 5.0.0
 
 ### Major Changes

@@ -1,5 +1,11 @@
 # @changesets/get-github-info
 
+## 1.0.1
+
+### Patch Changes
+
+- [#2264](https://github.com/changesets/changesets/pull/2264) [`4d7b4fb`](https://github.com/changesets/changesets/commit/4d7b4fbd013f009f03cccbbfc8d7a708d836bd79) Thanks [@bluwy](https://github.com/bluwy)! - Use consistent cache key when fetching the same commit or PR data
+
 ## 1.0.0
 
 ### Major Changes

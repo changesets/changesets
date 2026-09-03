@@ -1,5 +1,15 @@
 # @changesets/cli
 
+## 3.0.2
+
+### Patch Changes
+
+- [#2270](https://github.com/changesets/changesets/pull/2270) [`a0a4dc6`](https://github.com/changesets/changesets/commit/a0a4dc650033ea1dc53a9f2f7cbf9b46aaf339bd) Thanks [@bluwy](https://github.com/bluwy)! - Add review message on pre exit
+- Updated dependencies [[`1f4eb61`](https://github.com/changesets/changesets/commit/1f4eb6172547853d2a462a3ffd09e206f19e0a28), [`059f70a`](https://github.com/changesets/changesets/commit/059f70a82075a65108913eaecfc3b995565ce07b)]:
+  - @changesets/apply-release-plan@8.1.0
+  - @changesets/git@4.0.1
+  - @changesets/read@1.0.1
+
 ## 3.0.1
 
 ### Patch Changes
