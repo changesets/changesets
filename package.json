@@ -48,7 +48,7 @@
     "@tsconfig/node22": "^22.0.6",
     "@types/node": "^26.2.0",
     "@types/semver": "^7.8.0",
-    "@vitest/coverage-v8": "^4.1.11",
+    "@vitest/coverage-v8": "^5.0.0",
     "@vitest/eslint-plugin": "^1.6.27",
     "eslint": "^10.9.0",
     "eslint-config-prettier": "^10.1.8",
@@ -61,12 +61,19 @@
     "tsdown": "^0.22.14",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.67.0",
-    "vitest": "^4.1.11"
+    "vitest": "^5.0.0"
   },
   "lint-staged": {
     "*.{js,jsx,mjs,cjs,ts,tsx,mts,cts,json,json5,yaml,yml,css,scss,md}": [
       "oxfmt --write --no-error-on-unmatched-pattern"
     ]
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "^22.12 || ^24 || >=26",
+      "onFail": "error"
+    }
   },
   "engines": {
     "node": "^22.11 || ^24 || >=26"
