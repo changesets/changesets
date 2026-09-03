@@ -424,6 +424,80 @@ describe("git", { tags: ["slow"] }, () => {
         const commits = await getCommitsThatAddFiles(["b.js"], { cwd: clone });
         expect(commits).toEqual([originalCommit]);
       });
+
+      it("reads the SHA of a file-add when tweaked then moved to pre", async () => {
+        const cwd = await gitdir({});
+        await outputFile(path.join(cwd, "a.js"), 'export default "Andarist"');
+        const originalCommit = await addFileAndCommit("a.js", cwd);
+
+        await outputFile(
+          path.join(cwd, "a.js"),
+          'export default "Andarist tweaked"',
+        );
+        await add("a.js", cwd);
+        await commit("tweak a.js", cwd);
+
+        await fs.mkdir(path.join(cwd, "pre"));
+        await renameFileAndCommit("a.js", "pre/a.js", cwd);
+
+        const clone = await shallowClone(cwd, 1);
+        const commits = await getCommitsThatAddFiles(["pre/a.js"], {
+          cwd: clone,
+        });
+        expect(commits).toEqual([originalCommit]);
+      });
+
+      it("reads the SHA of a file-add when moved to pre then tweaked", async () => {
+        const cwd = await gitdir({});
+        await outputFile(path.join(cwd, "a.js"), 'export default "bluwy"');
+        const originalCommit = await addFileAndCommit("a.js", cwd);
+
+        await fs.mkdir(path.join(cwd, "pre"));
+        await renameFileAndCommit("a.js", "pre/a.js", cwd);
+
+        await outputFile(
+          path.join(cwd, "pre/a.js"),
+          'export default "bluwy tweaked"',
+        );
+        await add("pre/a.js", cwd);
+        await commit("tweak pre/a.js", cwd);
+
+        const clone = await shallowClone(cwd, 1);
+        const commits = await getCommitsThatAddFiles(["pre/a.js"], {
+          cwd: clone,
+        });
+        expect(commits).toEqual([originalCommit]);
+      });
+
+      it("reads the SHA of a file-add even if it is an exact copy of a previously added file", async () => {
+        const cwd = await gitdir({});
+        await outputFile(path.join(cwd, "a.js"), 'export default "foo"');
+        await addFileAndCommit("a.js", cwd);
+
+        await outputFile(path.join(cwd, "b.js"), 'export default "foo"');
+        const secondCommit = await addFileAndCommit("b.js", cwd);
+
+        const clone = await shallowClone(cwd, 2);
+        const commits = await getCommitsThatAddFiles(["b.js"], { cwd: clone });
+        expect(commits).toEqual([secondCommit]);
+      });
+
+      it("reads the SHA of a file-add even if it is highly similar to a previously added file", async () => {
+        const cwd = await gitdir({});
+        const contentA =
+          "---\n'pkg': patch\n---\n\nThis is a rather long and completely identical summary sentence to ensure Git detects similarity. Adds a brand new function export: foo\n";
+        await outputFile(path.join(cwd, "a.md"), contentA);
+        await addFileAndCommit("a.md", cwd);
+
+        const contentB =
+          "---\n'pkg': patch\n---\n\nThis is a rather long and completely identical summary sentence to ensure Git detects similarity. Adds a brand new function export: bar\n";
+        await outputFile(path.join(cwd, "b.md"), contentB);
+        const secondCommit = await addFileAndCommit("b.md", cwd);
+
+        const clone = await shallowClone(cwd, 2);
+        const commits = await getCommitsThatAddFiles(["b.md"], { cwd: clone });
+        expect(commits).toEqual([secondCommit]);
+      });
     });
   });
 
