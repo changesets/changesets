@@ -17,6 +17,7 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
+    "@changesets/catalogs": "workspace:^",
     "@changesets/errors": "workspace:^",
     "@changesets/get-dependents-graph": "workspace:^",
     "@changesets/should-skip-package": "workspace:^",

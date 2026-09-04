@@ -838,6 +838,152 @@ describe("git", { tags: ["slow"] }, () => {
         "pkg-a",
       ]);
     });
+
+    describe("with catalogs", () => {
+      const catalogWorkspace = (catalog: Record<string, string>) => ({
+        "package.json": JSON.stringify({ private: true, name: "root" }),
+        "pnpm-workspace.yaml": [
+          "packages:",
+          "  - packages/*",
+          "catalog:",
+          ...Object.entries(catalog).map(
+            ([name, range]) => `  ${name}: ${range}`,
+          ),
+          "catalogs:",
+          "  legacy:",
+          "    react: ^17.0.2",
+          "",
+        ].join("\n"),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          dependencies: { react: "catalog:" },
+        }),
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          devDependencies: { jest: "catalog:" },
+        }),
+        "packages/pkg-c/package.json": JSON.stringify({
+          name: "pkg-c",
+          dependencies: { react: "catalog:legacy" },
+        }),
+      });
+
+      const updateCatalog = async (
+        cwd: string,
+        catalog: Record<string, string>,
+      ) => {
+        await outputFile(
+          path.join(cwd, "pnpm-workspace.yaml"),
+          catalogWorkspace(catalog)["pnpm-workspace.yaml"],
+        );
+        await commit("update catalog", cwd);
+      };
+
+      it("should return the packages referencing an updated entry", async () => {
+        const cwd = await gitdir(
+          catalogWorkspace({ react: "^18.0.0", jest: "^30.0.0" }),
+        );
+        await exec("git", ["checkout", "-b", "new-branch"], {
+          nodeOptions: { cwd },
+        });
+        await updateCatalog(cwd, { react: "^19.0.0", jest: "^30.0.0" });
+
+        const changedPackages = await getChangedPackagesSinceRef({
+          cwd,
+          ref: "main",
+        });
+
+        expect(changedPackages.map((pkg) => pkg.packageJson.name)).toEqual([
+          "pkg-a",
+        ]);
+      });
+
+      it("should ignore catalogs when detectCatalogChanges is off", async () => {
+        const cwd = await gitdir(
+          catalogWorkspace({ react: "^18.0.0", jest: "^30.0.0" }),
+        );
+        await exec("git", ["checkout", "-b", "new-branch"], {
+          nodeOptions: { cwd },
+        });
+        await updateCatalog(cwd, { react: "^19.0.0", jest: "^30.0.0" });
+
+        const changedPackages = await getChangedPackagesSinceRef({
+          cwd,
+          ref: "main",
+          detectCatalogChanges: false,
+        });
+
+        expect(changedPackages).toHaveLength(0);
+      });
+
+      it("should not return packages referencing an entry that didn't change", async () => {
+        const cwd = await gitdir(
+          catalogWorkspace({ react: "^18.0.0", jest: "^30.0.0" }),
+        );
+        await exec("git", ["checkout", "-b", "new-branch"], {
+          nodeOptions: { cwd },
+        });
+        await updateCatalog(cwd, { react: "^18.0.0", jest: "^31.0.0" });
+
+        const changedPackages = await getChangedPackagesSinceRef({
+          cwd,
+          ref: "main",
+        });
+
+        expect(changedPackages.map((pkg) => pkg.packageJson.name)).toEqual([
+          "pkg-b",
+        ]);
+      });
+
+      it("should tell entries of different catalogs apart", async () => {
+        const cwd = await gitdir(
+          catalogWorkspace({ react: "^18.0.0", jest: "^30.0.0" }),
+        );
+        await exec("git", ["checkout", "-b", "new-branch"], {
+          nodeOptions: { cwd },
+        });
+        await outputFile(
+          path.join(cwd, "pnpm-workspace.yaml"),
+          catalogWorkspace({ react: "^18.0.0", jest: "^30.0.0" })[
+            "pnpm-workspace.yaml"
+          ].replace("react: ^17.0.2", "react: ^17.1.0"),
+        );
+        await commit("update legacy catalog", cwd);
+
+        const changedPackages = await getChangedPackagesSinceRef({
+          cwd,
+          ref: "main",
+        });
+
+        expect(changedPackages.map((pkg) => pkg.packageJson.name)).toEqual([
+          "pkg-c",
+        ]);
+      });
+
+      it("should still report packages with changed files", async () => {
+        const cwd = await gitdir(
+          catalogWorkspace({ react: "^18.0.0", jest: "^30.0.0" }),
+        );
+        await exec("git", ["checkout", "-b", "new-branch"], {
+          nodeOptions: { cwd },
+        });
+        await outputFile(
+          path.join(cwd, "packages/pkg-b/index.js"),
+          "export const answer = 42;",
+        );
+        await add("packages/pkg-b/index.js", cwd);
+        await updateCatalog(cwd, { react: "^19.0.0", jest: "^30.0.0" });
+
+        const changedPackages = await getChangedPackagesSinceRef({
+          cwd,
+          ref: "main",
+        });
+
+        expect(
+          changedPackages.map((pkg) => pkg.packageJson.name).toSorted(),
+        ).toEqual(["pkg-a", "pkg-b"]);
+      });
+    });
   });
 
   describe("getChangedChangesetFilesSinceRef", () => {

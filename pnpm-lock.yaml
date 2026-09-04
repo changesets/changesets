@@ -85,6 +85,9 @@ importers:
 
   packages/apply-release-plan:
     dependencies:
+      '@changesets/catalogs':
+        specifier: workspace:^
+        version: link:../catalogs
       '@changesets/config':
         specifier: workspace:^
         version: link:../config
@@ -122,6 +125,9 @@ importers:
 
   packages/assemble-release-plan:
     dependencies:
+      '@changesets/catalogs':
+        specifier: workspace:^
+        version: link:../catalogs
       '@changesets/errors':
         specifier: workspace:^
         version: link:../errors
@@ -141,6 +147,22 @@ importers:
       '@changesets/config':
         specifier: workspace:*
         version: link:../config
+
+  packages/catalogs:
+    dependencies:
+      '@changesets/types':
+        specifier: workspace:^
+        version: link:../types
+      jsonc-parser:
+        specifier: ^3.3.1
+        version: 3.3.1
+      yaml:
+        specifier: ^2.9.0
+        version: 2.9.0
+    devDependencies:
+      '@changesets/test-utils':
+        specifier: workspace:*
+        version: link:../../scripts/test-utils
 
   packages/changelog-git:
     dependencies:
@@ -169,6 +191,9 @@ importers:
       '@changesets/assemble-release-plan':
         specifier: workspace:^
         version: link:../assemble-release-plan
+      '@changesets/catalogs':
+        specifier: workspace:^
+        version: link:../catalogs
       '@changesets/changelog-git':
         specifier: workspace:^
         version: link:../changelog-git
@@ -274,6 +299,9 @@ importers:
 
   packages/config:
     dependencies:
+      '@changesets/catalogs':
+        specifier: workspace:^
+        version: link:../catalogs
       '@changesets/get-dependents-graph':
         specifier: workspace:^
         version: link:../get-dependents-graph
@@ -307,6 +335,9 @@ importers:
 
   packages/get-dependents-graph:
     dependencies:
+      '@changesets/catalogs':
+        specifier: workspace:^
+        version: link:../catalogs
       '@changesets/types':
         specifier: workspace:^
         version: link:../types
@@ -336,6 +367,9 @@ importers:
       '@changesets/assemble-release-plan':
         specifier: workspace:^
         version: link:../assemble-release-plan
+      '@changesets/catalogs':
+        specifier: workspace:^
+        version: link:../catalogs
       '@changesets/config':
         specifier: workspace:^
         version: link:../config
@@ -356,6 +390,9 @@ importers:
 
   packages/git:
     dependencies:
+      '@changesets/catalogs':
+        specifier: workspace:^
+        version: link:../catalogs
       '@changesets/errors':
         specifier: workspace:^
         version: link:../errors
