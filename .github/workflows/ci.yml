@@ -89,13 +89,13 @@ jobs:
 
       - name: Vitest tests
         if: matrix.os != 'windows-latest' && !(matrix.node_version == 24 && matrix.os == 'ubuntu-latest')
-        run: pnpm test
+        run: pnpm test:unit
 
       # For Windows, run fixtures in the runner tempdir instead of os tempdir. The default tempdir
       # is in the D drive which is known to be slow: https://github.com/actions/runner-images/issues/8755
       - name: Vitest tests on Windows
         if: matrix.os == 'windows-latest'
-        run: pnpm test
+        run: pnpm test:unit
         env:
           TEMP: ${{ runner.temp }}
           TMP: ${{ runner.temp }}
@@ -103,13 +103,37 @@ jobs:
       # Run coverage only once on Ubuntu & node 24 to avoid duplicate codecov uploads
       - name: Vitest tests with coverage
         if: matrix.node_version == 24 && matrix.os == 'ubuntu-latest'
-        run: pnpm test --coverage
+        run: pnpm test:unit --coverage
 
       - name: Upload coverage
         uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
         if: matrix.node_version == 24 && matrix.os == 'ubuntu-latest'
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+
+  e2e:
+    name: End-to-end tests
+    needs: [build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: $/.github/actions/ci-setup
+        with:
+          node-version: 24
+          download-dist: true
+          install-e2e: true
+
+      - name: Check Git version
+        run: git --version
+
+      - name: Setup mock Git user
+        run: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
+
+      - name: Typecheck end-to-end tests
+        run: pnpm --filter=@changesets/e2e types:check
+
+      - name: Run end-to-end tests
+        run: pnpm test:e2e
 
   typecheck:
     name: Typecheck
@@ -144,7 +168,7 @@ jobs:
     name: CI OK
     runs-on: ubuntu-latest
     if: always()
-    needs: [lint-workflows, build, test, typecheck, lint]
+    needs: [lint-workflows, build, test, e2e, typecheck, lint]
     steps:
       - name: Exit with error if some jobs are not successful
         run: exit 1

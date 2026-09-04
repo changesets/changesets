@@ -15,5 +15,6 @@
     ],
     "types": ["node"]
   },
-  "include": ["./"]
+  "include": ["**/*"],
+  "exclude": ["scripts/e2e/**/*"]
 }

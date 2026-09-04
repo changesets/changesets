@@ -13,10 +13,9 @@ import { tagExists } from "@changesets/git";
 import { packTar, type TarSource } from "modern-tar/fs";
 import { exec } from "tinyexec";
 import { describe, expect, it } from "vitest";
-import { AsyncDisposableStack } from "../../../ponyfills/async-disposable-stack.ts";
+import { AsyncDisposableStack } from "../../packages/cli/src/ponyfills/async-disposable-stack.ts";
 import {
   AbortableAsyncDisposableStack,
-  cliPackageRoot,
   createPkgAFixture,
   createTempDir,
   getFreePort,
@@ -24,7 +23,8 @@ import {
   pmCases,
   runCliCommand,
   type TestRegistryConfig,
-} from "../../__tests__/e2e-utils.ts";
+  e2ePackageRoot,
+} from "./e2e-utils.ts";
 
 type RegistryRequestRecord = {
   bodyJson?: unknown;
@@ -688,7 +688,7 @@ log:
 
   const execResult = stack.use(
     execChild(
-      path.join(cliPackageRoot, "node_modules", ".bin", "pnpr"),
+      path.join(e2ePackageRoot, "node_modules", ".bin", "pnpr"),
       [
         "--config",
         config,
@@ -701,7 +701,7 @@ log:
       ],
       {
         nodeOptions: {
-          cwd: cliPackageRoot,
+          cwd: e2ePackageRoot,
           stdio: ["ignore", "pipe", "pipe"],
         },
       },
@@ -948,7 +948,7 @@ function createPmContext(
   };
 }
 
-describe("Publish command e2e", { tags: ["slow", "e2e"] }, () => {
+describe("Publish command e2e", () => {
   describe.each(pmCases)("$name", (pm) => {
     it("publishes a new version of a package", async ({ signal }) => {
       await using stack = new AbortableAsyncDisposableStack(signal);

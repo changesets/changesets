@@ -13,6 +13,10 @@ inputs:
     description: "Whether to download a dist folder artifact from the current run"
     required: false
     default: "false"
+  install-e2e:
+    description: "Whether to install the e2e workspace and its dependencies"
+    required: false
+    default: "false"
 
 runs:
   using: composite
@@ -32,10 +36,17 @@ runs:
         cache: ${{ inputs.skip-cache != 'true' && 'pnpm' || '' }}
 
     - name: Install dependencies
+      if: ${{ inputs.install-e2e != 'true' }}
       shell: bash
-      run: pnpm install --frozen-lockfile
+      run: pnpm run bootstrap
+
+    - name: Install e2e dependencies
+      if: ${{ inputs.install-e2e == 'true' }}
+      shell: bash
+      run: pnpm run bootstrap:e2e
 
     - name: Check with manypkg
+      if: ${{ inputs.install-e2e != 'true' }}
       shell: bash
       run: pnpm manypkg check
 

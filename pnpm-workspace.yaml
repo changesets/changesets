@@ -25,6 +25,9 @@ overrides:
 
 shellEmulator: true
 
+# Bootstrap scripts intentionally run before the workspace is fully installed.
+verifyDepsBeforeRun: warn
+
 trustPolicy: no-downgrade
 trustPolicyExclude:
   - pnpm@10.34.5
