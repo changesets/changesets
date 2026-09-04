@@ -1,5 +1,16 @@
 # @changesets/apply-release-plan
 
+## 8.1.0
+
+### Minor Changes
+
+- [#2265](https://github.com/changesets/changesets/pull/2265) [`1f4eb61`](https://github.com/changesets/changesets/commit/1f4eb6172547853d2a462a3ffd09e206f19e0a28) Thanks [@bluwy](https://github.com/bluwy)! - Add default changelog message if the release has no changes for a package, e.g. due to fixed packages releases
+
+### Patch Changes
+
+- Updated dependencies [[`059f70a`](https://github.com/changesets/changesets/commit/059f70a82075a65108913eaecfc3b995565ce07b)]:
+  - @changesets/git@4.0.1
+
 ## 8.0.0
 
 ### Major Changes

@@ -1,5 +1,12 @@
 # @changesets/read
 
+## 1.0.1
+
+### Patch Changes
+
+- Updated dependencies [[`059f70a`](https://github.com/changesets/changesets/commit/059f70a82075a65108913eaecfc3b995565ce07b)]:
+  - @changesets/git@4.0.1
+
 ## 1.0.0
 
 ### Major Changes
