@@ -118,16 +118,25 @@ export function getDependencyGraph(
           dependencies.push(depName);
           continue;
         }
-
-        if (!getValidRange(depRange)) {
-          valid = false;
-          // TODO: replace with returning errors/warnings
-          console.error(
-            `Package ${c.blue(name)} must depend on the current version of ${c.blue(depName)}: ${c.green(expected)} vs ${c.red(rawDepRange)}`,
-          );
-          continue;
-        }
       } else if (bumpVersionsWithWorkspaceProtocolOnly) {
+        continue;
+      }
+
+      if (typeof expected !== "string") {
+        valid = false;
+        // TODO: replace with returning errors/warnings
+        console.error(
+          `Package ${c.blue(name)} depends on ${c.blue(depName)}@${c.red(rawDepRange)}, but ${c.blue(depName)} is also the name of a workspace package without a version. Add a version to ${c.blue(depName)} or rename the workspace package.`,
+        );
+        continue;
+      }
+
+      if (usesWorkspaceRange && !getValidRange(depRange)) {
+        valid = false;
+        // TODO: replace with returning errors/warnings
+        console.error(
+          `Package ${c.blue(name)} must depend on the current version of ${c.blue(depName)}: ${c.green(expected)} vs ${c.red(rawDepRange)}`,
+        );
         continue;
       }
 
