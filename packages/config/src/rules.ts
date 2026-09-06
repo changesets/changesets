@@ -49,14 +49,15 @@ const noDuplicateFixedPackages: Rule = ({ config, errors }) => {
       }
       foundNames.add(name);
     }
-    errors.push(
-      ...Array.from(
-        duplicatedNames,
-        (pkgOrGlob) =>
-          `fixed: Invalid group: The package or glob "${pkgOrGlob}" is defined in multiple groups of fixed packages. Packages can only be belong to a single group. ${picomatchNote}`,
-      ),
-    );
   }
+
+  errors.push(
+    ...Array.from(
+      duplicatedNames,
+      (pkgOrGlob) =>
+        `fixed: Invalid group: The package or glob "${pkgOrGlob}" is defined in multiple groups of fixed packages. Packages can only be belong to a single group. ${picomatchNote}`,
+    ),
+  );
 };
 
 const linkedGroupsExist: Rule = ({
@@ -89,14 +90,15 @@ const noDuplicateLinkedPackages: Rule = ({ config, errors }) => {
       }
       foundNames.add(name);
     }
-    errors.push(
-      ...Array.from(
-        duplicatedNames,
-        (pkgOrGlob) =>
-          `linked: Invalid group: The package or glob "${pkgOrGlob}" is defined in multiple groups of linked packages. Packages can only be belong to a single group. ${picomatchNote}`,
-      ),
-    );
   }
+
+  errors.push(
+    ...Array.from(
+      duplicatedNames,
+      (pkgOrGlob) =>
+        `linked: Invalid group: The package or glob "${pkgOrGlob}" is defined in multiple groups of linked packages. Packages can only be belong to a single group. ${picomatchNote}`,
+    ),
+  );
 };
 
 const noFixedAndLinkedPackages: Rule = ({ config, errors }) => {
