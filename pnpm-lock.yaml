@@ -206,8 +206,8 @@ importers:
         specifier: ^3.1.0
         version: 3.1.0
       '@pnpm/deps.graph-sequencer':
-        specifier: ^1100.0.1
-        version: 1100.0.1
+        specifier: ^1101.0.0
+        version: 1101.0.0
       cac:
         specifier: ^7.0.0
         version: 7.0.0
@@ -980,8 +980,8 @@ packages:
     resolution: {integrity: sha512-htyl8TWnKL7K/ESFa1oW2UB5lVDxuF5DpM7tBi6Hu2LNL3mWkIzNLG6N4zoCUP1lCKNxWy/3iu8mS8MvToGd6w==}
     engines: {node: '>=12.22.0'}
 
-  '@pnpm/deps.graph-sequencer@1100.0.1':
-    resolution: {integrity: sha512-pOr5+q1fLYKwFN3LAJuGZEnfXDcQ73zqgDHMtGy+K+uIoUqyY+6MeDCWFwfu+4EFuq76I5EPFofoNAI+Bmmq4A==}
+  '@pnpm/deps.graph-sequencer@1101.0.0':
+    resolution: {integrity: sha512-e8JOJ54nMXnBNMuHt/UUJ5k9VcqGv0tV557xeAdoOoKTTlln1Ge2x8OQAJnWXtRIQimSlOe+J001ADLblJ+UVw==}
     engines: {node: '>=22.13'}
 
   '@pnpm/network.ca-file@1.0.2':
@@ -3410,7 +3410,7 @@ snapshots:
 
   '@pnpm/config.env-replace@1.1.0': {}
 
-  '@pnpm/deps.graph-sequencer@1100.0.1': {}
+  '@pnpm/deps.graph-sequencer@1101.0.0': {}
 
   '@pnpm/network.ca-file@1.0.2':
     dependencies:
@@ -4869,7 +4869,7 @@ snapshots:
   vite@8.2.0(@types/node@26.2.0)(yaml@2.9.0):
     dependencies:
       lightningcss: 1.33.0
-      picomatch: 4.0.5
+      picomatch: 4.0.7
       postcss: 8.5.26
       rolldown: 1.2.0
       tinyglobby: 0.2.17
