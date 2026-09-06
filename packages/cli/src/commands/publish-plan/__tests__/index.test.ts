@@ -61,22 +61,24 @@ describe("publish-plan", () => {
 
     const result = await publishPlan({ cwd });
 
-    expect(result).toEqual([
+    expect(result).toMatchInlineSnapshot(`
       [
-        {
-          kind: "publish",
-          name: "pkg-a",
-          version: "1.0.0",
-          access: "restricted",
-          tag: "latest",
-        },
-        {
-          kind: "tag-only",
-          name: "pkg-b",
-          version: "1.0.0",
-        },
-      ],
-    ]);
+        [
+          {
+            "access": "restricted",
+            "kind": "publish",
+            "name": "pkg-a",
+            "tag": "latest",
+            "version": "1.0.0",
+          },
+          {
+            "kind": "tag-only",
+            "name": "pkg-b",
+            "version": "1.0.0",
+          },
+        ],
+      ]
+    `);
   });
 
   it("returns empty arrays when there is nothing to publish or tag", async () => {
@@ -130,17 +132,19 @@ describe("publish-plan", () => {
     const output = "publish-plan.json";
     const result = await publishPlan({ cwd, output });
 
-    expect(result).toEqual([
+    expect(result).toMatchInlineSnapshot(`
       [
-        {
-          kind: "publish",
-          name: "pkg-a",
-          version: "1.0.0",
-          access: "restricted",
-          tag: "latest",
-        },
-      ],
-    ]);
+        [
+          {
+            "access": "restricted",
+            "kind": "publish",
+            "name": "pkg-a",
+            "tag": "latest",
+            "version": "1.0.0",
+          },
+        ],
+      ]
+    `);
     await expect(fs.readFile(path.join(cwd, output), "utf8")).resolves.toEqual(
       `${JSON.stringify({ version: 1, plan: result }, undefined, 2)}`,
     );
