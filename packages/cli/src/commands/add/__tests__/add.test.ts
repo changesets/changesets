@@ -691,6 +691,100 @@ describe("Add command", () => {
     );
   });
 
+  describe("release type flags", () => {
+    let cwd: string;
+
+    beforeEach(async () => {
+      cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          name: "root-pkg",
+          workspaces: ["packages/*"],
+        }),
+        "package-lock.json": "",
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          version: "1.0.0",
+        }),
+        "packages/pkg-c/package.json": JSON.stringify({
+          name: "pkg-c",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify(defaultConfig),
+      });
+    });
+
+    it("should generate a changeset for a single package", async () => {
+      await addChangeset({
+        cwd,
+        message: "summary from message",
+        major: ["pkg-a"],
+      });
+
+      const changesets = await getChangesets(cwd);
+      expect(changesets.length).toBe(1);
+      expect(changesets[0]).toEqual(
+        expect.objectContaining({
+          summary: "summary from message",
+          releases: [{ name: "pkg-a", type: "major" }],
+        }),
+      );
+      expect(mockedUtils.askMultiselect).not.toHaveBeenCalled();
+      expect(mockedUtils.askList).not.toHaveBeenCalled();
+    });
+
+    it("should generate a changeset for multiple packages passed to one flag", async () => {
+      await addChangeset({
+        cwd,
+        message: "summary from message",
+        patch: ["pkg-a", "pkg-c"],
+      });
+
+      const changesets = await getChangesets(cwd);
+      expect(changesets.length).toBe(1);
+      expect(changesets[0]).toEqual(
+        expect.objectContaining({
+          summary: "summary from message",
+          releases: [
+            { name: "pkg-a", type: "patch" },
+            { name: "pkg-c", type: "patch" },
+          ],
+        }),
+      );
+      expect(mockedUtils.askMultiselect).not.toHaveBeenCalled();
+      expect(mockedUtils.askList).not.toHaveBeenCalled();
+    });
+
+    it("should generate a changeset for packages passed to different flags", async () => {
+      await addChangeset({
+        cwd,
+        message: "summary from message",
+        major: ["pkg-a"],
+        minor: ["pkg-b"],
+        patch: ["pkg-c"],
+      });
+
+      const changesets = await getChangesets(cwd);
+      expect(changesets.length).toBe(1);
+      expect(changesets[0]).toEqual(
+        expect.objectContaining({
+          summary: "summary from message",
+          releases: [
+            { name: "pkg-a", type: "major" },
+            { name: "pkg-b", type: "minor" },
+            { name: "pkg-c", type: "patch" },
+          ],
+        }),
+      );
+      expect(mockedUtils.askMultiselect).not.toHaveBeenCalled();
+      expect(mockedUtils.askList).not.toHaveBeenCalled();
+    });
+  });
+
   it("should be able to add a changeset when called from subdirectory", async () => {
     const rootDir = await testdir({
       "package.json": JSON.stringify({
