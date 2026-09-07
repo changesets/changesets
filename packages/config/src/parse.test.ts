@@ -624,6 +624,44 @@ describe("validateConfig", () => {
 
   // any tests that don't fit nicely into the cases above
   describe("rules", () => {
+    describe("noDuplicateFixedPackages", () => {
+      it("should report a duplicated package once when more groups follow it", async () => {
+        const config = { fixed: [["pkg-a"], ["pkg-a"], ["pkg-b"]] };
+
+        const cwd = await testdir({
+          ".changeset/config.json": JSON.stringify(config),
+          "package.json": JSON.stringify(rootManifest),
+        });
+        const packages = withPackages(cwd, ["pkg-a", "pkg-b"]);
+
+        const result = validateConfig(config, packages);
+
+        expect(result.errors).toHaveLength(1);
+        expect(result.errors![0]).toContain(
+          'fixed: Invalid group: The package or glob "pkg-a" is defined in multiple groups',
+        );
+      });
+    });
+
+    describe("noDuplicateLinkedPackages", () => {
+      it("should report a duplicated package once when more groups follow it", async () => {
+        const config = { linked: [["pkg-a"], ["pkg-a"], ["pkg-b"]] };
+
+        const cwd = await testdir({
+          ".changeset/config.json": JSON.stringify(config),
+          "package.json": JSON.stringify(rootManifest),
+        });
+        const packages = withPackages(cwd, ["pkg-a", "pkg-b"]);
+
+        const result = validateConfig(config, packages);
+
+        expect(result.errors).toHaveLength(1);
+        expect(result.errors![0]).toContain(
+          'linked: Invalid group: The package or glob "pkg-a" is defined in multiple groups',
+        );
+      });
+    });
+
     describe("alsoSkipDependentsOfSkipped", () => {
       it("should error when a not-skipped package depends on a skipped package", async () => {
         const pkgA = {
