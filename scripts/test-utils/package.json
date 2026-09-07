@@ -10,7 +10,7 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
-    "fs-fixture": "^2.14.0",
+    "fs-fixture": "^2.15.0",
     "tinyexec": "^1.3.0"
   },
   "engines": {
