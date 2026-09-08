@@ -10,6 +10,7 @@ The command line for changesets is the main way of interacting with it. There ar
 - version [--ignore, --snapshot]
 - publish [--otp=code, --tag]
 - status [--since=master --verbose --output=JSON_FILE.json]
+- check
 - pre [exit|enter {tag}]
 - git-tag
 
@@ -142,6 +143,16 @@ The status command provides information about the changesets that currently exis
 - `--since` - to only display information about changesets since a specific branch or git tag (such as `main`, or the git hash of latest). While this can be used to add a CI check for changesets, we recommend not doing this. We instead recommend using the [changeset bot](https://github.com/apps/changeset-bot) to detect pull requests missing changesets, as not all pull requests need one if you are on GitHub.
 
 > NOTE: `status` will fail if you are in the middle of running `version` or `publish`. If you want to get changeset status at the time of a version increase and publish, you need to run it immediately before running `version`.
+
+## check
+
+```
+changeset check
+```
+
+The check command validates that every changeset in `.changeset/` is well-formed (valid frontmatter with package names and version types) and only references packages that still exist in the workspace. It exits with status code `1` on the first invalid changeset, printing the offending file and the reason.
+
+This is useful in CI on your main branch (or on pull requests) to catch changesets that were created or edited by hand or by an AI tool and would otherwise break `changeset version` during a release. Unlike `status`, `check` does not require changesets to exist for changed packages — it only validates the changesets that are already present.
 
 ## pre
 
