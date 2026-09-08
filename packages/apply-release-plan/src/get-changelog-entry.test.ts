@@ -39,6 +39,10 @@ async function getDependencyChangesets(
   target: string,
   releases: ModCompWithPackage[],
   changesets: NewChangesetWithCommit[],
+  config: {
+    updateInternalDependents?: "always" | "out-of-range";
+    updateInternalDependencies?: "patch" | "minor";
+  } = {},
 ): Promise<NewChangesetWithCommit[]> {
   let recorded: NewChangesetWithCommit[] = [];
   const funcs: ChangelogFunctions = {
@@ -56,7 +60,9 @@ async function getDependencyChangesets(
     funcs,
     null,
     {
-      updateInternalDependencies: "patch",
+      updateInternalDependencies: config.updateInternalDependencies ?? "patch",
+      updateInternalDependents:
+        config.updateInternalDependents ?? "out-of-range",
       onlyUpdatePeerDependentsWhenOutOfRange: false,
     },
   );
@@ -195,6 +201,53 @@ describe("getChangelogEntry", () => {
     ).then((cs) => cs.map((cs) => cs.id));
 
     expect(changesetIds).toEqual(["changeset-d"]);
+  });
+
+  it("lists an in-range dependency when updateInternalDependents is always", async () => {
+    // a -> b. b is a patch bump within a's range, and a only bumps internal
+    // deps of at least "minor" type, so under "out-of-range" b is not listed.
+    // "always" mirrors assemble-release-plan, which bumps a for every internal
+    // dependency update, so b's commit should still surface.
+    const releases = [
+      makeRelease("a", { b: "^1.0.0" }, []),
+      makeRelease("b", {}, ["changeset-b"]),
+    ];
+    const changesets = [makeChangeset("changeset-b", "b")];
+
+    const changesetIds = await getDependencyChangesets(
+      "a",
+      releases,
+      changesets,
+      {
+        updateInternalDependents: "always",
+        updateInternalDependencies: "minor",
+      },
+    ).then((cs) => cs.map((cs) => cs.id));
+
+    expect(changesetIds).toEqual(["changeset-b"]);
+  });
+
+  it("does not list an in-range dependency when updateInternalDependents is out-of-range", async () => {
+    // a -> b. b is a patch bump within a's range, and a only bumps internal
+    // deps of at least "minor" type, so under the default "out-of-range"
+    // behavior b is not listed and its commit does not surface.
+    const releases = [
+      makeRelease("a", { b: "^1.0.0" }, []),
+      makeRelease("b", {}, ["changeset-b"]),
+    ];
+    const changesets = [makeChangeset("changeset-b", "b")];
+
+    const changesetIds = await getDependencyChangesets(
+      "a",
+      releases,
+      changesets,
+      {
+        updateInternalDependents: "out-of-range",
+        updateInternalDependencies: "minor",
+      },
+    ).then((cs) => cs.map((cs) => cs.id));
+
+    expect(changesetIds).toEqual([]);
   });
 
   it("handles dependency cycles without infinite recursion", async () => {

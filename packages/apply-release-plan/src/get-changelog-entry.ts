@@ -1,5 +1,7 @@
 import type {
   ChangelogFunctions,
+  Config,
+  ExperimentalOptions,
   ModCompWithPackage,
   NewChangesetWithCommit,
 } from "@changesets/types";
@@ -12,10 +14,8 @@ type ChangelogLines = {
   patch: Array<Promise<string>>;
 };
 
-type DependencyUpdateConfig = {
-  updateInternalDependencies: "patch" | "minor";
-  onlyUpdatePeerDependentsWhenOutOfRange: boolean;
-};
+type DependencyUpdateConfig = Pick<Config, "updateInternalDependencies"> &
+  Required<ExperimentalOptions>;
 
 function getDependentReleases(
   cwd: string,
@@ -27,6 +27,13 @@ function getDependentReleases(
     const dependencyVersionRange = release.packageJson.dependencies?.[rel.name];
     const peerDependencyVersionRange =
       release.packageJson.peerDependencies?.[rel.name];
+
+    if (
+      dependencyVersionRange &&
+      config.updateInternalDependents === "always"
+    ) {
+      return true;
+    }
 
     const versionRange = dependencyVersionRange || peerDependencyVersionRange;
     const usesWorkspaceRange = versionRange?.startsWith("workspace:");
@@ -88,9 +95,11 @@ export async function getChangelogEntry(
   changelogOpts: null | Record<string, unknown>,
   {
     updateInternalDependencies,
+    updateInternalDependents,
     onlyUpdatePeerDependentsWhenOutOfRange,
   }: {
     updateInternalDependencies: "patch" | "minor";
+    updateInternalDependents: "always" | "out-of-range";
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
   },
 ) {
@@ -118,6 +127,7 @@ export async function getChangelogEntry(
   });
   const dependencyUpdateConfig: DependencyUpdateConfig = {
     updateInternalDependencies,
+    updateInternalDependents,
     onlyUpdatePeerDependentsWhenOutOfRange,
   };
 
