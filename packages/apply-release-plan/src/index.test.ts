@@ -2154,6 +2154,57 @@ describe("apply release plan", () => {
       `);
     });
 
+    it("should update a changelog and maintain non-version CHANGELOG intro for one package", async () => {
+      const releasePlan = new FakeReleasePlan();
+      const { changedFiles } = await testSetup(
+        {
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "package-lock.json": "",
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+          }),
+          "packages/pkg-a/CHANGELOG.md":
+            "# Changelog for pkg-a\n\n## Overview\n\nThis file contains a history\nof changes made to pkg-a. We\nhope you enjoy them.\n\n## 1.0.0\n\n- Fixed some bug",
+        },
+        releasePlan.getReleasePlan(),
+        {
+          ...releasePlan.config,
+          changelog: [changesetsCliChangelogPath, null],
+        },
+      );
+
+      const readmePath = changedFiles.find((a) =>
+        a.endsWith(`pkg-a${path.sep}CHANGELOG.md`),
+      );
+
+      if (!readmePath) throw new Error(`could not find an updated changelog`);
+      const readme = await fs.readFile(readmePath, "utf-8");
+
+      expect(readme.trim()).toMatchInlineSnapshot(`
+        "# Changelog for pkg-a
+
+        ## Overview
+
+        This file contains a history
+        of changes made to pkg-a. We
+        hope you enjoy them.
+
+        ## 1.1.0
+
+        ### Minor Changes
+
+        - Hey, let's have fun with testing!
+
+        ## 1.0.0
+
+        - Fixed some bug"
+      `);
+    });
+
     it("should insert new entry before existing version heading when no package title is present", async () => {
       const releasePlan = new FakeReleasePlan();
       const { changedFiles } = await testSetup(
@@ -2190,6 +2241,7 @@ describe("apply release plan", () => {
         ### Minor Changes
 
         - Hey, let's have fun with testing!
+
         ## 1.0.0
 
         ### Minor Changes
