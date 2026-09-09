@@ -358,8 +358,8 @@ async function updateChangelog(
 
   let newChangelog: string;
   if (firstVersionHeaderIndex >= 0) {
-    const prefix = fileData.substring(0, firstVersionHeaderIndex);
-    const suffix = fileData.substring(firstVersionHeaderIndex);
+    const prefix = fileData.slice(0, firstVersionHeaderIndex);
+    const suffix = fileData.slice(firstVersionHeaderIndex);
     newChangelog = prefix + templateString.trimStart() + "\n" + suffix;
   } else {
     const index = fileData.indexOf("\n");
