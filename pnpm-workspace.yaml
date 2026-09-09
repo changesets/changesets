@@ -13,14 +13,14 @@ dedupePeerDependents: true
 
 minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
-  - "@pnpm/exe.darwin-arm64@12.0.0"
-  - "@pnpm/exe.darwin-x64@12.0.0"
-  - "@pnpm/exe.linux-arm64@12.0.0"
-  - "@pnpm/exe.linux-arm64-musl@12.0.0"
-  - "@pnpm/exe.linux-x64@12.0.0"
-  - "@pnpm/exe.linux-x64-musl@12.0.0"
-  - "@pnpm/exe.win32-arm64@12.0.0"
-  - "@pnpm/exe.win32-x64@12.0.0"
+  - "@pnpm/exe.darwin-arm64@12.3.4"
+  - "@pnpm/exe.darwin-x64@12.3.4"
+  - "@pnpm/exe.linux-arm64@12.3.4"
+  - "@pnpm/exe.linux-arm64-musl@12.3.4"
+  - "@pnpm/exe.linux-x64@12.3.4"
+  - "@pnpm/exe.linux-x64-musl@12.3.4"
+  - "@pnpm/exe.win32-arm64@12.3.4"
+  - "@pnpm/exe.win32-x64@12.3.4"
   - "@pnpm/pnpr@0.1.0-alpha.8"
   - "@pnpm/pnpr.darwin-arm64@0.1.0-alpha.8"
   - "@pnpm/pnpr.darwin-x64@0.1.0-alpha.8"
@@ -34,7 +34,7 @@ minimumReleaseAgeExclude:
   - "@vitest/mocker@5.0.0"
   - "@vitest/spy@5.0.0"
   - tinybench@6.1.4
-  - pnpm@12.0.0
+  - pnpm@12.3.4
   - vite@8.2.0
   - vitest@5.0.0
 
