@@ -123,12 +123,6 @@ jobs:
           download-dist: true
           install-e2e: true
 
-      - name: Check Git version
-        run: git --version
-
-      - name: Setup mock Git user
-        run: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
-
       - name: Typecheck E2E tests
         run: pnpm --filter=@changesets/e2e types:check
 

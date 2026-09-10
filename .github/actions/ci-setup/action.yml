@@ -35,13 +35,21 @@ runs:
       uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
       with:
         cache: ${{ inputs.skip-cache != 'true' }}
-        # The e2e manifest separates its store cache; the lockfile still invalidates both caches.
+        # Use separate cache keys for regular and E2E dependency installations.
         cache_dependency_path: |
           pnpm-lock.yaml
           ${{ inputs.install-e2e == 'true' && 'scripts/e2e/package.json' || '' }}
-        run_install: |
-          args:
-            - "${{ inputs.install-e2e == 'true' && '--filter=@changesets/e2e...' || '--filter=!@changesets/e2e' }}"
+
+    - name: Install dependencies
+      if: ${{ inputs.install-e2e != 'true' }}
+      shell: bash
+      run: pnpm run bootstrap
+
+    # E2E consumes prebuilt dist artifacts, so it only installs its workspace dependency closure.
+    - name: Install E2E dependencies
+      if: ${{ inputs.install-e2e == 'true' }}
+      shell: bash
+      run: pnpm run bootstrap:e2e
 
     - name: Check with manypkg
       if: ${{ inputs.install-e2e != 'true' }}
