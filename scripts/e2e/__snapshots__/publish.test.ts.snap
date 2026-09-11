@@ -666,8 +666,6 @@ exports[`Publish command e2e > pnpm 12 > retries interactively after an OTP auth
 📦 pkg-a@1.0.0 → [registry-url]/
 This operation requires a one-time password.
 Enter OTP: 654321
-This operation requires a one-time password.
-Enter OTP: 654321
 ✅ Published package pkg-a@1.0.0
 │
 ◆  Successfully published:

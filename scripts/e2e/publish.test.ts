@@ -228,9 +228,10 @@ function normalizeOtpPrompts(message: string) {
         (_match, continuedOutput: string | undefined) =>
           `? One-time password: [prompt]${continuedOutput ? "\n\n" : ""}`,
       )
-      // pnpm redraws the prompt after every entered digit.
+      // pnpm redraws the prompt after every entered digit. Depending on the
+      // version, the redrawn message starts inline or on the next line.
       .replace(
-        /Enter OTP:[^\n]*?(?:\?|✔) This operation requires a one-time password\.(?:\n|(?=Enter OTP:))/g,
+        /Enter OTP:[^\n]*?(?:(?:\?|✔) |\n)This operation requires a one-time password\.(?:\n|(?=Enter OTP:))/g,
         "",
       )
       // ConPTY may materialize pnpm's cleared prompt rows as blank lines.
