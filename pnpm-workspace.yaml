@@ -5,6 +5,7 @@ packages:
 
 allowBuilds:
   "@pnpm/pnpr": true
+  pnpm: true
 
 blockExoticSubdeps: true
 dedupePeers: true
@@ -12,10 +13,34 @@ dedupePeerDependents: true
 
 minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
+  - "@pnpm/exe.android-arm64@12.4.1"
+  - "@pnpm/exe.android-x64@12.4.1"
+  - "@pnpm/exe.darwin-arm64@12.4.1"
+  - "@pnpm/exe.darwin-x64@12.4.1"
+  - "@pnpm/exe.freebsd-x64@12.4.1"
+  - "@pnpm/exe.linux-arm64@12.4.1"
+  - "@pnpm/exe.linux-arm64-musl@12.4.1"
+  - "@pnpm/exe.linux-ppc64@12.4.1"
+  - "@pnpm/exe.linux-riscv64@12.4.1"
+  - "@pnpm/exe.linux-s390x@12.4.1"
+  - "@pnpm/exe.linux-x64@12.4.1"
+  - "@pnpm/exe.linux-x64-musl@12.4.1"
+  - "@pnpm/exe.win32-arm64@12.4.1"
+  - "@pnpm/exe.win32-x64@12.4.1"
+  - "@pnpm/pnpr@0.1.0-alpha.8"
+  - "@pnpm/pnpr.darwin-arm64@0.1.0-alpha.8"
+  - "@pnpm/pnpr.darwin-x64@0.1.0-alpha.8"
+  - "@pnpm/pnpr.linux-arm64@0.1.0-alpha.8"
+  - "@pnpm/pnpr.linux-arm64-musl@0.1.0-alpha.8"
+  - "@pnpm/pnpr.linux-x64@0.1.0-alpha.8"
+  - "@pnpm/pnpr.linux-x64-musl@0.1.0-alpha.8"
+  - "@pnpm/pnpr.win32-arm64@0.1.0-alpha.8"
+  - "@pnpm/pnpr.win32-x64@0.1.0-alpha.8"
   - "@vitest/coverage-v8@5.0.0"
   - "@vitest/mocker@5.0.0"
   - "@vitest/spy@5.0.0"
   - tinybench@6.1.4
+  - pnpm@12.4.1
   - vite@8.2.0
   - vitest@5.0.0
 
