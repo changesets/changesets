@@ -1,5 +1,13 @@
 # @changesets/apply-release-plan
 
+## 8.1.1
+
+### Patch Changes
+
+- [#2295](https://github.com/changesets/changesets/pull/2295) [`bfe9050`](https://github.com/changesets/changesets/commit/bfe9050a22061683934cad8529437b2235f1c0b7) Thanks [@benjie](https://github.com/benjie)! - New version information will now be added to `CHANGELOG.md` above the first version header (if any) allowing intro content in `CHANGELOG.md` to be maintained at the top.
+- Updated dependencies [[`e522996`](https://github.com/changesets/changesets/commit/e522996c676f911bf43203d8787e17b6e81e4fdf)]:
+  - @changesets/config@4.0.1
+
 ## 8.1.0
 
 ### Minor Changes
