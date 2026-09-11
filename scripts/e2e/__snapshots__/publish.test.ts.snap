@@ -627,6 +627,116 @@ pkg-a@1.0.0
 "
 `;
 
+exports[`Publish command e2e > pnpm 12 > handles lifecycle stdout while publishing 1`] = `
+"🦋 changeset v[version]
+
+Package pkg-a was not found in the registry.
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages◇  Successfully published:
+pkg-a@1.0.0
+◒  Creating git tags◇  Created git tags.
+"
+`;
+
+exports[`Publish command e2e > pnpm 12 > publishes a first version of a package 1`] = `
+"🦋 changeset v[version]
+
+Package pkg-a was not found in the registry.
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+◒  Publishing packages◇  Successfully published:
+pkg-a@1.0.0
+◒  Creating git tags◇  Created git tags.
+"
+`;
+
+exports[`Publish command e2e > pnpm 12 > retries interactively after an OTP auth challenge 1`] = `
+"┌  🦋 changeset v[version]
+│
+●  These packages will be published as they were not found in the registry:
+│  pkg-a@1.0.0
+│  0 packages are already published.
+│
+◇  pkg-a requires 2FA verification to publish...
+📦 pkg-a@1.0.0 → [registry-url]/
+This operation requires a one-time password.
+Enter OTP: 654321
+This operation requires a one-time password.
+Enter OTP: 654321
+✅ Published package pkg-a@1.0.0
+│
+◆  Successfully published:
+│  pkg-a@1.0.0
+│
+◒  Creating git tags◇  Created git tags.
+"
+`;
+
+exports[`Publish command e2e > pnpm 12 > surfaces pre-publish errors 1`] = `
+"🦋 changeset v[version]
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+
+Some packages failed to publish:
+pkg-a@1.0.0
+└ ERR_PNPM_EXECUTOR_LIFECYCLE_SCRIPT_FAILED: [fixture-dir]/packages/pkg-a prepack: \`node -e "console.log(JSON.stringify({ lifecycle: 'output' })); console.error('prepack failed'); process.exit(1)"\` exited with exit status: 1
+🦋 Exited with code 1
+
+"
+`;
+
+exports[`Publish command e2e > pnpm 12 > surfaces publish failures for bad credentials 1`] = `
+"🦋 changeset v[version]
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+
+Some packages failed to publish:
+pkg-a@1.0.0
+└ ERR_PNPM_FAILED_TO_PUBLISH: Failed to publish package pkg-a@1.0.0 (status 401 Unauthorized): Authentication required for package "pkg-a"
+🦋 Exited with code 1
+
+"
+`;
+
+exports[`Publish command e2e > pnpm 12 > surfaces publish failures when not logged in 1`] = `
+"🦋 changeset v[version]
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+
+Some packages failed to publish:
+pkg-a@1.0.0
+└ ERR_PNPM_FAILED_TO_PUBLISH: Failed to publish package pkg-a@1.0.0 (status 401 Unauthorized): Authentication required for package "pkg-a"
+🦋 Exited with code 1
+
+"
+`;
+
+exports[`Publish command e2e > pnpm 12 > surfaces web-auth OTP publish failures in non-tty mode 1`] = `
+"🦋 changeset v[version]
+
+These packages will be published as they were not found in the registry:
+pkg-a@1.0.0
+0 packages are already published.
+
+Some packages failed to publish:
+pkg-a@1.0.0
+└ ERR_PNPM_OTP_NON_INTERACTIVE: The registry requires additional authentication, but pnpm is not running in an interactive terminal
+🦋 Exited with code 1
+
+"
+`;
+
 exports[`Publish command e2e > yarn 4 > handles lifecycle stdout while publishing 1`] = `
 "🦋 changeset v[version]
 

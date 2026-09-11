@@ -291,6 +291,10 @@ function sanitizePublishLog(message: unknown, registryUrl: string) {
       /logs can be found here: .*?\.log/g,
       "logs can be found here: [yarn-prepack-log]",
     )
+    .replace(
+      /(?:[A-Za-z]:)?(?:[\\/][^\\/\r\n]+)*[\\/]fs-fixture-[^\\/\r\n]+[\\/]packages[\\/]pkg-a/g,
+      "[fixture-dir]/packages/pkg-a",
+    )
     .replace(/^npm notice shasum: .+$/gm, "npm notice shasum: [shasum]")
     .replace(
       /^npm notice integrity: .+$/gm,
