@@ -119,15 +119,24 @@ ${(error as Error).toString()}
       path.resolve(changesetBase, `${changesetID}.md`),
       packages.rootDir,
     );
-    await git.commit(
+    const commit = await git.commit(
       await getAddMessage(newChangeset, commitOpts),
       packages.rootDir,
     );
-    finalLogMessageLines.push(
-      c.green(
-        `${options?.empty ? "Empty " : ""}Changeset added and committed!`,
-      ),
-    );
+    if (!commit) {
+      log.error("Changesets ran into trouble committing your files");
+      finalLogMessageLines.push(
+        c.green(
+          `${options?.empty ? "Empty " : ""}Changeset added - you can now commit it!`,
+        ),
+      );
+    } else {
+      finalLogMessageLines.push(
+        c.green(
+          `${options?.empty ? "Empty " : ""}Changeset added and committed!`,
+        ),
+      );
+    }
   } else {
     finalLogMessageLines.push(
       c.green(
