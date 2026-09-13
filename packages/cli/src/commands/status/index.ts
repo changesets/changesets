@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { assembleReleasePlan } from "@changesets/assemble-release-plan";
+import { withCatalogs } from "@changesets/catalogs";
 import c from "@changesets/color";
 import { ExitError } from "@changesets/errors";
 import { readPreState } from "@changesets/pre";
@@ -22,7 +23,7 @@ export interface StatusOptions {
 export async function status(options?: StatusOptions) {
   const cwd = options?.cwd ?? process.cwd();
 
-  const packages = await getPackages(cwd);
+  const packages = await withCatalogs(await getPackages(cwd));
   await ensureChangesetFolder(packages.rootDir);
 
   const config = await readConfig(packages);

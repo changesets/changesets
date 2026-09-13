@@ -1,7 +1,7 @@
 import path from "node:path";
 import { stripVTControlCharacters } from "node:util";
 import { temporarilySilenceLogs } from "@changesets/test-utils";
-import type { Package } from "@changesets/types";
+import type { Package, Packages } from "@changesets/types";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getDependencyGraph } from "./get-dependency-graph.ts";
 
@@ -301,4 +301,112 @@ describe("getting the dependency graph", function () {
       );
     }),
   );
+
+  describe("catalogs", () => {
+    const makePackages = (
+      barRange: string,
+      catalogs?: Packages["catalogs"],
+    ) => {
+      const rootPackage: Package = {
+        dir: path.resolve(),
+        packageJson: { name: "root", version: "1.0.0" },
+      };
+      return {
+        rootPackage,
+        packages: {
+          tool: { type: "pnpm" },
+          rootDir: rootPackage.dir,
+          rootPackage,
+          packages: [
+            {
+              dir: "packages/foo",
+              packageJson: {
+                name: "foo",
+                version: "1.0.0",
+                dependencies: { bar: barRange },
+              },
+            },
+            {
+              dir: "packages/bar",
+              packageJson: { name: "bar", version: "1.0.0" },
+            },
+          ],
+          catalogs,
+        } satisfies Packages,
+      };
+    };
+
+    it("should resolve a dependency referenced through the default catalog", () => {
+      const { packages, rootPackage } = makePackages("catalog:", {
+        entries: new Map([["default", new Map([["bar", "^1.0.0"]])]]),
+        source: undefined,
+      });
+      const { graph, valid } = getDependencyGraph(packages, rootPackage);
+
+      expect(graph.get("foo")!.dependencies).toStrictEqual(["bar"]);
+      expect(valid).toBe(true);
+      expect((console.error as any).mock.calls).toMatchInlineSnapshot(`[]`);
+    });
+
+    it("should resolve a dependency referenced through a named catalog", () => {
+      const { packages, rootPackage } = makePackages("catalog:internal", {
+        entries: new Map([["internal", new Map([["bar", "^1.0.0"]])]]),
+        source: undefined,
+      });
+      const { graph, valid } = getDependencyGraph(packages, rootPackage);
+
+      expect(graph.get("foo")!.dependencies).toStrictEqual(["bar"]);
+      expect(valid).toBe(true);
+    });
+
+    it(
+      "should error when the catalog has no entry for the dependency",
+      temporarilySilenceLogs(() => {
+        const { packages, rootPackage } = makePackages("catalog:", {
+          entries: new Map([["default", new Map([["react", "^19.0.0"]])]]),
+          source: undefined,
+        });
+        const { graph, valid } = getDependencyGraph(packages, rootPackage);
+
+        expect(graph.get("foo")!.dependencies).toStrictEqual([]);
+        expect(valid).toBe(false);
+        expect(
+          stripVTControlCharacters((console.error as any).mock.calls[0][0]),
+        ).toMatchInlineSnapshot(
+          `"Package foo depends on bar through catalog:, but the default catalog has no entry for it"`,
+        );
+      }),
+    );
+
+    it(
+      "should error when the referenced catalog doesn't exist",
+      temporarilySilenceLogs(() => {
+        const { packages, rootPackage } = makePackages("catalog:internal", {
+          entries: new Map([["default", new Map([["bar", "^1.0.0"]])]]),
+          source: undefined,
+        });
+        const { valid } = getDependencyGraph(packages, rootPackage);
+
+        expect(valid).toBe(false);
+        expect(
+          stripVTControlCharacters((console.error as any).mock.calls[0][0]),
+        ).toMatchInlineSnapshot(
+          `"Package foo depends on bar through catalog:internal, but the "internal" catalog has no entry for it"`,
+        );
+      }),
+    );
+
+    it("should skip catalog dependencies with bumpVersionsWithWorkspaceProtocolOnly", () => {
+      const { packages, rootPackage } = makePackages("catalog:", {
+        entries: new Map([["default", new Map([["bar", "^1.0.0"]])]]),
+        source: undefined,
+      });
+      const { graph, valid } = getDependencyGraph(packages, rootPackage, {
+        bumpVersionsWithWorkspaceProtocolOnly: true,
+      });
+
+      expect(graph.get("foo")!.dependencies).toStrictEqual([]);
+      expect(valid).toBe(true);
+    });
+  });
 });

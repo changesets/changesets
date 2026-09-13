@@ -1,5 +1,6 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { withCatalogs } from "@changesets/catalogs";
 import c from "@changesets/color";
 import { ExitError } from "@changesets/errors";
 import * as git from "@changesets/git";
@@ -30,7 +31,7 @@ export interface AddOptions {
 export async function add(options?: AddOptions): Promise<void> {
   const cwd = options?.cwd ?? process.cwd();
 
-  const packages = await getPackages(cwd);
+  const packages = await withCatalogs(await getPackages(cwd));
   await ensureChangesetFolder(packages.rootDir);
   if (packages.packages.length === 0) {
     log.error(

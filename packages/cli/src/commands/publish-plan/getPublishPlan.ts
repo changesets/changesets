@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import { withCatalogs } from "@changesets/catalogs";
 import c from "@changesets/color";
 import { ExitError } from "@changesets/errors";
 import { getDependentsGraph } from "@changesets/get-dependents-graph";
@@ -275,7 +276,7 @@ export async function getPublishPlan(
   config: Config,
   options?: { tag?: string },
 ): Promise<PublishPlan> {
-  const packages = await getPackages(rootDir);
+  const packages = await withCatalogs(await getPackages(rootDir));
   const preState = await readPreState(rootDir);
 
   const releases = await getUnpublishedPackages(

@@ -1,12 +1,12 @@
 {
-  "name": "@changesets/get-dependents-graph",
-  "version": "3.0.0",
-  "description": "Get the graph of dependents in a monorepo",
+  "name": "@changesets/catalogs",
+  "version": "1.0.0-next.0",
+  "description": "Reads and updates the dependency catalogs of pnpm, Yarn and Bun workspaces",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/changesets/changesets.git",
-    "directory": "packages/get-dependents-graph"
+    "directory": "packages/catalogs"
   },
   "files": [
     "dist"
@@ -17,12 +17,11 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
-    "@changesets/catalogs": "workspace:^",
     "@changesets/types": "workspace:^",
-    "semver": "^7.8.1"
+    "jsonc-parser": "^3.3.1",
+    "yaml": "^2.9.0"
   },
   "devDependencies": {
-    "@changesets/color": "workspace:^",
     "@changesets/test-utils": "workspace:*"
   },
   "engines": {

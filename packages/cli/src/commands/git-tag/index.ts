@@ -1,3 +1,4 @@
+import { withCatalogs } from "@changesets/catalogs";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import { spinner } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
@@ -14,7 +15,7 @@ export interface GitTagOptions {
 export async function gitTag(options?: GitTagOptions) {
   await using reporter = await createOutputReport(options?.output);
   const cwd = options?.cwd ?? process.cwd();
-  const packages = await getPackages(cwd);
+  const packages = await withCatalogs(await getPackages(cwd));
   await ensureChangesetFolder(packages.rootDir);
   const config = await readConfig(packages);
 

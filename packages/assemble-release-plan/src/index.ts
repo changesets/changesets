@@ -165,6 +165,7 @@ export function assembleReleasePlan(
       releases,
       packagesByName,
       rootDir: packages.rootDir,
+      catalogs: packages.catalogs,
       dependencyGraph,
       preInfo,
       config,

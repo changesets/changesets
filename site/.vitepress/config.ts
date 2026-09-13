@@ -216,6 +216,7 @@ function getMainSidebar(): DefaultTheme.SidebarItem[] {
         },
         { text: "Automating Changesets", link: "automating" },
         { text: "Backporting Changes", link: "backporting-changes" },
+        { text: "Catalogs", link: "catalogs" },
         { text: "Fixed Packages", link: "fixed-packages" },
         { text: "Linked Packages", link: "linked-packages" },
         {
