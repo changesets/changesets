@@ -178,6 +178,43 @@ describe("getting the dependency graph", function () {
   );
 
   it(
+    "should report dependencies that collide with a versionless workspace package",
+    temporarilySilenceLogs(() => {
+      const rootPackage: Package = {
+        dir: path.resolve(),
+        packageJson: { name: "root", version: "1.0.0" },
+      };
+      const { valid } = getDependencyGraph(
+        {
+          tool: { type: "pnpm" },
+          rootDir: rootPackage.dir,
+          rootPackage,
+          packages: [
+            {
+              dir: "packages/stripe",
+              packageJson: {
+                name: "stripe",
+                private: true,
+                dependencies: {
+                  stripe: "^18.0.0",
+                },
+              } as unknown as Package["packageJson"],
+            },
+          ],
+        },
+        rootPackage,
+      );
+
+      expect(valid).toBe(false);
+      expect(
+        stripVTControlCharacters((console.error as any).mock.calls[0][0]),
+      ).toBe(
+        "Package stripe depends on stripe@^18.0.0, but stripe is also the name of a workspace package without a version. Add a version to stripe or rename the workspace package.",
+      );
+    }),
+  );
+
+  it(
     "should skip dependencies not specified using workspace protocol when bumpVersionsWithWorkspaceProtocolOnly is true",
     temporarilySilenceLogs(() => {
       const rootPackage: Package = {
