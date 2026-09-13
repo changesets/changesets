@@ -335,6 +335,42 @@ export async function getCurrentCommitId({
     .trim();
 }
 
+export async function getDefaultBranchName(
+  cwd: string,
+): Promise<string | undefined> {
+  try {
+    const symbolicRefCmd = await exec(
+      "git",
+      ["symbolic-ref", "refs/remotes/origin/HEAD"],
+      { nodeOptions: { cwd } },
+    );
+
+    if (symbolicRefCmd.exitCode !== 0) {
+      return undefined;
+    }
+
+    const remoteBranchRef = symbolicRefCmd.stdout.toString().trim();
+    const originPrefix = "refs/remotes/origin/";
+    if (!remoteBranchRef.startsWith(originPrefix)) {
+      return undefined;
+    }
+
+    const verifyRefCmd = await exec(
+      "git",
+      ["show-ref", "--verify", "--quiet", remoteBranchRef],
+      { nodeOptions: { cwd } },
+    );
+    if (verifyRefCmd.exitCode !== 0) {
+      return undefined;
+    }
+
+    const branchName = remoteBranchRef.slice(originPrefix.length);
+    return branchName || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export async function remoteTagExists(tagStr: string) {
   const gitCmd = await exec("git", [
     "ls-remote",
