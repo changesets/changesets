@@ -3,4 +3,4 @@
 "@changesets/cli": patch
 ---
 
-Keep upper bounds when updating internal dependency ranges such as `>=1.0.0 <2.0.0`.
+Fixed semver ranges (such as `>=1.0.0 <2.0.0`) getting cut off (`>=2.0.0`) when updating internal dependencies.
