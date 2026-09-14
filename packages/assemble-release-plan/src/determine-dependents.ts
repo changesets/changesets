@@ -1,6 +1,8 @@
 import path from "node:path";
+import { resolveCatalogRange } from "@changesets/catalogs";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import type {
+  Catalogs,
   Config,
   DependencyType,
   PackageJSON,
@@ -29,6 +31,7 @@ export function determineDependents({
   releases,
   packagesByName,
   rootDir,
+  catalogs,
   dependencyGraph,
   preInfo,
   config,
@@ -36,6 +39,7 @@ export function determineDependents({
   releases: Map<string, InternalRelease>;
   packagesByName: Map<string, Package>;
   rootDir: string;
+  catalogs: Catalogs | undefined;
   dependencyGraph: Map<string, string[]>;
   preInfo: PreInfo | undefined;
   config: Config;
@@ -82,6 +86,7 @@ export function determineDependents({
             dependentPackage.packageJson,
             nextRelease,
             dependencyPackage,
+            catalogs,
           );
 
           for (const { depType, versionRange } of dependencyVersionRanges) {
@@ -175,6 +180,7 @@ function getDependencyVersionRanges(
   dependentPkgJSON: PackageJSON,
   dependencyRelease: InternalRelease,
   dependencyPackage: Package,
+  catalogs: Catalogs | undefined,
 ): {
   depType: DependencyType;
   versionRange: string;
@@ -192,6 +198,18 @@ function getDependencyVersionRanges(
   for (const type of DEPENDENCY_TYPES) {
     let versionRange = dependentPkgJSON[type]?.[dependencyRelease.name];
     if (!versionRange) continue;
+
+    const resolvedRange = resolveCatalogRange(
+      versionRange,
+      dependencyRelease.name,
+      catalogs,
+    );
+
+    if (resolvedRange == null) {
+      continue;
+    }
+
+    versionRange = resolvedRange;
 
     if (versionRange.startsWith("workspace:")) {
       versionRange = versionRange.replace(/^workspace:/, "");
