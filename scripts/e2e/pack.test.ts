@@ -27,6 +27,10 @@ function sanitizePackLog(message: unknown) {
         /logs can be found here: .*?\.log/g,
         "logs can be found here: [yarn-prepack-log]",
       )
+      .replace(
+        /(?:[A-Za-z]:)?(?:[\\/][^\\/\r\n]+)*[\\/]fs-fixture-[^\\/\r\n]+[\\/]packages[\\/]pkg-a/g,
+        "[fixture-dir]/packages/pkg-a",
+      )
   );
 }
 

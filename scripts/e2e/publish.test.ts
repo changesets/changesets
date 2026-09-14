@@ -249,6 +249,11 @@ function normalizeOtpPrompts(message: string) {
       // A PTY may omit the line break between the echoed code and the package
       // manager's output. Ensure any result starts on its own line.
       .replace(/(Enter OTP: \d{6})(?=[^\d\s])/g, "$1\n")
+      // pnpm 12 may leave duplicate completed prompts after VT stripping.
+      .replace(
+        /((?:\? )?This operation requires a one-time password\.\nEnter OTP: \d{6}\n)(?:\1)+/g,
+        "$1",
+      )
   );
 }
 
@@ -290,6 +295,10 @@ function sanitizePublishLog(message: unknown, registryUrl: string) {
     .replace(
       /logs can be found here: .*?\.log/g,
       "logs can be found here: [yarn-prepack-log]",
+    )
+    .replace(
+      /(?:[A-Za-z]:)?(?:[\\/][^\\/\r\n]+)*[\\/]fs-fixture-[^\\/\r\n]+[\\/]packages[\\/]pkg-a/g,
+      "[fixture-dir]/packages/pkg-a",
     )
     .replace(/^npm notice shasum: .+$/gm, "npm notice shasum: [shasum]")
     .replace(
@@ -1609,9 +1618,9 @@ describe("Publish command e2e", () => {
           })),
         )
         .toEqual(
-          // Most package managers fail locally when no token is configured. pnpm 11
+          // Most package managers fail locally when no token is configured. pnpm 11+
           // still sends the publish request and lets the registry reject it.
-          pm.name === "pnpm 11"
+          pm.name === "pnpm 11" || pm.name === "pnpm 12"
             ? [{ authorization: undefined, statusCode: 401 }]
             : [],
         );
@@ -1889,7 +1898,7 @@ describe("Publish command e2e", () => {
           command: "publish",
           cwd,
           env: {
-            [pm.name.startsWith("pnpm 11")
+            [pm.name === "pnpm 11" || pm.name === "pnpm 12"
               ? "PNPM_CONFIG_OTP"
               : "NPM_CONFIG_OTP"]: "654321",
           },
