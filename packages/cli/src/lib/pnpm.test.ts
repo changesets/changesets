@@ -15,6 +15,18 @@ import type {
 vi.mock("tinyexec");
 const mockedExec = vi.mocked(exec);
 
+function bindPnpm(major: number) {
+  return {
+    info: (args: Parameters<typeof pnpm.info>[0]) => pnpm.info(args, { major }),
+    pack: (args: Parameters<typeof pnpm.pack>[0]) => pnpm.pack(args, { major }),
+    publish: (args: Parameters<typeof pnpm.publish>[0]) =>
+      pnpm.publish(args, { major }),
+  };
+}
+
+const pnpm10 = bindPnpm(10);
+const pnpm11 = bindPnpm(11);
+
 describe("package info", () => {
   it("does not use the publish-time registry override for info requests", async () => {
     const info = {
@@ -37,7 +49,7 @@ describe("package info", () => {
       stderr: "",
     });
 
-    await expect(pnpm.info({ cwd: "/workspace", pkg })).resolves.toEqual({
+    await expect(pnpm11.info({ cwd: "/workspace", pkg })).resolves.toEqual({
       published: true,
       info,
     });
@@ -49,6 +61,51 @@ describe("package info", () => {
         nodeOptions: { cwd: "/workspace" },
       },
     );
+  });
+
+  it("handles npm 12 info output delegated through pnpm 10", async () => {
+    const info = {
+      "dist-tags": { latest: "0.0.1" },
+      versions: ["0.0.1"],
+    };
+    const pkg = {
+      dir: "/workspace/packages/package",
+      packageJson: {
+        name: "@test/package",
+        version: "0.0.1",
+      },
+    } satisfies Package;
+    mockedExec.mockResolvedValue({
+      exitCode: 0,
+      stdout: JSON.stringify([info]),
+      stderr: "",
+    });
+
+    await expect(pnpm10.info({ cwd: "/workspace", pkg })).resolves.toEqual({
+      published: true,
+      info,
+    });
+  });
+
+  it("handles npm error output delegated through pnpm 10", async () => {
+    const pkg = {
+      dir: "/workspace/packages/package",
+      packageJson: {
+        name: "@test/package",
+        version: "0.0.1",
+      },
+    } satisfies Package;
+    mockedExec.mockResolvedValue({
+      exitCode: 1,
+      stdout: JSON.stringify({
+        error: { code: "E404", summary: "Not found", detail: "" },
+      }),
+      stderr: "",
+    });
+
+    await expect(pnpm10.info({ cwd: "/workspace", pkg })).resolves.toEqual({
+      published: false,
+    });
   });
 });
 
@@ -65,7 +122,7 @@ describe("packing", () => {
     mockedExec.mockResolvedValue({ exitCode: 0, stdout: "", stderr: "" });
 
     await expect(
-      pnpm.pack({
+      pnpm11.pack({
         pkg,
         packDir: "/workspace/packages/package/dist",
         outputDir: "/workspace/.packed",
@@ -82,6 +139,59 @@ describe("packing", () => {
         nodeOptions: { cwd: pkg.dir },
       },
     );
+  });
+
+  it.each([
+    ["pnpm 10", pnpm10],
+    ["pnpm 11", pnpm11],
+  ])("preserves pnpm errors when packing with %s", async (_, publishTool) => {
+    const pkg = {
+      dir: "/workspace/packages/package",
+      packageJson: { name: "@test/package", version: "0.0.1" },
+    } satisfies Package;
+    mockedExec.mockResolvedValue({
+      exitCode: 1,
+      stdout: JSON.stringify({
+        error: { code: "ERR_PNPM_PACK", message: "Packing failed" },
+      }),
+      stderr: "",
+    });
+
+    await expect(
+      publishTool.pack({
+        pkg,
+        packDir: pkg.dir,
+        outputDir: "/workspace/.packed",
+        tarballPath: "/workspace/.packed/package.tgz",
+      }),
+    ).resolves.toEqual({
+      error: { code: "ERR_PNPM_PACK", message: "Packing failed" },
+    });
+  });
+
+  it("handles npm errors delegated through pnpm 10 when packing", async () => {
+    const pkg = {
+      dir: "/workspace/packages/package",
+      packageJson: { name: "@test/package", version: "0.0.1" },
+    } satisfies Package;
+    mockedExec.mockResolvedValue({
+      exitCode: 1,
+      stdout: JSON.stringify({
+        error: { code: "EFAIL", summary: "Packing failed", detail: "Details" },
+      }),
+      stderr: "",
+    });
+
+    await expect(
+      pnpm10.pack({
+        pkg,
+        packDir: pkg.dir,
+        outputDir: "/workspace/.packed",
+        tarballPath: "/workspace/.packed/package.tgz",
+      }),
+    ).resolves.toEqual({
+      error: { code: "EFAIL", message: "Packing failed\nDetails" },
+    });
   });
 });
 
@@ -106,7 +216,7 @@ describe("publishing", () => {
   it("should return `published` if npm cli succeeds", async () => {
     mockedExec.mockResolvedValue({ exitCode: 0, stdout: "", stderr: "" });
 
-    const result = await pnpm.publish({
+    const result = await pnpm11.publish({
       pkg,
       release,
       tarballPath: null,
@@ -123,10 +233,10 @@ describe("publishing", () => {
 
   it.each(alreadyPublishedCases)(
     "should return correct error if version is already published (%s)",
-    async (_, snapshot) => {
+    async (version, snapshot) => {
       mockedExec.mockResolvedValue(snapshot);
 
-      const result = await pnpm.publish({
+      const result = await (version === "v10" ? pnpm10 : pnpm11).publish({
         pkg,
         release,
         tarballPath: null,
@@ -142,10 +252,10 @@ describe("publishing", () => {
 
   it.each(need2faCases)(
     "should return correct error if action requires 2fa (%s)",
-    async (_, snapshot) => {
+    async (version, snapshot) => {
       mockedExec.mockResolvedValue(snapshot);
 
-      const result = await pnpm.publish({
+      const result = await (version === "v10" ? pnpm10 : pnpm11).publish({
         pkg,
         release,
         tarballPath: null,
@@ -166,7 +276,7 @@ describe("publishing", () => {
   it("returns 2fa state details if provided", async () => {
     mockedExec.mockResolvedValue(need2faErrorSnapshot.pnpm.v11);
 
-    const result = await pnpm.publish({
+    const result = await pnpm11.publish({
       pkg,
       release,
       tarballPath: null,
@@ -185,7 +295,10 @@ describe("publishing", () => {
     );
   });
 
-  it("preserves pnpm error codes", async () => {
+  it.each([
+    ["pnpm 10", pnpm10],
+    ["pnpm 11", pnpm11],
+  ])("preserves pnpm error codes with %s", async (_, publishTool) => {
     mockedExec.mockResolvedValue({
       exitCode: 1,
       stdout: JSON.stringify({
@@ -197,7 +310,7 @@ describe("publishing", () => {
       stderr: "",
     });
 
-    const result = await pnpm.publish({
+    const result = await publishTool.publish({
       pkg,
       release,
       tarballPath: null,
@@ -211,7 +324,7 @@ describe("publishing", () => {
   it("lets pnpm publish `publishConfig.directory` natively", async () => {
     mockedExec.mockResolvedValue({ exitCode: 0, stdout: "", stderr: "" });
 
-    await pnpm.publish({
+    await pnpm11.publish({
       pkg: {
         ...pkg,
         packageJson: {

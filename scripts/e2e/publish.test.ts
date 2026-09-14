@@ -1766,8 +1766,9 @@ describe("Publish command e2e", () => {
       );
       expect.soft(publishRequests.map((request) => request.statusCode)).toEqual(
         // npm 11+ rejects an already-published version during its local
-        // preflight. Other clients send the PUT and receive the registry's 403.
-        pm.name !== "npm 11" && pm.name !== "npm 12" ? [403] : [],
+        // preflight, including when pnpm 10 delegates to npm. Other clients
+        // send the PUT and receive the registry's 403.
+        ["npm 11", "npm 12", "pnpm 10 + npm 12"].includes(pm.name) ? [] : [403],
       );
     });
 
