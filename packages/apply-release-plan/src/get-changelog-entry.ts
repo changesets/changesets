@@ -1,5 +1,7 @@
 import type {
   ChangelogFunctions,
+  Config,
+  ExperimentalOptions,
   ModCompWithPackage,
   NewChangesetWithCommit,
 } from "@changesets/types";
@@ -12,6 +14,77 @@ type ChangelogLines = {
   patch: Array<Promise<string>>;
 };
 
+type DependencyUpdateConfig = Pick<Config, "updateInternalDependencies"> &
+  Required<ExperimentalOptions>;
+
+function getDependentReleases(
+  cwd: string,
+  release: ModCompWithPackage,
+  releases: ModCompWithPackage[],
+  config: DependencyUpdateConfig,
+): ModCompWithPackage[] {
+  return releases.filter((rel) => {
+    const dependencyVersionRange = release.packageJson.dependencies?.[rel.name];
+    const peerDependencyVersionRange =
+      release.packageJson.peerDependencies?.[rel.name];
+
+    if (
+      dependencyVersionRange &&
+      config.updateInternalDependents === "always"
+    ) {
+      return true;
+    }
+
+    const versionRange = dependencyVersionRange || peerDependencyVersionRange;
+    const usesWorkspaceRange = versionRange?.startsWith("workspace:");
+    return (
+      versionRange &&
+      (usesWorkspaceRange || validRange(versionRange) != null) &&
+      shouldUpdateDependencyBasedOnConfig(
+        cwd,
+        rel,
+        {
+          depVersionRange: versionRange,
+          depType: dependencyVersionRange ? "dependencies" : "peerDependencies",
+        },
+        {
+          minReleaseType: config.updateInternalDependencies,
+          onlyUpdatePeerDependentsWhenOutOfRange:
+            config.onlyUpdatePeerDependentsWhenOutOfRange,
+        },
+      )
+    );
+  });
+}
+
+function collectOriginChangesets(
+  cwd: string,
+  release: ModCompWithPackage,
+  releases: ModCompWithPackage[],
+  config: DependencyUpdateConfig,
+  visited: Set<string>,
+): string[] {
+  if (visited.has(release.name)) return [];
+  visited.add(release.name);
+
+  if (release.changesets.length > 0) {
+    return [...release.changesets];
+  }
+
+  const origin: string[] = [];
+  for (const dependency of getDependentReleases(
+    cwd,
+    release,
+    releases,
+    config,
+  )) {
+    origin.push(
+      ...collectOriginChangesets(cwd, dependency, releases, config, visited),
+    );
+  }
+  return origin;
+}
+
 // release is the package and version we are releasing
 export async function getChangelogEntry(
   cwd: string,
@@ -22,9 +95,11 @@ export async function getChangelogEntry(
   changelogOpts: null | Record<string, unknown>,
   {
     updateInternalDependencies,
+    updateInternalDependents,
     onlyUpdatePeerDependentsWhenOutOfRange,
   }: {
     updateInternalDependencies: "patch" | "minor";
+    updateInternalDependents: "always" | "out-of-range";
     onlyUpdatePeerDependentsWhenOutOfRange: boolean;
   },
 ) {
@@ -50,37 +125,33 @@ export async function getChangelogEntry(
       );
     }
   });
-  const dependentReleases = releases.filter((rel) => {
-    const dependencyVersionRange = release.packageJson.dependencies?.[rel.name];
-    const peerDependencyVersionRange =
-      release.packageJson.peerDependencies?.[rel.name];
+  const dependencyUpdateConfig: DependencyUpdateConfig = {
+    updateInternalDependencies,
+    updateInternalDependents,
+    onlyUpdatePeerDependentsWhenOutOfRange,
+  };
 
-    const versionRange = dependencyVersionRange || peerDependencyVersionRange;
-    const usesWorkspaceRange = versionRange?.startsWith("workspace:");
-    return (
-      versionRange &&
-      (usesWorkspaceRange || validRange(versionRange) != null) &&
-      shouldUpdateDependencyBasedOnConfig(
-        cwd,
-        rel,
-        {
-          depVersionRange: versionRange,
-          depType: dependencyVersionRange ? "dependencies" : "peerDependencies",
-        },
-        {
-          minReleaseType: updateInternalDependencies,
-          onlyUpdatePeerDependentsWhenOutOfRange,
-        },
-      )
-    );
-  });
+  const dependentReleases = getDependentReleases(
+    cwd,
+    release,
+    releases,
+    dependencyUpdateConfig,
+  );
 
   const relevantChangesetIds: Set<string> = new Set();
 
   dependentReleases.forEach((rel) => {
-    rel.changesets.forEach((cs) => {
-      relevantChangesetIds.add(cs);
-    });
+    for (const id of collectOriginChangesets(
+      cwd,
+      rel,
+      releases,
+      dependencyUpdateConfig,
+      new Set(),
+    )) {
+      if (changesets.some((cs) => cs.id === id)) {
+        relevantChangesetIds.add(id);
+      }
+    }
   });
 
   const relevantChangesets = changesets.filter((cs) =>
