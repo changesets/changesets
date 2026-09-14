@@ -1,5 +1,16 @@
 # @changesets/cli
 
+## 3.0.3
+
+### Patch Changes
+
+- [#2297](https://github.com/changesets/changesets/pull/2297) [`3f163da`](https://github.com/changesets/changesets/commit/3f163da9211babfe835c8ec883ee3085d9a55aab) Thanks [@Andarist](https://github.com/Andarist)! - Fixed semver ranges (such as `>=1.0.0 <2.0.0`) getting cut off (`>=2.0.0`) when updating internal dependencies.
+
+- [#2276](https://github.com/changesets/changesets/pull/2276) [`ca9d110`](https://github.com/changesets/changesets/commit/ca9d1103c209768d213cc5a88ed44f2396fe5854) Thanks [@Andarist](https://github.com/Andarist)! - Fixed pnpm 10 compatibility with npm 12 when reading registry information, packing, and publishing packages.
+- Updated dependencies [[`3f163da`](https://github.com/changesets/changesets/commit/3f163da9211babfe835c8ec883ee3085d9a55aab), [`bfe9050`](https://github.com/changesets/changesets/commit/bfe9050a22061683934cad8529437b2235f1c0b7), [`e522996`](https://github.com/changesets/changesets/commit/e522996c676f911bf43203d8787e17b6e81e4fdf)]:
+  - @changesets/apply-release-plan@8.1.1
+  - @changesets/config@4.0.1
+
 ## 3.0.2
 
 ### Patch Changes

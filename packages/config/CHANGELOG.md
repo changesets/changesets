@@ -1,5 +1,11 @@
 # @changesets/config
 
+## 4.0.1
+
+### Patch Changes
+
+- [#2282](https://github.com/changesets/changesets/pull/2282) [`e522996`](https://github.com/changesets/changesets/commit/e522996c676f911bf43203d8787e17b6e81e4fdf) Thanks [@MaxFreedomPollard](https://github.com/MaxFreedomPollard)! - Report a package that is defined in multiple `fixed` or `linked` groups only once, instead of once for every group that follows the duplicate.
+
 ## 4.0.0
 
 ### Major Changes
