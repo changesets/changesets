@@ -403,6 +403,120 @@ describe("apply release plan", () => {
       });
     });
 
+    test.each([
+      [">=1.0.0 <2.0.0", "1.0.0", "2.0.0", "major", ">=2.0.0 <3.0.0"],
+      // Preserve the original comparator order to minimize the manifest diff.
+      ["<2.0.0 >=1.0.0", "1.0.0", "2.0.0", "major", "<3.0.0 >=2.0.0"],
+      // The refreshed lower bound has to include the new version, so `>` becomes `>=`.
+      [">1.0.0 <2.0.0", "1.0.0", "2.0.0", "major", ">=2.0.0 <3.0.0"],
+      // There is no finite `<=` equivalent for a complete major range, so it becomes `<`.
+      [">=1.0.0 <=1.9.9", "1.0.0", "2.0.0", "major", ">=2.0.0 <3.0.0"],
+      [">=1.0.0 <3.0.0", "1.0.0", "2.0.0", "major", ">=2.0.0 <3.0.0"],
+      [">=1.2.0 <1.3.0", "1.2.0", "1.3.0", "minor", ">=1.3.0 <1.4.0"],
+      [">=1.2.3 <1.2.4", "1.2.3", "1.2.4", "patch", ">=1.2.4 <1.2.5"],
+    ] as const)(
+      "should update the bounded dependency range %s",
+      async (versionRange, oldVersion, newVersion, type, expected) => {
+        const releasePlan = new FakeReleasePlan(
+          [
+            {
+              id: "some-id",
+              releases: [{ name: "pkg-b", type }],
+              summary: "a very useful summary",
+            },
+          ],
+          [
+            {
+              changesets: ["some-id"],
+              name: "pkg-b",
+              newVersion,
+              oldVersion,
+              type,
+            },
+          ],
+        );
+        const { changedFiles } = await testSetup(
+          {
+            "package.json": JSON.stringify({
+              private: true,
+              workspaces: ["packages/*"],
+            }),
+            "package-lock.json": "",
+            "packages/pkg-a/package.json": JSON.stringify({
+              name: "pkg-a",
+              version: "1.0.0",
+              dependencies: {
+                "pkg-b": versionRange,
+              },
+            }),
+            "packages/pkg-b/package.json": JSON.stringify({
+              name: "pkg-b",
+              version: oldVersion,
+            }),
+          },
+          releasePlan.getReleasePlan(),
+          releasePlan.config,
+        );
+        const pkgPath = changedFiles.find((file) =>
+          file.endsWith(`pkg-a${path.sep}package.json`),
+        );
+
+        if (!pkgPath) throw new Error(`could not find an updated package json`);
+        const pkgJSON = await readJson(pkgPath);
+
+        expect(pkgJSON).toMatchObject({
+          dependencies: { "pkg-b": expected },
+        });
+      },
+    );
+
+    it("should leave dependency ranges unchanged for none releases", async () => {
+      const releasePlan = new FakeReleasePlan(
+        [],
+        [
+          {
+            changesets: [],
+            name: "pkg-b",
+            newVersion: "1.0.0",
+            oldVersion: "1.0.0",
+            type: "none",
+          },
+        ],
+      );
+      const { changedFiles } = await testSetup(
+        {
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "package-lock.json": "",
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+            dependencies: {
+              "pkg-b": ">=2.0.0 <3.0.0",
+            },
+          }),
+          "packages/pkg-b/package.json": JSON.stringify({
+            name: "pkg-b",
+            version: "1.0.0",
+          }),
+        },
+        releasePlan.getReleasePlan(),
+        releasePlan.config,
+      );
+      const pkgPath = changedFiles.find((file) =>
+        file.endsWith(`pkg-a${path.sep}package.json`),
+      );
+
+      if (!pkgPath) throw new Error(`could not find an updated package json`);
+      const pkgJSON = await readJson(pkgPath);
+
+      expect(pkgJSON).toMatchObject({
+        dependencies: { "pkg-b": ">=2.0.0 <3.0.0" },
+      });
+    });
+
     it("should not update workspace version aliases", async () => {
       const releasePlan = new FakeReleasePlan(
         [
