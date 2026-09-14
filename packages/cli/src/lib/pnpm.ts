@@ -65,13 +65,13 @@ type PnpmCommandError = {
 function getPnpmError(stderr: string, stdout: string): PnpmCommandError {
   const json = getLastJsonObjectFromString(stdout);
   const error = json?.error;
-  if (error && typeof error === "object" && !Array.isArray(error)) {
-    return {
-      code: typeof error.code === "string" ? error.code : undefined,
-      message: typeof error.message === "string" ? error.message : undefined,
-    };
+  if (!error || typeof error !== "object" || Array.isArray(error)) {
+    return { message: stderr || stdout || undefined };
   }
-  return { message: stderr || stdout || undefined };
+  return {
+    code: typeof error.code === "string" ? error.code : undefined,
+    message: typeof error.message === "string" ? error.message : undefined,
+  };
 }
 
 // -- PublishTool -- //
