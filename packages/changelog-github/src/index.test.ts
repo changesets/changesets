@@ -32,7 +32,11 @@ vi.mock(
     return {
       /* eslint-disable vitest/no-standalone-expect */
       async getCommitInfo({ commit, repo }) {
-        expect(commit).toBe(data.commit);
+        expect([
+          data.commit,
+          "ABCDEF0",
+          "ABCDEF0123456789ABCDEF0123456789ABCDEF01",
+        ]).toContain(commit);
         expect(repo).toBe(data.repo);
         return {
           commit: {
@@ -189,6 +193,26 @@ describe.each([data.commit, "wrongcommit", undefined])(
     });
   },
 );
+
+test.each(["ABCDEF0", "ABCDEF0123456789ABCDEF0123456789ABCDEF01"])(
+  "accepts a hexadecimal commit hint: %s",
+  async (commit) => {
+    expect(
+      await getReleaseLine(...getChangeset(`commit: ${commit}`, undefined)),
+    ).toEqual(
+      `\n\n- [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something\n`,
+    );
+  },
+);
+
+test("does not treat an invalid commit hint as metadata", async () => {
+  const commit =
+    ':sshUrl}pwn:repository(owner:"target-org",name:"private-target-repo"){sshUrl,isPrivate,extra';
+
+  expect(
+    await getReleaseLine(...getChangeset(`commit: ${commit}`, undefined)),
+  ).toBe(`\n\n- something\n    commit: ${commit}`);
+});
 
 describe.each(["author", "user"])(
   "override author with %s keyword",

@@ -110,7 +110,7 @@ const changelogFunctions: ChangelogFunctions = {
         if (!isNaN(num)) prFromSummary = num;
         return "";
       })
-      .replace(/^\s*commit:\s*([^\s]+)/im, (_, commit) => {
+      .replace(/^\s*commit:\s*([0-9a-f]{7,40})\b/im, (_, commit) => {
         commitFromSummary = commit;
         return "";
       })

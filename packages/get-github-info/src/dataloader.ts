@@ -145,7 +145,12 @@ async function batchLoad(
   const repoNames = Object.keys(repos);
   return requests.map((request) => {
     const repoKey = `repo__${repoNames.indexOf(request.repo)}`;
-    const dataKey = `${request.kind}__${request.kind === "pull" ? request.pull : request.commit}`;
+    const dataKey =
+      request.kind === "pull"
+        ? `pull__${request.pull}`
+        : `commit__${repos[request.repo].findIndex(
+            (data) => data.kind === "commit" && data.commit === request.commit,
+          )}`;
     return (data.data![repoKey] as any)?.[dataKey];
   });
 }
@@ -171,11 +176,12 @@ function makeQuery(repos: ReposWithCommitsAndPRsToFetch) {
     name: ${JSON.stringify(name)}
   ) {\n`;
 
-    for (const data of repoData) {
+    for (let j = 0; j < repoData.length; j++) {
+      const data = repoData[j];
       if (data.kind === "commit") {
         needsCommitFragment = true;
         query += `\
-    commit__${data.commit}: object(expression: ${JSON.stringify(data.commit)}) {
+    commit__${j}: object(expression: ${JSON.stringify(data.commit)}) {
       ... on Commit {
         ...CommitFragment
       }
