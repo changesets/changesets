@@ -116,7 +116,7 @@ async function batchLoad(
       headers: {
         Authorization: `Token ${GITHUB_TOKEN}`,
       },
-      body: JSON.stringify({ query: makeQuery(repos) }),
+      body: JSON.stringify(makeQuery(repos)),
     });
   } catch (e) {
     throw new Error("Failed to fetch data from GitHub", { cause: e });
@@ -161,7 +161,9 @@ type ReposWithCommitsAndPRsToFetch = Record<
 >;
 
 function makeQuery(repos: ReposWithCommitsAndPRsToFetch) {
-  let query = "query {\n";
+  let query = "{\n";
+  const variableDefinitions: string[] = [];
+  const variables: Record<string, string | number> = {};
   let needsCommitFragment = false;
   let needsPullFragment = false;
 
@@ -169,27 +171,41 @@ function makeQuery(repos: ReposWithCommitsAndPRsToFetch) {
   for (let i = 0; i < repoNames.length; i++) {
     const repoData = repos[repoNames[i]];
     const [owner, name] = repoNames[i].split("/");
+    const ownerVariable = `repoOwner__${i}`;
+    const nameVariable = `repoName__${i}`;
+    variableDefinitions.push(
+      `$${ownerVariable}: String!`,
+      `$${nameVariable}: String!`,
+    );
+    variables[ownerVariable] = owner;
+    variables[nameVariable] = name;
 
     query += `\
   repo__${i}: repository(
-    owner: ${JSON.stringify(owner)},
-    name: ${JSON.stringify(name)}
+    owner: $${ownerVariable},
+    name: $${nameVariable}
   ) {\n`;
 
     for (let j = 0; j < repoData.length; j++) {
       const data = repoData[j];
       if (data.kind === "commit") {
         needsCommitFragment = true;
+        const commitVariable = `commit__${i}__${j}`;
+        variableDefinitions.push(`$${commitVariable}: String!`);
+        variables[commitVariable] = data.commit;
         query += `\
-    commit__${j}: object(expression: ${JSON.stringify(data.commit)}) {
+    commit__${j}: object(expression: $${commitVariable}) {
       ... on Commit {
         ...CommitFragment
       }
     }\n`;
       } else if (data.kind === "pull") {
         needsPullFragment = true;
+        const pullVariable = `pull__${i}__${j}`;
+        variableDefinitions.push(`$${pullVariable}: Int!`);
+        variables[pullVariable] = data.pull;
         query += `\
-    pull__${data.pull}: pullRequest(number: ${JSON.stringify(data.pull)}) {
+    pull__${data.pull}: pullRequest(number: $${pullVariable}) {
       ...PullFragment
     }\n`;
       }
@@ -239,5 +255,8 @@ fragment PullFragment on PullRequest {
 }\n`;
   }
 
-  return query;
+  return {
+    query: `query(\n  ${variableDefinitions.join("\n  ")}\n) ${query}`,
+    variables,
+  };
 }

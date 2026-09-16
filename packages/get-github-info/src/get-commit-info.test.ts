@@ -49,14 +49,16 @@ test("does not interpolate commit expressions into GraphQL aliases", async () =>
   const commit =
     ':sshUrl}pwn:repository(owner:"target-org",name:"private-target-repo"){sshUrl,isPrivate,extra';
   let githubQuery = "";
+  let githubVariables: Record<string, unknown> = {};
 
   nock("https://api.github.com", {
     reqheaders: {
       Authorization: `Token ${process.env.GITHUB_TOKEN}`,
     },
   })
-    .post(apiPath, ({ query }) => {
+    .post(apiPath, ({ query, variables }) => {
       githubQuery = query;
+      githubVariables = variables;
       return true;
     })
     .reply(
@@ -82,11 +84,15 @@ test("does not interpolate commit expressions into GraphQL aliases", async () =>
 
   expect(commitResult).toBeUndefined();
   expect(pullResult?.pull.number).toBe(1613);
-  expect(githubQuery).toContain(
-    `commit__0: object(expression: ${JSON.stringify(commit)})`,
-  );
-  expect(githubQuery).not.toContain(`commit__${commit}:`);
-  expect(githubQuery).toContain("pull__1613: pullRequest(number: 1613)");
+  expect(githubQuery).toContain("commit__0: object(expression: $commit__0__0)");
+  expect(githubQuery).not.toContain(commit);
+  expect(githubQuery).toContain("pull__1613: pullRequest(number: $pull__0__1)");
+  expect(githubVariables).toEqual({
+    repoOwner__0: "emotion-js",
+    repoName__0: "emotion",
+    commit__0__0: commit,
+    pull__0__1: 1613,
+  });
 });
 
 test("associated with multiple PRs with only one merged", async () => {
@@ -195,12 +201,16 @@ test("associated with multiple PRs with only one merged", async () => {
   `);
 
   expect(githubQuery).toMatchInlineSnapshot(`
-    "query {
+    "query(
+      $repoOwner__0: String!
+      $repoName__0: String!
+      $commit__0__0: String!
+    ) {
       repo__0: repository(
-        owner: "emotion-js",
-        name: "emotion"
+        owner: $repoOwner__0,
+        name: $repoName__0
       ) {
-        commit__0: object(expression: "a085003") {
+        commit__0: object(expression: $commit__0__0) {
           ... on Commit {
             ...CommitFragment
           }
@@ -337,12 +347,16 @@ test("associated with multiple PRs with multiple merged gets the one that was me
   `);
 
   expect(githubQuery).toMatchInlineSnapshot(`
-    "query {
+    "query(
+      $repoOwner__0: String!
+      $repoName__0: String!
+      $commit__0__0: String!
+    ) {
       repo__0: repository(
-        owner: "emotion-js",
-        name: "emotion"
+        owner: $repoOwner__0,
+        name: $repoName__0
       ) {
-        commit__0: object(expression: "a085003") {
+        commit__0: object(expression: $commit__0__0) {
           ... on Commit {
             ...CommitFragment
           }
@@ -443,12 +457,16 @@ test("gets the author of the associated pull request if it exists rather than th
   `);
 
   expect(githubQuery).toMatchInlineSnapshot(`
-    "query {
+    "query(
+      $repoOwner__0: String!
+      $repoName__0: String!
+      $commit__0__0: String!
+    ) {
       repo__0: repository(
-        owner: "JedWatson",
-        name: "react-select"
+        owner: $repoOwner__0,
+        name: $repoName__0
       ) {
-        commit__0: object(expression: "c7e9c69") {
+        commit__0: object(expression: $commit__0__0) {
           ... on Commit {
             ...CommitFragment
           }
@@ -549,38 +567,42 @@ test("uses custom GITHUB_GRAPHQL_URL when set", async () => {
       }
     `);
   expect(githubQuery).toMatchInlineSnapshot(`
-      "query {
-        repo__0: repository(
-          owner: "emotion-js",
-          name: "emotion"
-        ) {
-          commit__0: object(expression: "a085003") {
-            ... on Commit {
-              ...CommitFragment
-            }
+    "query(
+      $repoOwner__0: String!
+      $repoName__0: String!
+      $commit__0__0: String!
+    ) {
+      repo__0: repository(
+        owner: $repoOwner__0,
+        name: $repoName__0
+      ) {
+        commit__0: object(expression: $commit__0__0) {
+          ... on Commit {
+            ...CommitFragment
           }
         }
       }
-      fragment CommitFragment on Commit {
-        commitUrl
-        associatedPullRequests(first: 50) {
-          nodes {
-            number
-            url
-            mergedAt
-            author {
-              login
-              url
-            }
-          }
-        }
-        author {
-          user {
+    }
+    fragment CommitFragment on Commit {
+      commitUrl
+      associatedPullRequests(first: 50) {
+        nodes {
+          number
+          url
+          mergedAt
+          author {
             login
             url
           }
         }
       }
-      "
-    `);
+      author {
+        user {
+          login
+          url
+        }
+      }
+    }
+    "
+  `);
 });

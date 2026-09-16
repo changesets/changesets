@@ -103,12 +103,16 @@ test("returns pull request info", async () => {
   `);
 
   expect(githubQuery).toMatchInlineSnapshot(`
-    "query {
+    "query(
+      $repoOwner__0: String!
+      $repoName__0: String!
+      $pull__0__0: Int!
+    ) {
       repo__0: repository(
-        owner: "emotion-js",
-        name: "emotion"
+        owner: $repoOwner__0,
+        name: $repoName__0
       ) {
-        pull__1613: pullRequest(number: 1613) {
+        pull__1613: pullRequest(number: $pull__0__0) {
           ...PullFragment
         }
       }
