@@ -36,6 +36,14 @@ function normalizeOptions(
     if (array?.includes(key)) {
       const v = options[key];
       const values: unknown[] = Array.isArray(v) ? v : [v];
+
+      // The negated form (`--no-major`) parses as `false` and turns the option
+      // off, so treat it as if the option was never passed.
+      if (values.includes(false)) {
+        delete options[key];
+        continue;
+      }
+
       const expanded: Array<string | true> = [];
       for (const value of values) {
         // An optional-value option parses as `true` when passed without one.

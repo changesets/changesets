@@ -139,6 +139,11 @@ const tests: CommandTest[] = [
           patch: ["pkg-c"],
         },
       },
+      {
+        // The negated form turns the option off rather than naming a package.
+        args: ["--no-patch"],
+        options: {},
+      },
     ],
   },
   {

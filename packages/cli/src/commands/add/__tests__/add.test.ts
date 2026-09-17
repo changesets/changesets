@@ -961,6 +961,29 @@ describe("Add command", () => {
     `);
   });
 
+  it("should warn and continue when named release type flags cannot detect changed packages", async () => {
+    const loggerWarnSpy = vi.spyOn(clack.log, "warn");
+    const cwd = await createBasicFixture();
+
+    await addChangeset({
+      cwd,
+      message: "summary from message",
+      patch: ["pkg-a"],
+    });
+
+    const output = stripVTControlCharacters(loggerWarnSpy.mock.calls[0][0]);
+    expect(output).toContain(
+      "Failed to identify which packages have changed since the base branch",
+    );
+
+    const changesets = await getChangesets(cwd);
+    expect(changesets[0]).toEqual(
+      expect.objectContaining({
+        releases: [{ name: "pkg-a", type: "patch" }],
+      }),
+    );
+  });
+
   it("should exit with an error when a valueless release type flag cannot detect changed packages", async () => {
     const loggerErrorSpy = vi.spyOn(clack.log, "error");
     const cwd = await createBasicFixture();
