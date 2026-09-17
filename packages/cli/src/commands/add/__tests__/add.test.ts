@@ -98,6 +98,41 @@ const createBasicFixture = async () => {
   return cwd;
 };
 
+// Changes pkg-a and pkg-b on top of the `foo` ref, leaving pkg-c untouched, so
+// that `since: "foo"` detects exactly pkg-a and pkg-b.
+const createChangedPackagesFixture = async () => {
+  const cwd = await gitdir({
+    "package.json": JSON.stringify({
+      private: true,
+      name: "root-pkg",
+      workspaces: ["packages/*"],
+    }),
+    "yarn.lock": "",
+    "packages/pkg-a/package.json": JSON.stringify({
+      name: "pkg-a",
+      version: "1.0.0",
+    }),
+    "packages/pkg-b/package.json": JSON.stringify({
+      name: "pkg-b",
+      version: "1.0.0",
+    }),
+    "packages/pkg-c/package.json": JSON.stringify({
+      name: "pkg-c",
+      version: "1.0.0",
+    }),
+    ".changeset/config.json": JSON.stringify(defaultConfig),
+  });
+
+  await exec("git", ["checkout", "-b", "foo"], { nodeOptions: { cwd } });
+  await exec("git", ["checkout", "-b", "bar"], { nodeOptions: { cwd } });
+  await outputFile(path.join(cwd, "packages/pkg-a/a.js"), 'export default "a"');
+  await outputFile(path.join(cwd, "packages/pkg-b/b.js"), 'export default "b"');
+  await git.add(".", cwd);
+  await git.commit("update pkg-a and pkg-b", cwd);
+
+  return cwd;
+};
+
 beforeEach(() => {
   vi.resetAllMocks();
   vi.restoreAllMocks();
@@ -783,6 +818,134 @@ describe("Add command", () => {
     );
     expect(mockedUtils.askMultiselect).not.toHaveBeenCalled();
     expect(mockedUtils.askList).not.toHaveBeenCalled();
+  });
+
+  it("should bump the changed packages when a release type flag has no value", async () => {
+    const cwd = await createChangedPackagesFixture();
+    await addChangeset({
+      cwd,
+      message: "summary from message",
+      since: "foo",
+      patch: [true],
+    });
+
+    const changesets = await getChangesets(cwd);
+    expect(changesets.length).toBe(1);
+    expect(changesets[0]).toEqual(
+      expect.objectContaining({
+        summary: "summary from message",
+        releases: [
+          { name: "pkg-a", type: "patch" },
+          { name: "pkg-b", type: "patch" },
+        ],
+      }),
+    );
+    expect(mockedUtils.askMultiselect).not.toHaveBeenCalled();
+    expect(mockedUtils.askList).not.toHaveBeenCalled();
+  });
+
+  it("should combine named packages with the changed packages in the same flag", async () => {
+    const cwd = await createChangedPackagesFixture();
+    await addChangeset({
+      cwd,
+      message: "summary from message",
+      since: "foo",
+      patch: ["pkg-c", true],
+    });
+
+    const changesets = await getChangesets(cwd);
+    expect(changesets[0]).toEqual(
+      expect.objectContaining({
+        releases: [
+          { name: "pkg-a", type: "patch" },
+          { name: "pkg-b", type: "patch" },
+          { name: "pkg-c", type: "patch" },
+        ],
+      }),
+    );
+  });
+
+  it("should exclude packages named by another release type flag", async () => {
+    const cwd = await createChangedPackagesFixture();
+    await addChangeset({
+      cwd,
+      message: "summary from message",
+      since: "foo",
+      major: ["pkg-a"],
+      patch: [true],
+    });
+
+    const changesets = await getChangesets(cwd);
+    expect(changesets[0]).toEqual(
+      expect.objectContaining({
+        releases: [
+          { name: "pkg-a", type: "major" },
+          { name: "pkg-b", type: "patch" },
+        ],
+      }),
+    );
+  });
+
+  it("should exit with an error when two release type flags have no value", async () => {
+    const loggerErrorSpy = vi.spyOn(clack.log, "error");
+    const cwd = await createChangedPackagesFixture();
+
+    await expect(() =>
+      addChangeset({
+        cwd,
+        message: "summary from message",
+        since: "foo",
+        minor: [true],
+        patch: [true],
+      }),
+    ).rejects.toThrow("The process exited with code: 1");
+
+    const output = stripVTControlCharacters(loggerErrorSpy.mock.calls[0][0]);
+    expect(output).toEqual(
+      [
+        "The package pkg-a is passed to multiple release type options: `--minor`, `--patch`. Please select only one release type for this package.",
+        "The package pkg-b is passed to multiple release type options: `--minor`, `--patch`. Please select only one release type for this package.",
+      ].join("\n"),
+    );
+  });
+
+  it("should exit with an error when a valueless release type flag detects no changed packages", async () => {
+    const loggerErrorSpy = vi.spyOn(clack.log, "error");
+    const cwd = await createChangedPackagesFixture();
+
+    await expect(() =>
+      addChangeset({
+        cwd,
+        message: "summary from message",
+        since: "bar",
+        patch: [true],
+      }),
+    ).rejects.toThrow("The process exited with code: 1");
+
+    const output = stripVTControlCharacters(loggerErrorSpy.mock.calls[0][0]);
+    expect(output).toMatchInlineSnapshot(`
+      "No changed packages were found, so the release type options have nothing to bump.
+        Pass package names to the option, or use \`--since\` to compare against a different ref
+        Use \`--empty\` to write a changeset with no releases"
+    `);
+  });
+
+  it("should exit with an error when a valueless release type flag cannot detect changed packages", async () => {
+    const loggerErrorSpy = vi.spyOn(clack.log, "error");
+    const cwd = await createBasicFixture();
+
+    await expect(() =>
+      addChangeset({
+        cwd,
+        message: "summary from message",
+        patch: [true],
+      }),
+    ).rejects.toThrow("The process exited with code: 1");
+
+    const output = stripVTControlCharacters(loggerErrorSpy.mock.calls[0][0]);
+    expect(output).toContain(
+      "Failed to identify which packages have changed since the base branch",
+    );
   });
 
   it("should be able to add a changeset when called from subdirectory", async () => {
