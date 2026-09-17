@@ -3,7 +3,7 @@ import path from "node:path";
 import { gitdir, outputFile, shallowClone } from "@changesets/test-utils";
 import { writeChangeset } from "@changesets/write";
 import { exec } from "tinyexec";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   add,
   commit,
@@ -13,6 +13,7 @@ import {
   getChangedPackagesSinceRef,
   getCommitsThatAddFiles,
   getCurrentCommitId,
+  getDefaultBranchName,
   getDivergedCommit,
   tag,
   tagExists,
@@ -26,6 +27,82 @@ async function getCommitCount(cwd: string) {
 }
 
 describe("git", { tags: ["slow"] }, () => {
+  describe("getDefaultBranchName", () => {
+    it("returns the branch referenced by origin/HEAD", async () => {
+      const cwd = await gitdir({
+        "a.js": 'export default "a"',
+      });
+
+      await exec("git", ["update-ref", "refs/remotes/origin/trunk", "HEAD"], {
+        nodeOptions: { cwd },
+      });
+      await exec(
+        "git",
+        [
+          "symbolic-ref",
+          "refs/remotes/origin/HEAD",
+          "refs/remotes/origin/trunk",
+        ],
+        { nodeOptions: { cwd } },
+      );
+
+      expect(await getDefaultBranchName(cwd)).toBe("trunk");
+    });
+
+    it("returns undefined when origin/HEAD cannot be resolved", async () => {
+      const cwd = await gitdir({
+        "a.js": 'export default "a"',
+      });
+
+      expect(await getDefaultBranchName(cwd)).toBeUndefined();
+    });
+
+    it("returns undefined when origin/HEAD references a non-origin branch", async () => {
+      const cwd = await gitdir({
+        "a.js": 'export default "a"',
+      });
+
+      await exec(
+        "git",
+        ["symbolic-ref", "refs/remotes/origin/HEAD", "refs/heads/main"],
+        { nodeOptions: { cwd } },
+      );
+
+      expect(await getDefaultBranchName(cwd)).toBeUndefined();
+    });
+
+    it("returns undefined when origin/HEAD references a missing branch", async () => {
+      const cwd = await gitdir({
+        "a.js": 'export default "a"',
+      });
+
+      await exec(
+        "git",
+        [
+          "symbolic-ref",
+          "refs/remotes/origin/HEAD",
+          "refs/remotes/origin/missing",
+        ],
+        { nodeOptions: { cwd } },
+      );
+
+      expect(await getDefaultBranchName(cwd)).toBeUndefined();
+    });
+
+    it("returns undefined when git cannot be executed", async () => {
+      const cwd = await gitdir({
+        "a.js": 'export default "a"',
+      });
+
+      vi.stubEnv("PATH", "");
+      try {
+        expect(await getDefaultBranchName(cwd)).toBeUndefined();
+      } finally {
+        vi.unstubAllEnvs();
+      }
+    });
+  });
+
   describe("getDivergedCommit", () => {
     it("should return same commit when branches have not diverged", async () => {
       const cwd = await gitdir({

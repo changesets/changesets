@@ -4,6 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import c from "@changesets/color";
 import { defaultWrittenConfig } from "@changesets/config";
+import { getDefaultBranchName } from "@changesets/git";
 import type { AccessType } from "@changesets/types";
 import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
@@ -17,7 +18,7 @@ export interface InitOptions {
   cwd?: string;
 }
 
-async function getInteractiveConfig() {
+async function getInteractiveConfig(cwd: string) {
   const config = { ...defaultWrittenConfig };
 
   const useGithub = await cli.askConfirm(
@@ -49,12 +50,13 @@ async function getInteractiveConfig() {
     ],
   );
 
+  const defaultBaseBranch = (await getDefaultBranchName(cwd)) ?? "main";
   const baseBranchInput = await cli.askQuestion(
     "Which base branch should be used?",
-    { placeholder: "main" },
+    { placeholder: defaultBaseBranch },
   );
 
-  config.baseBranch = baseBranchInput || "main";
+  config.baseBranch = baseBranchInput || defaultBaseBranch;
 
   const priorityOrder = [
     "$schema",
@@ -110,7 +112,7 @@ Changeset commands can be run with no problems.
     await fs.mkdir(changesetBase, { recursive: true });
   }
 
-  const newConfigStr = await getInteractiveConfig();
+  const newConfigStr = await getInteractiveConfig(packages.rootDir);
 
   await fs.writeFile(path.resolve(changesetBase, "config.json"), newConfigStr);
 
