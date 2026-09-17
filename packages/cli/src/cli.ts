@@ -35,19 +35,23 @@ function normalizeOptions(
     // is treated the same as `--minor pkg1 --minor pkg2`.
     if (array?.includes(key)) {
       const v = options[key];
-      const values = Array.isArray(v)
-        ? v.map(String)
-        : [
-            // those won't actually be objects and we want to stringify other primitive types
-            // eslint-disable-next-line @typescript-eslint/no-base-to-string
-            String(v),
-          ];
-      options[key] = values.flatMap((value) =>
-        value
-          .split(",")
-          .map((part) => part.trim())
-          .filter(Boolean),
-      );
+      const values: unknown[] = Array.isArray(v) ? v : [v];
+      const expanded: Array<string | true> = [];
+      for (const value of values) {
+        // An option declared with an optional value parses as `true` when it is
+        // passed without one. Keep that marker for the command to interpret.
+        if (value === true) {
+          expanded.push(true);
+          continue;
+        }
+        expanded.push(
+          ...String(value)
+            .split(",")
+            .map((part) => part.trim())
+            .filter(Boolean),
+        );
+      }
+      options[key] = expanded;
     }
     // If a flag is passed multiple times (becoming an array), only take the last value.
     else if (Array.isArray(options[key])) {
@@ -83,6 +87,7 @@ cli
   .usage("[command] [options]")
   .example("  $ changeset -m 'Description'")
   .example("  $ changeset --open --since main")
+  .example("  $ changeset --patch -m 'Fix the export types'")
   .alias("!") // special alias for default command
   .option("--empty", "Add an empty changeset")
   .option("--open", "Open the changeset in the editor after creating it")
@@ -91,9 +96,18 @@ cli
     "Detect changed packages since the provided git ref",
   )
   .option("-m, --message <text>", "Directly provide a message to the changeset")
-  .option("--major <pkg>", "Package(s) to major bump (comma-separated)")
-  .option("--minor <pkg>", "Package(s) to minor bump (comma-separated)")
-  .option("--patch <pkg>", "Package(s) to patch bump (comma-separated)")
+  .option(
+    "--major [pkg]",
+    "Package(s) to major bump (comma-separated, defaults to the changed packages)",
+  )
+  .option(
+    "--minor [pkg]",
+    "Package(s) to minor bump (comma-separated, defaults to the changed packages)",
+  )
+  .option(
+    "--patch [pkg]",
+    "Package(s) to patch bump (comma-separated, defaults to the changed packages)",
+  )
   .action(async (options) => {
     normalizeOptions(options, { array: ["major", "minor", "patch"] });
     const { add } = await import("./commands/add/index.ts");
