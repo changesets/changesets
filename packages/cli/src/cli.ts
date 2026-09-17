@@ -38,8 +38,8 @@ function normalizeOptions(
       const values: unknown[] = Array.isArray(v) ? v : [v];
       const expanded: Array<string | true> = [];
       for (const value of values) {
-        // An option declared with an optional value parses as `true` when it is
-        // passed without one. Keep that marker for the command to interpret.
+        // An optional-value option parses as `true` when passed without one.
+        // Keep that marker for the command to interpret.
         if (value === true) {
           expanded.push(true);
           continue;

@@ -70,18 +70,16 @@ If you set the commit option in the config, the command will add the updated cha
 - `--open` - opens the created changeset in an external editor
 - `--message` (or `-m`) - provides the changeset summary from the command line instead of prompting for it.
 
-- `--major`, `--minor`, `--patch` - select the packages to bump from the command line instead of prompting for them. Each takes a comma-separated list of package names and can be repeated. Together with `--message` this makes `add` fully non-interactive.
+- `--major`, `--minor`, `--patch` - bump the given packages instead of prompting. Each takes a comma-separated list and can be repeated. With `--message`, `add` runs without prompting.
+
+Without a list, the option bumps the detected changed packages, the set the prompt shows under `changed packages`. Packages you name are left out of that set, so the second line below majors `pkg-a` and patches every other changed package.
 
 ```
 changeset add --major pkg-a --patch pkg-b,pkg-c -m 'Remove the deprecated API'
-```
-
-Passed without a list, the option bumps the packages that changed since the base branch (or since `--since`), the same set that the interactive prompt shows under `changed packages`. Packages you name explicitly keep the release type you named them with and are left out of that set.
-
-```
-changeset add --patch -m 'Fix the export types'
 changeset add --major pkg-a --patch -m 'Remove the deprecated API'
 ```
+
+Detection diffs the working tree against the base branch, so an uncommitted edit counts, but a new file only counts once it is added to git.
 
 - `--since` - uses the provided branch, tag, or git ref (such as `main` or a git commit hash) to detect which packages have changed when populating the list of changed packages in the CLI. This is useful in gitflow workflows where you have multiple target branches and `baseBranch` in the config doesn't cover all use cases. If not provided, the command falls back to the `baseBranch` value in your `.changeset/config.json`.
 

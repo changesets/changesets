@@ -98,8 +98,7 @@ const createBasicFixture = async () => {
   return cwd;
 };
 
-// Changes pkg-a and pkg-b on top of the `foo` ref, leaving pkg-c untouched, so
-// that `since: "foo"` detects exactly pkg-a and pkg-b.
+// Leaves pkg-c untouched, so `since: "foo"` detects exactly pkg-a and pkg-b.
 const createChangedPackagesFixture = async () => {
   const cwd = await gitdir({
     "package.json": JSON.stringify({
@@ -857,9 +856,9 @@ describe("Add command", () => {
     expect(changesets[0]).toEqual(
       expect.objectContaining({
         releases: [
+          { name: "pkg-c", type: "patch" },
           { name: "pkg-a", type: "patch" },
           { name: "pkg-b", type: "patch" },
-          { name: "pkg-c", type: "patch" },
         ],
       }),
     );
@@ -884,6 +883,38 @@ describe("Add command", () => {
         ],
       }),
     );
+  });
+
+  it("should bump the only package of a single package repo from a valueless flag", async () => {
+    const cwd = await gitdir({
+      "package.json": JSON.stringify({
+        name: "single-package",
+        version: "1.0.0",
+      }),
+      "index.js": "export default 0",
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+
+    await exec("git", ["checkout", "-b", "foo"], { nodeOptions: { cwd } });
+    await exec("git", ["checkout", "-b", "bar"], { nodeOptions: { cwd } });
+    await outputFile(path.join(cwd, "index.js"), "export default 1");
+    await git.add(".", cwd);
+    await git.commit("update the package", cwd);
+
+    await addChangeset({
+      cwd,
+      message: "summary from message",
+      since: "foo",
+      minor: [true],
+    });
+
+    const changesets = await getChangesets(cwd);
+    expect(changesets[0]).toEqual(
+      expect.objectContaining({
+        releases: [{ name: "single-package", type: "minor" }],
+      }),
+    );
+    expect(mockedUtils.askList).not.toHaveBeenCalled();
   });
 
   it("should exit with an error when two release type flags have no value", async () => {
@@ -924,8 +955,8 @@ describe("Add command", () => {
 
     const output = stripVTControlCharacters(loggerErrorSpy.mock.calls[0][0]);
     expect(output).toMatchInlineSnapshot(`
-      "No changed packages were found, so the release type options have nothing to bump.
-        Pass package names to the option, or use \`--since\` to compare against a different ref
+      "No changed packages found
+        Name the packages on the option, or use \`--since\` to compare against a different ref
         Use \`--empty\` to write a changeset with no releases"
     `);
   });

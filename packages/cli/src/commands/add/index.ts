@@ -84,9 +84,8 @@ Failed to identify which packages have changed since the ${options?.since ? "ref
 ${(error as Error).toString()}
 `.trim();
 
-      // A release type option passed without a value stands for the changed
-      // packages, so the detection decides the changeset rather than only
-      // ordering a prompt. Without it there is nothing to fall back to.
+      // A release type option passed without a value has nothing to fall back
+      // to, so the detection is no longer best effort.
       if (usesDetectedPackages(options ?? {})) {
         log.error(message);
         throw new ExitError(1);

@@ -81,8 +81,8 @@ function formatPkgNameAndVersion(pkgName: string, version: string) {
   return `${c.bold(pkgName)}@${c.bold(version)}`;
 }
 
-// `true` is how an option declared with an optional value arrives when it is
-// passed without one. It stands for the packages detected as changed.
+// `true` is an option passed without a value. It stands for the detected
+// changed packages.
 export type BumpFlags = {
   major?: Array<string | true>;
   minor?: Array<string | true>;
@@ -105,8 +105,8 @@ export function usesDetectedPackages(bumpFlags: BumpFlags): boolean {
     .includes(true);
 }
 
-// A package named by any bump flag keeps the release type it was named with, so
-// the detected list drops it rather than colliding with that flag.
+// A named package keeps the release type it was named with, so the detected
+// list drops it rather than colliding with that option.
 function resolveBumpFlags(
   bumpFlags: BumpFlags,
   changedPackages: Array<string>,
@@ -117,20 +117,19 @@ function resolveBumpFlags(
       .flatMap((values) => values ?? [])
       .filter((value) => value !== true),
   );
-  const detectedPackages = changedPackages.filter(
-    (pkgName) => !namedPackages.has(pkgName),
-  );
+  const detectedPackages = changedPackages
+    .filter((pkgName) => !namedPackages.has(pkgName))
+    .sort((a, b) => a.localeCompare(b));
 
   const [major, minor, patch] = flagValues.map(
     (values) =>
-      values &&
-      [
+      values && [
         ...new Set(
           values.flatMap((value) =>
             value === true ? detectedPackages : [value],
           ),
         ),
-      ].sort((a, b) => a.localeCompare(b)),
+      ],
   );
 
   return { major, minor, patch };
@@ -221,8 +220,8 @@ export async function createChangeset(
     if (releases.length === 0) {
       log.error(
         `
-No changed packages were found, so the release type options have nothing to bump.
-  ${c.italic("Pass package names to the option, or use `--since` to compare against a different ref")}
+No changed packages found
+  ${c.italic("Name the packages on the option, or use `--since` to compare against a different ref")}
   ${c.italic("Use `--empty` to write a changeset with no releases")}
 `.trim(),
       );
