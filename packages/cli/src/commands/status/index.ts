@@ -5,7 +5,13 @@ import c from "@changesets/color";
 import { ExitError } from "@changesets/errors";
 import { readPreState } from "@changesets/pre";
 import { readChangesets } from "@changesets/read";
-import type { ComprehensiveRelease } from "@changesets/types";
+import { shouldSkipPackage } from "@changesets/should-skip-package";
+import type {
+  ComprehensiveRelease,
+  Config,
+  Packages,
+  ReleasePlan,
+} from "@changesets/types";
 import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import { readConfig } from "../../utils/read-config.ts";
@@ -35,6 +41,7 @@ export async function status(options?: StatusOptions) {
     config,
     preState,
   );
+  warnAboutSkippedReleases(releasePlan, packages, config);
   const changedPackages = await getVersionableChangedPackages(config, {
     cwd: packages.rootDir,
     ref: options?.since,
@@ -64,6 +71,49 @@ If this change doesn't need a release, run ${c.cyan("changeset add --empty")}.
   );
 
   return releasePlan;
+}
+
+function warnAboutSkippedReleases(
+  releasePlan: ReleasePlan,
+  packages: Packages,
+  config: Config,
+) {
+  const packagesByName = new Map(
+    packages.packages.map((pkg) => [pkg.packageJson.name, pkg]),
+  );
+
+  // A changeset that lists an ignored/private package is dropped from the plan
+  // without any trace. One that lists nothing but such packages therefore has
+  // no effect at all, which is worth pointing out - typos already error,
+  // but choosing a package that isn't going to be released doesn't.
+  const ignoredChangesets = releasePlan.changesets.filter(
+    (changeset) =>
+      changeset.releases.length > 0 &&
+      changeset.releases.every(({ name }) =>
+        shouldSkipPackage(packagesByName.get(name)!, {
+          ignore: config.ignore,
+          allowPrivatePackages: config.privatePackages.version,
+        }),
+      ),
+  );
+
+  if (ignoredChangesets.length === 0) {
+    return;
+  }
+
+  log.warn(
+    `
+The following changesets don't list any package that's going to be released, so they have no effect:
+${ignoredChangesets
+  .map(
+    (changeset) =>
+      `  - ${c.blue(`.changeset/${changeset.id}.md`)} (${changeset.releases
+        .map(({ name }) => name)
+        .join(", ")})`,
+  )
+  .join("\n")}
+    `.trim(),
+  );
 }
 
 function printStatus(releases: ComprehensiveRelease[], verbose?: boolean) {
