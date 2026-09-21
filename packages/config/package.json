@@ -31,8 +31,8 @@
   "devDependencies": {
     "@changesets/test-utils": "workspace:*",
     "@types/picomatch": "4.0.3",
-    "@valibot/to-json-schema": "^1.7.1",
-    "valibot": "^1.4.2"
+    "@valibot/to-json-schema": "^1.8.0",
+    "valibot": "^1.5.0"
   },
   "engines": {
     "node": "^22.11 || ^24 || >=26"
