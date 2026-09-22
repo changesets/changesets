@@ -44,7 +44,7 @@
     "@changesets/should-skip-package": "workspace:^",
     "@changesets/types": "workspace:^",
     "@changesets/write": "workspace:^",
-    "@clack/prompts": "^1.7.0",
+    "@clack/prompts": "^1.8.1",
     "@manypkg/get-packages": "^3.1.0",
     "@pnpm/deps.graph-sequencer": "^1100.0.1",
     "cac": "^7.0.0",
