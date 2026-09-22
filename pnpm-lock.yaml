@@ -485,8 +485,8 @@ importers:
         specifier: 1.2.0-beta.15
         version: 1.2.0-beta.15
       '@pnpm/pnpr':
-        specifier: 0.1.0-alpha.8
-        version: 0.1.0-alpha.8
+        specifier: 0.1.0-alpha.11
+        version: 0.1.0-alpha.11
       '@tsconfig/node24':
         specifier: ^24.0.5
         version: 24.0.5
@@ -1100,52 +1100,52 @@ packages:
     resolution: {integrity: sha512-h104Kh26rR8tm+a3Qkc5S4VLYint3FE48as7+/5oCEcKR2idC/pF1G6AhIXKI+eHPJa/3J9i5z0Al47IeGHPkA==}
     engines: {node: '>=12'}
 
-  '@pnpm/pnpr.darwin-arm64@0.1.0-alpha.8':
-    resolution: {integrity: sha512-ZZ6e2GvqYQhUp5flmgj1rOS2hOKG/F60pFQE8uqC81pABnGObwXuFDPJJP74dbWoCBwvIDZHJOH2zl2wEnBFsQ==}
+  '@pnpm/pnpr.darwin-arm64@0.1.0-alpha.11':
+    resolution: {integrity: sha512-H8Yskx7hepaCUcMX0n1J2VLXcWRq4nC0hjbDMylVdQ7MXE2M9beX3jwh8wVzBeRZiy3Uyi7ck5brsYlo3xn+Aw==}
     cpu: [arm64]
     os: [darwin]
 
-  '@pnpm/pnpr.darwin-x64@0.1.0-alpha.8':
-    resolution: {integrity: sha512-waUS+Jqe82pcOH7VPGkhsKl/wB3OUifvMP/f5CSJqGE503e+6f8bwkhZVvtbT/am4OasbXd1WZb0LVBJndLTaQ==}
+  '@pnpm/pnpr.darwin-x64@0.1.0-alpha.11':
+    resolution: {integrity: sha512-Grp7xpNtzHM3z1l51ckekpxpHPTxE+miB2QHdaaHa7N48gm2w1S0R3wNmjaXt7KmXXg4fbJIPUG0sYBJEnsfEw==}
     cpu: [x64]
     os: [darwin]
 
-  '@pnpm/pnpr.linux-arm64-musl@0.1.0-alpha.8':
-    resolution: {integrity: sha512-eC3bmhu+HSj1O4DnOaMQU8YbScayFUtABDghUC4AcolOTegzn2xv6LZsAJl4IYr4XZTF/QEV1dSmzHXHwGyEQw==}
+  '@pnpm/pnpr.linux-arm64-musl@0.1.0-alpha.11':
+    resolution: {integrity: sha512-iMl1rUm/EaQlagqB7gHmiX1oLBmJn3UvHYmEIrcu8R6bbxre7CCThcqmNq3HvYT5cumsx2tazqd6NbfQ7vBoSA==}
     cpu: [arm64]
     os: [linux]
     libc: [musl]
 
-  '@pnpm/pnpr.linux-arm64@0.1.0-alpha.8':
-    resolution: {integrity: sha512-gH1PiH5ZrVCQ33wyy8GSma7vAWLwAovEPbb3/mUhBaw414AoRHRS1og8cotuJo3TA8UmCfttmEfWfKdihBKRYQ==}
+  '@pnpm/pnpr.linux-arm64@0.1.0-alpha.11':
+    resolution: {integrity: sha512-Jl07JGWoH1JN9h/ONOjkRKOaoJ19wB/OLV6A0JsLvNCmbhoPKQhSz7uzohdX/yHjfFxDm+WfPLnnMYcAAzcVfQ==}
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
 
-  '@pnpm/pnpr.linux-x64-musl@0.1.0-alpha.8':
-    resolution: {integrity: sha512-RedLEo6Kjis9IkyeYXOzFE/ukiUIFLIIqHZVEZsj0CPu3zwkkOnPXXecFt5n+Cwmt7MKBqm0n+1s4O3ZeSW2vg==}
+  '@pnpm/pnpr.linux-x64-musl@0.1.0-alpha.11':
+    resolution: {integrity: sha512-5ZEudE/ahIfhdeY9qbDX1PMhMpJHy/iVygDfk2zwsOrjYb4CvMQpb59/Lp1E6ehzAtpQzv9xne9rlPYaXeLveQ==}
     cpu: [x64]
     os: [linux]
     libc: [musl]
 
-  '@pnpm/pnpr.linux-x64@0.1.0-alpha.8':
-    resolution: {integrity: sha512-JxydCbSxtxUL5IskpuHtCnBaQPFOjeXsW/ts3oBNccoGkXxlhqTi/FYpvBF7XZ4E2nxx+wAFzclMJhM/UMi+fA==}
+  '@pnpm/pnpr.linux-x64@0.1.0-alpha.11':
+    resolution: {integrity: sha512-snEy4u0wz4W76vPgRoyb3ZgB2n3wyfi8PeHgk+PWgER0Y2OFu3nXWxEitNbnE8B9L9DdV8MVHPyNUZv61pK3Hw==}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
 
-  '@pnpm/pnpr.win32-arm64@0.1.0-alpha.8':
-    resolution: {integrity: sha512-GYe5puWVbGtwzboYq87H82qeNFaF1soAZPQlAiGLwlJD8oS4Y9GM8D+pHXl08IQoVdK0/8dLgUy62O95Ptg7qA==}
+  '@pnpm/pnpr.win32-arm64@0.1.0-alpha.11':
+    resolution: {integrity: sha512-I+gS5udvauOU+eEoz4vRZxnIc/JNjkizXxfZ369C75/KoUmLR+qwYpmTfvh28TIcrjK2G4hM1MpwK8cW5pgi/Q==}
     cpu: [arm64]
     os: [win32]
 
-  '@pnpm/pnpr.win32-x64@0.1.0-alpha.8':
-    resolution: {integrity: sha512-k1w4FzEnbsmsaBTaL61AAyUyAEaMWsrUhEIafg5moGoGvPggBIBKnwf0rvBbGAbAezRVZwr1sAzwYxzFPjVSQQ==}
+  '@pnpm/pnpr.win32-x64@0.1.0-alpha.11':
+    resolution: {integrity: sha512-PdAwdWRvb/sZNsmIS2LKq2NTQOPiApMRE4d6/wgHYrWUPAvm7pKEXPGsV83V1ag8Y40KKFMA2llmT0gNXsgrFw==}
     cpu: [x64]
     os: [win32]
 
-  '@pnpm/pnpr@0.1.0-alpha.8':
-    resolution: {integrity: sha512-6gf1XHdBSkM9QzJDkb/0Tx9jEEHSA7AYvxFASPTQmvur8wWIj81KVlXXuBFep8Jx8hB8z8t6C7pJMU89j8gf8A==}
+  '@pnpm/pnpr@0.1.0-alpha.11':
+    resolution: {integrity: sha512-l76qeXE4bFmOtxzW4XfwanH/e65YMORgo0LZOWWa6K2QZ71nHEMRdkWepuVMS5zUpi4axCDDVWWP4wBCKxtscw==}
     engines: {node: '>=18.*'}
     hasBin: true
 
@@ -3660,40 +3660,40 @@ snapshots:
       '@pnpm/network.ca-file': 1.0.2
       config-chain: 1.1.13
 
-  '@pnpm/pnpr.darwin-arm64@0.1.0-alpha.8':
+  '@pnpm/pnpr.darwin-arm64@0.1.0-alpha.11':
     optional: true
 
-  '@pnpm/pnpr.darwin-x64@0.1.0-alpha.8':
+  '@pnpm/pnpr.darwin-x64@0.1.0-alpha.11':
     optional: true
 
-  '@pnpm/pnpr.linux-arm64-musl@0.1.0-alpha.8':
+  '@pnpm/pnpr.linux-arm64-musl@0.1.0-alpha.11':
     optional: true
 
-  '@pnpm/pnpr.linux-arm64@0.1.0-alpha.8':
+  '@pnpm/pnpr.linux-arm64@0.1.0-alpha.11':
     optional: true
 
-  '@pnpm/pnpr.linux-x64-musl@0.1.0-alpha.8':
+  '@pnpm/pnpr.linux-x64-musl@0.1.0-alpha.11':
     optional: true
 
-  '@pnpm/pnpr.linux-x64@0.1.0-alpha.8':
+  '@pnpm/pnpr.linux-x64@0.1.0-alpha.11':
     optional: true
 
-  '@pnpm/pnpr.win32-arm64@0.1.0-alpha.8':
+  '@pnpm/pnpr.win32-arm64@0.1.0-alpha.11':
     optional: true
 
-  '@pnpm/pnpr.win32-x64@0.1.0-alpha.8':
+  '@pnpm/pnpr.win32-x64@0.1.0-alpha.11':
     optional: true
 
-  '@pnpm/pnpr@0.1.0-alpha.8':
+  '@pnpm/pnpr@0.1.0-alpha.11':
     optionalDependencies:
-      '@pnpm/pnpr.darwin-arm64': 0.1.0-alpha.8
-      '@pnpm/pnpr.darwin-x64': 0.1.0-alpha.8
-      '@pnpm/pnpr.linux-arm64': 0.1.0-alpha.8
-      '@pnpm/pnpr.linux-arm64-musl': 0.1.0-alpha.8
-      '@pnpm/pnpr.linux-x64': 0.1.0-alpha.8
-      '@pnpm/pnpr.linux-x64-musl': 0.1.0-alpha.8
-      '@pnpm/pnpr.win32-arm64': 0.1.0-alpha.8
-      '@pnpm/pnpr.win32-x64': 0.1.0-alpha.8
+      '@pnpm/pnpr.darwin-arm64': 0.1.0-alpha.11
+      '@pnpm/pnpr.darwin-x64': 0.1.0-alpha.11
+      '@pnpm/pnpr.linux-arm64': 0.1.0-alpha.11
+      '@pnpm/pnpr.linux-arm64-musl': 0.1.0-alpha.11
+      '@pnpm/pnpr.linux-x64': 0.1.0-alpha.11
+      '@pnpm/pnpr.linux-x64-musl': 0.1.0-alpha.11
+      '@pnpm/pnpr.win32-arm64': 0.1.0-alpha.11
+      '@pnpm/pnpr.win32-x64': 0.1.0-alpha.11
 
   '@publint/pack@0.1.7':
     dependencies:
