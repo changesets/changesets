@@ -132,6 +132,8 @@ Example:
 }
 ```
 
+The patterns are matched against paths relative to each package's directory, not the repository root. With the example above, a change to `packages/foo/src/index.ts` marks `foo` as changed because it matches `src/**` inside that package. A changed file that is not inside any package directory never marks a package as changed, and when packages are nested, a file counts for the innermost package that contains it.
+
 ## format
 
 - **Type:** `"auto" | "prettier" | "oxfmt" | "deno" | "dprint" | false`
