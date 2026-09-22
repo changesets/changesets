@@ -4,9 +4,13 @@ import * as git from "@changesets/git";
 import { gitdir, outputFile, silenceLogsInBlock } from "@changesets/test-utils";
 import type { ReleasePlan } from "@changesets/types";
 import { writeChangeset } from "@changesets/write";
+import { log } from "@clack/prompts";
 import { exec } from "tinyexec";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { status } from "../index.ts";
+
+vi.mock("@clack/prompts");
+const mockedLogger = vi.mocked(log);
 
 function replaceHumanIds(releaseObj: ReleasePlan | undefined) {
   if (!releaseObj) {
@@ -273,6 +277,136 @@ describe("status", { tags: ["slow"] }, () => {
     await status({ cwd, since: "main" });
 
     expect(process.exit).not.toHaveBeenCalled();
+  });
+
+  it("should warn when a changeset only references packages that are not going to be released", async () => {
+    const cwd = await gitdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "root-pkg",
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        private: true,
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify({
+        privatePackages: {
+          version: false,
+        },
+      }),
+    });
+
+    await exec("git", ["checkout", "-b", "new-branch"], {
+      nodeOptions: { cwd },
+    });
+
+    await writeChangeset(
+      {
+        summary: "This is a summary",
+        releases: [{ name: "pkg-b", type: "minor" }],
+      },
+      cwd,
+    );
+    await git.add(".", cwd);
+    await git.commit("updated b", cwd);
+
+    const releaseObj = await status({ cwd, since: "main" });
+
+    expect(releaseObj?.releases).toEqual([]);
+    expect(mockedLogger.warn).toHaveBeenCalledTimes(1);
+    expect(mockedLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(
+        "The following changesets don't list any package that's going to be released",
+      ),
+    );
+    expect(mockedLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining("pkg-b"),
+    );
+  });
+
+  it("should not warn when a changeset references a package that is going to be released", async () => {
+    const cwd = await gitdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "root-pkg",
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        private: true,
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify({
+        privatePackages: {
+          version: false,
+        },
+      }),
+    });
+
+    await exec("git", ["checkout", "-b", "new-branch"], {
+      nodeOptions: { cwd },
+    });
+
+    await writeChangeset(
+      {
+        summary: "This is a summary",
+        releases: [{ name: "pkg-a", type: "minor" }],
+      },
+      cwd,
+    );
+    await git.add(".", cwd);
+    await git.commit("updated a", cwd);
+
+    const releaseObj = await status({ cwd, since: "main" });
+
+    expect(releaseObj?.releases).toHaveLength(1);
+    expect(mockedLogger.warn).not.toHaveBeenCalled();
+  });
+
+  it("should not warn about empty changesets", async () => {
+    const cwd = await gitdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "root-pkg",
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify({}),
+    });
+
+    await exec("git", ["checkout", "-b", "new-branch"], {
+      nodeOptions: { cwd },
+    });
+
+    await writeChangeset(
+      {
+        summary: "This is a summary",
+        releases: [],
+      },
+      cwd,
+    );
+    await git.add(".", cwd);
+    await git.commit("added empty changeset", cwd);
+
+    await status({ cwd, since: "main" });
+
+    expect(mockedLogger.warn).not.toHaveBeenCalled();
   });
 
   it.todo("should respect the verbose flag", () => false);
