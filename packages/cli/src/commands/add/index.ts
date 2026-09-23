@@ -13,18 +13,19 @@ import { importantWarning } from "../../utils/cli-utilities.ts";
 import { readConfig } from "../../utils/read-config.ts";
 import { getVersionableChangedPackages } from "../../utils/versionablePackages.ts";
 import { ensureChangesetFolder } from "../shared.ts";
-import { createChangeset } from "./createChangeset.ts";
+import {
+  type BumpFlags,
+  createChangeset,
+  usesDetectedPackages,
+} from "./createChangeset.ts";
 import { printConfirmationMessage } from "./messages.ts";
 
-export interface AddOptions {
+export interface AddOptions extends BumpFlags {
   cwd?: string;
   empty?: boolean;
   open?: boolean;
   since?: string;
   message?: string;
-  major?: string[];
-  minor?: string[];
-  patch?: string[];
 }
 
 export async function add(options?: AddOptions): Promise<void> {
@@ -78,14 +79,21 @@ No versionable packages found
         })
       ).map((pkg) => pkg.packageJson.name);
     } catch (error) {
-      // NOTE: Getting the changed packages is best effort as it's only being used for easier selection
-      // in the CLI. So if any error happens while we try to do so, we only log a warning and continue
-      log.warn(
-        `
+      const message = `
 Failed to identify which packages have changed since the ${options?.since ? "ref" : "base branch"} due to an error:
 ${(error as Error).toString()}
-`.trim(),
-      );
+`.trim();
+
+      // A release type option passed without a value has nothing to fall back
+      // to, so the detection is no longer best effort.
+      if (usesDetectedPackages(options ?? {})) {
+        log.error(message);
+        throw new ExitError(1);
+      }
+
+      // NOTE: Getting the changed packages is best effort as it's only being used for easier selection
+      // in the CLI. So if any error happens while we try to do so, we only log a warning and continue
+      log.warn(message);
     }
 
     newChangeset = await createChangeset(
