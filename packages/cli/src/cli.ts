@@ -172,6 +172,18 @@ cli
   });
 
 cli
+  .command(
+    "check",
+    "Validate that all changesets are well-formed and in sync with the workspace",
+  )
+  .example("  $ changeset check")
+  .action(async (options) => {
+    normalizeOptions(options);
+    const { check } = await import("./commands/check/index.ts");
+    await check(options);
+  });
+
+cli
   .command("git-tag", "Create git tags for the current version of all packages")
   .alias("tag")
   .action(async (options) => {
