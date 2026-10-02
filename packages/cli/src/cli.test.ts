@@ -140,6 +140,24 @@ const tests: CommandTest[] = [
         },
       },
       {
+        args: ["--include", "pkg-a", "--include", "pkg-b"],
+        options: {
+          include: ["pkg-a", "pkg-b"],
+        },
+      },
+      {
+        args: ["--include", " pkg-a , , pkg-b , "],
+        options: {
+          include: ["pkg-a", "pkg-b"],
+        },
+      },
+      {
+        args: ["--include", " , "],
+        options: {
+          include: [],
+        },
+      },
+      {
         args: ["--snapshot"],
         options: {
           snapshot: true,

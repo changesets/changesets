@@ -105,13 +105,28 @@ cli
   .example("  $ changeset version")
   .example("  $ changeset version --snapshot 'pr#123'")
   .option("--ignore <pkg>", "Packages to ignore")
+  .option("--include <pkg>", "Packages to include (all others are ignored)")
   .option("--snapshot [name]", "Create a snapshot prerelease")
   .option(
     "--snapshot-prerelease-template <template>",
     "Template for snapshot prerelease",
   )
   .action(async (options) => {
-    normalizeOptions(options, { array: ["ignore"] });
+    // CAC coerces empty values to 0, so check include input in the raw arguments.
+    const args = cli.rawArgs.slice(2);
+    const endOfOptions = args.indexOf("--");
+    const optionArgs = endOfOptions === -1 ? args : args.slice(0, endOfOptions);
+    if (
+      optionArgs.some((arg, index) =>
+        arg === "--include"
+          ? optionArgs[index + 1]?.trim() === ""
+          : /^--include=\s*$/.test(arg),
+      )
+    ) {
+      log.error("The `--include` option requires a nonempty package name.");
+      throw new ExitError(1);
+    }
+    normalizeOptions(options, { array: ["ignore", "include"] });
     const { version } = await import("./commands/version/index.ts");
     await version(options);
   });
