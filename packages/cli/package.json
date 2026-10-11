@@ -44,7 +44,7 @@
     "@changesets/should-skip-package": "workspace:^",
     "@changesets/types": "workspace:^",
     "@changesets/write": "workspace:^",
-    "@clack/prompts": "^1.7.0",
+    "@clack/prompts": "^1.8.1",
     "@manypkg/get-packages": "^3.1.0",
     "@pnpm/deps.graph-sequencer": "^1100.0.1",
     "cac": "^7.0.0",
@@ -58,7 +58,7 @@
     "@changesets/color": "workspace:^",
     "@changesets/test-utils": "workspace:*",
     "@types/semver": "^7.8.0",
-    "human-id": "^4.2.1",
+    "human-id": "^4.2.2",
     "outdent": "^0.8.0"
   },
   "engines": {
