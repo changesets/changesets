@@ -73,6 +73,12 @@ If this change doesn't need a release, run ${c.cyan("changeset add --empty")}.
   return releasePlan;
 }
 
+/**
+ * A changeset naming an ignored package - or a private one, when
+ * `privatePackages.version` is off - is dropped from the plan without a trace.
+ * Typos already error, but a package that simply isn't going to be released
+ * doesn't, so point those changesets out.
+ */
 function warnAboutSkippedReleases(
   releasePlan: ReleasePlan,
   packages: Packages,
@@ -81,35 +87,32 @@ function warnAboutSkippedReleases(
   const packagesByName = new Map(
     packages.packages.map((pkg) => [pkg.packageJson.name, pkg]),
   );
+  const isSkipped = (name: string) =>
+    shouldSkipPackage(packagesByName.get(name)!, {
+      ignore: config.ignore,
+      allowPrivatePackages: config.privatePackages.version,
+    });
 
-  // A changeset that lists an ignored/private package is dropped from the plan
-  // without any trace. One that lists nothing but such packages therefore has
-  // no effect at all, which is worth pointing out - typos already error,
-  // but choosing a package that isn't going to be released doesn't.
-  const ignoredChangesets = releasePlan.changesets.filter(
-    (changeset) =>
-      changeset.releases.length > 0 &&
-      changeset.releases.every(({ name }) =>
-        shouldSkipPackage(packagesByName.get(name)!, {
-          ignore: config.ignore,
-          allowPrivatePackages: config.privatePackages.version,
-        }),
-      ),
-  );
+  const changesetsWithSkippedPackages = releasePlan.changesets
+    .map((changeset) => ({
+      changeset,
+      skipped: changeset.releases
+        .map(({ name }) => name)
+        .filter((name) => isSkipped(name)),
+    }))
+    .filter(({ skipped }) => skipped.length > 0);
 
-  if (ignoredChangesets.length === 0) {
+  if (changesetsWithSkippedPackages.length === 0) {
     return;
   }
 
   log.warn(
     `
-The following changesets don't list any package that's going to be released, so they have no effect:
-${ignoredChangesets
+The following changesets contain a package that is not going to be released as they are skipped:
+${changesetsWithSkippedPackages
   .map(
-    (changeset) =>
-      `  - ${c.blue(`.changeset/${changeset.id}.md`)} (${changeset.releases
-        .map(({ name }) => name)
-        .join(", ")})`,
+    ({ changeset, skipped }) =>
+      `  - ${c.blue(`.changeset/${changeset.id}.md`)} (${skipped.join(", ")})`,
   )
   .join("\n")}
     `.trim(),

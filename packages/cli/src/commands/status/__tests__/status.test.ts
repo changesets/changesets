@@ -279,7 +279,7 @@ describe("status", { tags: ["slow"] }, () => {
     expect(process.exit).not.toHaveBeenCalled();
   });
 
-  it("should warn when a changeset only references packages that are not going to be released", async () => {
+  it("should warn when a changeset references a package that is not going to be released", async () => {
     const cwd = await gitdir({
       "package.json": JSON.stringify({
         private: true,
@@ -323,7 +323,7 @@ describe("status", { tags: ["slow"] }, () => {
     expect(mockedLogger.warn).toHaveBeenCalledTimes(1);
     expect(mockedLogger.warn).toHaveBeenCalledWith(
       expect.stringContaining(
-        "The following changesets don't list any package that's going to be released",
+        "The following changesets contain a package that is not going to be released as they are skipped:",
       ),
     );
     expect(mockedLogger.warn).toHaveBeenCalledWith(
