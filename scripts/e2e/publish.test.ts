@@ -300,13 +300,20 @@ function sanitizePublishLog(message: unknown, registryUrl: string) {
       /(?:[A-Za-z]:)?(?:[\\/][^\\/\r\n]+)*[\\/]fs-fixture-[^\\/\r\n]+[\\/]packages[\\/]pkg-a/g,
       "[fixture-dir]/packages/pkg-a",
     )
+    .replace(
+      /bun publish v\S+ \([^)]+\)/g,
+      "bun publish v[version] ([revision])",
+    )
+    .replace(/^Shasum: .+$/gm, "Shasum: [shasum]")
+    .replace(/^Integrity: .+$/gm, "Integrity: [integrity]")
+    .replace(/^Packed size: .+$/gm, "Packed size: [packed-size]")
     .replace(/^npm notice shasum: .+$/gm, "npm notice shasum: [shasum]")
     .replace(
       /^npm notice integrity: .+$/gm,
       "npm notice integrity: [integrity]",
     );
 
-  return normalizeOtpPrompts(output)
+  const normalizedOutput = normalizeOtpPrompts(output)
     .replaceAll(
       /(?:^[◒◐◓◑•oO0] {2}Creating git tag\.*\n)+(?=^[◇o] {2}Created git tag\.$)/gm,
       "",
@@ -334,6 +341,15 @@ function sanitizePublishLog(message: unknown, registryUrl: string) {
     .replaceAll(new URL(registryUrl).origin, "[registry-url]")
     .replaceAll(/\/-\/auth\/cli\/[^\s"]+/g, "/-/auth/cli/[uuid]")
     .replaceAll(/\/-\/v1\/done\?authId=[^\s"]+/g, "/-/v1/done?authId=[uuid]");
+
+  // A captured Bun failure can race a progress redraw. Keep that transient
+  // row out of non-TTY snapshots while preserving interactive progress.
+  return output.includes("bun publish v[version]") && !output.startsWith("┌")
+    ? normalizedOutput.replace(
+        /^[◒◐◓◑•oO0] {2}Publishing packages(?: \(\d+\/\d+\))?[ \t]*$/gm,
+        "",
+      )
+    : normalizedOutput;
 }
 
 async function fetchPackument(registry: TestRegistry, packageName: string) {
@@ -1533,6 +1549,11 @@ describe("Publish command e2e", () => {
       const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
       const registry = stack.use(
         await createTestRegistry({
+          // Exercise Bun's auth rejection in the proxy: pnpr can close its
+          // connection during the rejected upload, surfacing a transport 502.
+          ...("bun" in pm.bins && {
+            auth: { packages: { "pkg-a": { token: CLIENT_AUTH_TOKEN } } },
+          }),
           packages: {
             "pkg-a": {
               versions: ["0.0.1"],
@@ -2001,7 +2022,7 @@ describe("Publish command e2e", () => {
           authorization: `Bearer ${CLIENT_AUTH_TOKEN}`,
           headers: expect.objectContaining({
             ...(pm.name !== "yarn 4" && {
-              "npm-auth-type": "web",
+              "npm-auth-type": "bun" in pm.bins ? "legacy" : "web",
               "npm-command": "publish",
             }),
           }),
@@ -2029,6 +2050,55 @@ describe("Publish command e2e", () => {
         },
       });
     });
+
+    it.runIf("bun" in pm.bins)(
+      "stops unexpected web authentication in non-tty mode",
+      async ({ signal }) => {
+        await using stack = new AbortableAsyncDisposableStack(signal);
+        const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+        const registry = stack.use(
+          await createTestRegistry({
+            packages: {
+              "pkg-a": { versions: ["0.0.1"], tags: { latest: "0.0.1" } },
+            },
+            async middleware({ request }) {
+              // Simulate a registry returning browser authentication even when
+              // Bun requested legacy auth. The done endpoint stays pending.
+              if (request.method === "PUT") {
+                return Response.json(
+                  {
+                    authUrl: new URL("/-/auth/cli/test-auth", request.url).href,
+                    doneUrl: new URL("/-/v1/done?authId=test-auth", request.url)
+                      .href,
+                  },
+                  { headers: { "www-authenticate": "OTP" }, status: 401 },
+                );
+              }
+            },
+          }),
+        );
+        const cwd = await pm.gitdir(
+          createPmContext(registry, pmBinPath, CLIENT_AUTH_TOKEN),
+          createPkgAFixture(),
+        );
+        const result = await runCliCommand({
+          command: "publish",
+          cwd,
+          pmBinPath,
+          signal,
+        });
+        expect.soft(result.exitCode).toBe(1);
+        expect
+          .soft(result.stdout)
+          .toContain(
+            "Bun attempted web authentication during a non-interactive publish",
+          );
+        expect
+          .soft(registry.requests.filter((request) => request.method === "PUT"))
+          .toHaveLength(1);
+        await expect.soft(tagExists("pkg-a@1.0.0", cwd)).resolves.toBe(false);
+      },
+    );
 
     it("retries interactively after an OTP auth challenge", async ({
       signal,

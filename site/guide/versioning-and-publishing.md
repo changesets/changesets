@@ -67,6 +67,37 @@ Check out the [CI automation](./automating.md) guide to simplify versioning and 
 Changesets supports the `publishConfig.directory` option in the `package.json` to publish a different directory than the package root. This works the same way as [pnpm's support](https://pnpm.io/package_json#publishconfigdirectory), however, Changesets normalizes this to work in all package managers.
 :::
 
+## Publishing with Bun
+
+Changesets detects Bun workspaces and uses `bun publish` and `bun pm pack`. Bun 1.3.1 or newer is required. Keep a `bun.lock` or `bun.lockb` in the workspace root so workspace discovery can identify the repository.
+
+Bun rewrites `workspace:*`, `workspace:^`, and `workspace:~` dependencies when packing and publishing. On Bun versions that resolve these ranges from the lockfile, the lockfile must reflect the current workspace versions. Otherwise a package can be published successfully with dependency versions from before the release.
+
+`changeset version` updates package manifests but does not update Bun's lockfile. Refresh the lockfile after versioning and include it in the version commit:
+
+```bash
+$ bunx @changesets/cli version
+$ bun install --lockfile-only --ignore-scripts
+$ git add .
+$ git commit -m "Version packages"
+$ bunx @changesets/cli publish
+```
+
+Refresh before `changeset pack` as well. `publish --from-pack-dir` publishes the existing tarballs without repacking them, so updating the lockfile after packing cannot repair dependency versions already in those artifacts.
+
+For a version script used by `changesets/action`, combine the two steps:
+
+```json [package.json]
+{
+  "scripts": {
+    "version-packages": "changeset version && bun install --lockfile-only --ignore-scripts",
+    "release": "changeset publish"
+  }
+}
+```
+
+Use `version-script: bun run version-packages` and `publish-script: bun run release` with `changesets/action@v2`. See [Bun authentication in CI](./automating.md#bun-authentication-in-ci) for token configuration.
+
 ## Publishing for the First Time
 
 For packages that are being published for the first time, make sure that the [`access`](./config.md#access) option is properly set. If all your packages are public, set it to `public`:

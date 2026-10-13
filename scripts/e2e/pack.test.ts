@@ -18,6 +18,7 @@ function sanitizePackLog(message: unknown) {
       // Normalize standalone carriage returns used for terminal progress redraws.
       .replaceAll("\r", "\n")
       .replace(/changeset v\S+/g, "changeset v[version]")
+      .replace(/bun pack v\S+ \([^)]+\)/g, "bun pack v[version] ([revision])")
       .replace(/(➤ YN0000: Done in )\d+s \d+ms/g, "$1[duration]")
       .replace(
         /^[A-Za-z]:\\(?:[^\\\r\n]+\\)*cmd\.exe \/d \/s \/c /gim,

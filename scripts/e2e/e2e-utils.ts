@@ -484,6 +484,11 @@ function createBunGitdir(packageName: string) {
 
 export const pmCases = [
   {
+    name: "bun 1.3.1",
+    bins: { bun: "bun-min" },
+    gitdir: createBunGitdir("bun-min"),
+  },
+  {
     name: "bun 1",
     bins: { bun: "bun-1" },
     gitdir: createBunGitdir("bun-1"),

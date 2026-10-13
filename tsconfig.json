@@ -13,7 +13,7 @@
       "ES2025.Collection",
       "ES2025.Iterator"
     ],
-    "types": ["node"]
+    "types": ["node", "vitest/globals"]
   },
   "include": ["**/*"],
   // E2e tests are typechecked separately after their on-demand dependencies are installed.

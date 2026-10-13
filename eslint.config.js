@@ -115,7 +115,10 @@ export default defineConfig(
     ...tseslint.configs.disableTypeChecked,
   },
   {
-    files: ["**/*.test.*"],
+    files: ["**/*.test.*", "**/*.vitest.*"],
+    languageOptions: {
+      globals: vitest.environments.env.globals,
+    },
     rules: {
       // mock functions often have to be async to match the original fn
       "@typescript-eslint/require-await": "off",

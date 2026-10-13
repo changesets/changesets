@@ -19,7 +19,9 @@ function sanitizeEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
 }
 
 function getBunError(stdout: string, stderr: string): BunCommandError {
-  const output = stderr || stdout;
+  // Bun can print the OTP prompt to stdout and the EOF error to stderr.
+  // Preserve both so authentication challenges can be retried interactively.
+  const output = [stderr.trim(), stdout.trim()].filter(Boolean).join("\n");
   const statusCode = output.match(/(?:^|\n)(\d{3})(?: [^:\n]+)?:/)?.[1];
   return {
     code: statusCode ? `E${statusCode}` : undefined,
@@ -125,6 +127,9 @@ export const publish: PublishTool["publish"] = async ({
     ? path.resolve(pkg.dir, pkg.packageJson.publishConfig.directory)
     : pkg.dir;
   const args = ["--access", release.access, "--tag", release.tag];
+  // The captured attempt must report an OTP challenge instead of waiting for
+  // browser authentication. Interactive retries keep Bun's default web flow.
+  if (!interactive) args.push("--auth-type", "legacy");
   if (otpCode) args.push("--otp", otpCode);
   // Bun resolves positional tarballs from the workspace root rather than cwd,
   // so an absolute path is needed for artifacts outside the package directory.
@@ -148,8 +153,9 @@ export const publish: PublishTool["publish"] = async ({
   if (!interactive) {
     const detectWebAuth = () => {
       if (
-        observedStdout.includes(webAuthPrompt) ||
-        observedStderr.includes(webAuthPrompt)
+        !webAuthDetected &&
+        (observedStdout.includes(webAuthPrompt) ||
+          observedStderr.includes(webAuthPrompt))
       ) {
         webAuthDetected = true;
         publishProcess.kill();
@@ -171,7 +177,7 @@ export const publish: PublishTool["publish"] = async ({
   if (webAuthDetected) {
     return {
       ...resultBase,
-      result: "failed",
+      result: "failed:needs-2fa",
       message:
         "Bun attempted web authentication during a non-interactive publish. The publish was stopped because Bun does not exit in this mode. Provide an OTP through the Changesets --otp option or NPM_CONFIG_OTP.",
     } satisfies PublishResult;
@@ -190,7 +196,11 @@ export const publish: PublishTool["publish"] = async ({
     } satisfies PublishResult;
   }
 
-  if (/\b(otp|one-time pass(?:word)?)\b/i.test(error.message ?? "")) {
+  if (
+    /\b(?:one-time pass(?:word)?|Enter OTP|failed to read OTP input|invalid OTP|OTP (?:required|invalid|expired))\b/i.test(
+      error.message ?? "",
+    )
+  ) {
     return {
       ...resultBase,
       result: "failed:needs-2fa",
