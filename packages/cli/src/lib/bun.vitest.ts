@@ -42,6 +42,16 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllEnvs());
 
 describe("publishing", () => {
+  it("reports an unsuccessful publish even when Bun emits no diagnostic", async () => {
+    mockedExec.mockResolvedValue({ exitCode: 137, stdout: "", stderr: "" });
+    await expect(bun.publish(publishOptions)).resolves.toEqual({
+      name: "pkg-a",
+      version: "1.0.0",
+      result: "failed",
+      code: undefined,
+      message: undefined,
+    });
+  });
   it("recognizes an OTP prompt on stdout even when stderr reports EOF", async () => {
     mockedExec.mockResolvedValue({
       exitCode: 1,
@@ -306,19 +316,54 @@ describe("publishing", () => {
 });
 
 describe("OTP precedence", () => {
-  it("prefers the CLI value, then uppercase env, then lowercase env", () => {
-    vi.stubEnv("NPM_CONFIG_OTP", "uppercase");
-    vi.stubEnv("npm_config_otp", "lowercase");
-    expect(bun.getOtpCode("explicit")).toBe("explicit");
-    expect(bun.getOtpCode()).toBe("uppercase");
-    vi.stubEnv("NPM_CONFIG_OTP", undefined);
-    expect(bun.getOtpCode()).toBe("lowercase");
-    vi.stubEnv("npm_config_otp", undefined);
-    expect(bun.getOtpCode()).toBeNull();
-  });
+  it.each(["NPM_CONFIG_OTP", "npm_config_otp"])(
+    "reads %s and prefers the CLI value",
+    (key) => {
+      vi.stubEnv(key, "env-code");
+      expect(bun.getOtpCode("explicit")).toBe("explicit");
+      expect(bun.getOtpCode()).toBe("env-code");
+      vi.stubEnv(key, undefined);
+      expect(bun.getOtpCode()).toBeNull();
+    },
+  );
+
+  // Windows aliases environment variable names case-insensitively, so these
+  // two values can only coexist on platforms with case-sensitive env names.
+  it.runIf(process.platform !== "win32")(
+    "prefers uppercase when both environment spellings coexist",
+    () => {
+      vi.stubEnv("NPM_CONFIG_OTP", "uppercase");
+      vi.stubEnv("npm_config_otp", "lowercase");
+      expect(bun.getOtpCode("explicit")).toBe("explicit");
+      expect(bun.getOtpCode()).toBe("uppercase");
+      vi.stubEnv("NPM_CONFIG_OTP", undefined);
+      expect(bun.getOtpCode()).toBe("lowercase");
+      vi.stubEnv("npm_config_otp", undefined);
+      expect(bun.getOtpCode()).toBeNull();
+    },
+  );
 });
 
 describe("package info", () => {
+  it("propagates a dist-tags query failure after a successful version lookup", async () => {
+    mockedExec.mockResolvedValueOnce({
+      exitCode: 0,
+      stdout: '{ "versions": ["1.0.0"] }',
+      stderr: "",
+    });
+    mockedExec.mockResolvedValueOnce({
+      exitCode: 1,
+      stdout: "",
+      stderr: "403 Forbidden: registry\n - Access denied.",
+    });
+    await expect(bun.info({ cwd: "/workspace", pkg })).resolves.toEqual({
+      error: {
+        code: "E403",
+        message: "403 Forbidden: registry\n - Access denied.",
+      },
+    });
+    expect(mockedExec).toHaveBeenCalledTimes(2);
+  });
   it("combines all versions with a separate dist-tags query", async () => {
     mockedExec.mockResolvedValueOnce({
       exitCode: 0,
@@ -398,6 +443,26 @@ describe("package info", () => {
 });
 
 describe("packing", () => {
+  it("returns the requested artifact path after successful packing", async () => {
+    mockedExec.mockResolvedValue({
+      exitCode: 0,
+      stdout: "bun pack",
+      stderr: "",
+    });
+    await expect(
+      bun.pack({
+        pkg,
+        packDir: pkg.dir,
+        outputDir: "/artifacts",
+        tarballPath: "/artifacts/pkg-a.tgz",
+      }),
+    ).resolves.toEqual({ tarballPath: "/artifacts/pkg-a.tgz" });
+    expect(mockedExec).toHaveBeenCalledWith(
+      "bun",
+      ["pm", "pack", "--filename", "/artifacts/pkg-a.tgz"],
+      { nodePath: false, nodeOptions: { cwd: pkg.dir } },
+    );
+  });
   it("rejects packing a different directory before invoking Bun", async () => {
     await expect(
       bun.pack({

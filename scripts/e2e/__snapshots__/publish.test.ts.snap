@@ -404,7 +404,7 @@ exports[`Publish command e2e > npm 10 > surfaces pre-publish errors 1`] = `
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages
+
 Some packages failed to publish:
 pkg-a@1.0.0
 └ 1: command failed
@@ -420,7 +420,7 @@ exports[`Publish command e2e > npm 10 > surfaces publish failures for bad creden
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages
+
 Some packages failed to publish:
 pkg-a@1.0.0
 └ E401: 401 Unauthorized - PUT [registry-url]/pkg-a
@@ -435,7 +435,7 @@ exports[`Publish command e2e > npm 10 > surfaces publish failures when not logge
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages
+
 Some packages failed to publish:
 pkg-a@1.0.0
 └ ENEEDAUTH: This command requires you to be logged in to [registry-url]/
@@ -451,7 +451,7 @@ exports[`Publish command e2e > npm 10 > surfaces web-auth OTP publish failures i
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages
+
 Some packages failed to publish:
 pkg-a@1.0.0
 └ EOTP: This operation requires a one-time password from your authenticator.
@@ -532,7 +532,7 @@ exports[`Publish command e2e > npm 11 > surfaces pre-publish errors 1`] = `
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages
+
 Some packages failed to publish:
 pkg-a@1.0.0
 └ 1: command failed
@@ -548,7 +548,7 @@ exports[`Publish command e2e > npm 11 > surfaces publish failures for bad creden
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages
+
 Some packages failed to publish:
 pkg-a@1.0.0
 └ E401: 401 Unauthorized - PUT [registry-url]/pkg-a
@@ -563,7 +563,7 @@ exports[`Publish command e2e > npm 11 > surfaces publish failures when not logge
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages
+
 Some packages failed to publish:
 pkg-a@1.0.0
 └ ENEEDAUTH: This command requires you to be logged in to [registry-url]/
@@ -579,7 +579,7 @@ exports[`Publish command e2e > npm 11 > surfaces web-auth OTP publish failures i
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages
+
 Some packages failed to publish:
 pkg-a@1.0.0
 └ EOTP: This operation requires a one-time password.
@@ -662,7 +662,7 @@ exports[`Publish command e2e > npm 12 > surfaces pre-publish errors 1`] = `
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages
+
 Some packages failed to publish:
 pkg-a@1.0.0
 └ 1: command failed
@@ -678,7 +678,7 @@ exports[`Publish command e2e > npm 12 > surfaces publish failures for bad creden
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages
+
 Some packages failed to publish:
 pkg-a@1.0.0
 └ E401: 401 Unauthorized - PUT [registry-url]/pkg-a
@@ -693,7 +693,7 @@ exports[`Publish command e2e > npm 12 > surfaces publish failures when not logge
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages
+
 Some packages failed to publish:
 pkg-a@1.0.0
 └ ENEEDAUTH: This command requires you to be logged in to [registry-url]/
@@ -709,7 +709,7 @@ exports[`Publish command e2e > npm 12 > surfaces web-auth OTP publish failures i
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages
+
 Some packages failed to publish:
 pkg-a@1.0.0
 └ EOTP: This operation requires a one-time password.
@@ -793,7 +793,7 @@ exports[`Publish command e2e > pnpm 10 + npm 10 > surfaces pre-publish errors 1`
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages
+
 Some packages failed to publish:
 pkg-a@1.0.0
 └ ELIFECYCLE: pkg-a@1.0.0 prepack: \`node -e "console.log(JSON.stringify({ lifecycle: 'output' })); console.error('prepack failed'); process.exit(1)"\`
@@ -809,7 +809,7 @@ exports[`Publish command e2e > pnpm 10 + npm 10 > surfaces publish failures for 
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages
+
 Some packages failed to publish:
 pkg-a@1.0.0
 └ E401: 401 Unauthorized - PUT [registry-url]/pkg-a
@@ -824,7 +824,7 @@ exports[`Publish command e2e > pnpm 10 + npm 10 > surfaces publish failures when
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages
+
 Some packages failed to publish:
 pkg-a@1.0.0
 └ ENEEDAUTH: This command requires you to be logged in to [registry-url]/
@@ -840,7 +840,7 @@ exports[`Publish command e2e > pnpm 10 + npm 10 > surfaces web-auth OTP publish 
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages
+
 Some packages failed to publish:
 pkg-a@1.0.0
 └ EOTP: This operation requires a one-time password from your authenticator.
@@ -922,7 +922,7 @@ exports[`Publish command e2e > pnpm 10 + npm 12 > surfaces pre-publish errors 1`
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages
+
 Some packages failed to publish:
 pkg-a@1.0.0
 └ ELIFECYCLE: pkg-a@1.0.0 prepack: \`node -e "console.log(JSON.stringify({ lifecycle: 'output' })); console.error('prepack failed'); process.exit(1)"\`
@@ -938,7 +938,7 @@ exports[`Publish command e2e > pnpm 10 + npm 12 > surfaces publish failures for 
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages
+
 Some packages failed to publish:
 pkg-a@1.0.0
 └ E401: 401 Unauthorized - PUT [registry-url]/pkg-a
@@ -953,7 +953,7 @@ exports[`Publish command e2e > pnpm 10 + npm 12 > surfaces publish failures when
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages
+
 Some packages failed to publish:
 pkg-a@1.0.0
 └ ENEEDAUTH: This command requires you to be logged in to [registry-url]/
@@ -969,7 +969,7 @@ exports[`Publish command e2e > pnpm 10 + npm 12 > surfaces web-auth OTP publish 
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages
+
 Some packages failed to publish:
 pkg-a@1.0.0
 └ EOTP: This operation requires a one-time password.
@@ -1037,7 +1037,7 @@ exports[`Publish command e2e > pnpm 11 > surfaces pre-publish errors 1`] = `
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages
+
 Some packages failed to publish:
 pkg-a@1.0.0
 └ ELIFECYCLE: pkg-a@1.0.0 prepack: \`node -e "console.log(JSON.stringify({ lifecycle: 'output' })); console.error('prepack failed'); process.exit(1)"\`
@@ -1053,7 +1053,7 @@ exports[`Publish command e2e > pnpm 11 > surfaces publish failures for bad crede
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages
+
 Some packages failed to publish:
 pkg-a@1.0.0
 └ E401: 401 Unauthorized - PUT [registry-url]/pkg-a
@@ -1068,7 +1068,7 @@ exports[`Publish command e2e > pnpm 11 > surfaces publish failures when not logg
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages
+
 Some packages failed to publish:
 pkg-a@1.0.0
 └ E401: 401 Unauthorized - PUT [registry-url]/pkg-a
@@ -1083,7 +1083,7 @@ exports[`Publish command e2e > pnpm 11 > surfaces web-auth OTP publish failures 
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages
+
 Some packages failed to publish:
 pkg-a@1.0.0
 └ ERR_PNPM_OTP_NON_INTERACTIVE: The registry requires additional authentication, but pnpm is not running in an interactive terminal
@@ -1257,7 +1257,7 @@ exports[`Publish command e2e > yarn 4 > surfaces pre-publish errors 1`] = `
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages
+
 Some packages failed to publish:
 pkg-a@1.0.0
 └ YN0036: Prepack script failed (exit code 1, logs can be found here: [yarn-prepack-log]); run yarn prepack to investigate
@@ -1272,7 +1272,7 @@ exports[`Publish command e2e > yarn 4 > surfaces publish failures for bad creden
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages
+
 Some packages failed to publish:
 pkg-a@1.0.0
 └ YN0041: Invalid authentication (as an unknown user)
@@ -1287,7 +1287,7 @@ exports[`Publish command e2e > yarn 4 > surfaces publish failures when not logge
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages
+
 Some packages failed to publish:
 pkg-a@1.0.0
 └ YN0033: No authentication configured for request
@@ -1302,7 +1302,7 @@ exports[`Publish command e2e > yarn 4 > surfaces web-auth OTP publish failures i
 These packages will be published as they were not found in the registry:
 pkg-a@1.0.0
 0 packages are already published.
-◒  Publishing packages
+
 Some packages failed to publish:
 pkg-a@1.0.0
 └ YN0041: Invalid OTP token

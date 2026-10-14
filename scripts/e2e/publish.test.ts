@@ -342,15 +342,32 @@ function sanitizePublishLog(message: unknown, registryUrl: string) {
     .replaceAll(/\/-\/auth\/cli\/[^\s"]+/g, "/-/auth/cli/[uuid]")
     .replaceAll(/\/-\/v1\/done\?authId=[^\s"]+/g, "/-/v1/done?authId=[uuid]");
 
-  // A captured Bun failure can race a progress redraw. Keep that transient
+  // A captured failure can race a progress redraw. Keep that transient
   // row out of non-TTY snapshots while preserving interactive progress.
-  return output.includes("bun publish v[version]") && !output.startsWith("┌")
+  return !output.startsWith("┌")
     ? normalizedOutput.replace(
         /^[◒◐◓◑•oO0] {2}Publishing packages(?: \(\d+\/\d+\))?[ \t]*$/gm,
         "",
       )
     : normalizedOutput;
 }
+
+it.each(["◒  Publishing packages", "◐  Publishing packages (1/2)"])(
+  "normalizes captured progress row %s without changing the error",
+  (row) => {
+    const before = "🦋 changeset v3.0.3\n\n0 packages are already published.\n";
+    const after =
+      "Some packages failed to publish:\npkg-a@1.0.0\n└ ERR_PNPM_OTP_NON_INTERACTIVE: Additional authentication required\n";
+    expect(
+      sanitizePublishLog(`${before}${row}\n${after}`, "http://localhost:1234"),
+    ).toBe(sanitizePublishLog(`${before}\n${after}`, "http://localhost:1234"));
+  },
+);
+
+it("preserves interactive publishing progress", () => {
+  const output = "┌  Publish\n◒  Publishing packages\n";
+  expect(sanitizePublishLog(output, "http://localhost:1234")).toBe(output);
+});
 
 async function fetchPackument(registry: TestRegistry, packageName: string) {
   const response = await fetch(
