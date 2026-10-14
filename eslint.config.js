@@ -116,12 +116,15 @@ export default defineConfig(
   },
   {
     files: ["**/*.test.*", "**/*.vitest.*"],
-    languageOptions: {
-      globals: vitest.environments.env.globals,
-    },
     rules: {
       // mock functions often have to be async to match the original fn
       "@typescript-eslint/require-await": "off",
+    },
+  },
+  {
+    files: ["**/*.vitest.*"],
+    languageOptions: {
+      globals: vitest.environments.env.globals,
     },
   },
   eslintConfigPrettier,

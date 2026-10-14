@@ -189,6 +189,20 @@ export async function createPmBinEnv(
     // CI-specific tests can opt in through env when needed.
     CI: undefined,
     GITHUB_ACTIONS: undefined,
+    // tinyexec merges this with process.env. Credentials and OTPs must come
+    // from the fixture, rather than a developer's shell or the CI runner.
+    NPM_CONFIG_TOKEN: undefined,
+    npm_config_token: undefined,
+    BUN_CONFIG_TOKEN: undefined,
+    NPM_TOKEN: undefined,
+    NODE_AUTH_TOKEN: undefined,
+    NPM_CONFIG_OTP: undefined,
+    npm_config_otp: undefined,
+    PNPM_CONFIG_OTP: undefined,
+    pnpm_config_otp: undefined,
+    NPM_CONFIG_REGISTRY: undefined,
+    npm_config_registry: undefined,
+    BUN_CONFIG_REGISTRY: undefined,
     // Required by ConPTY-launched processes on Windows.
     SystemRoot: process.env.SystemRoot,
     ...env,
@@ -470,7 +484,7 @@ function createBunGitdir(packageName: string) {
       ].join("\n"),
       ...fixture,
     });
-    await exec("bun", ["install", "--lockfile-only"], {
+    await exec("bun", ["install", "--lockfile-only", "--ignore-scripts"], {
       nodePath: false,
       nodeOptions: {
         cwd,

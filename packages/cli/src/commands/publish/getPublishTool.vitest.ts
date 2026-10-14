@@ -3,6 +3,11 @@ import type { detect } from "package-manager-detector/detect";
 import * as bun from "../../lib/bun.ts";
 import { getPublishTool } from "./getPublishTool.ts";
 
+declare const vi: typeof import("vitest").vi;
+declare const it: typeof import("vitest").it;
+declare const expect: typeof import("vitest").expect;
+declare const beforeEach: typeof import("vitest").beforeEach;
+
 const { mockedDetect } = vi.hoisted(() => ({
   mockedDetect: vi.fn<typeof detect>(),
 }));

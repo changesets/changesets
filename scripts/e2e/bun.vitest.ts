@@ -15,6 +15,10 @@ import {
   runCliCommand,
 } from "./e2e-utils.ts";
 
+declare const it: typeof import("vitest").it;
+declare const describe: typeof import("vitest").describe;
+declare const expect: typeof import("vitest").expect;
+
 const bunCases = pmCases.filter((pm) => "bun" in pm.bins);
 const token = "bun-ci-test-token";
 const plan = JSON.stringify({
@@ -95,6 +99,49 @@ async function createRegistry() {
 }
 
 describe.each(bunCases)("$name workspace packing", (pm) => {
+  it("includes a declared executable even when files excludes its directory", async ({
+    signal,
+  }) => {
+    await using stack = new AbortableAsyncDisposableStack(signal);
+    const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+    const cwd = await pm.gitdir(
+      { pmBinPath },
+      {
+        ...createPkgAFixture(),
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+          files: ["index.js"],
+          bin: "bin/cli.js",
+        }),
+        "packages/pkg-a/bin/cli.js":
+          "#!/usr/bin/env node\nconsole.log('pkg-a');\n",
+        "publish-plan.json": plan,
+      },
+    );
+    const result = await runCliCommand({
+      command: "pack",
+      args: [
+        "--from-publish-plan",
+        "publish-plan.json",
+        "--out-dir",
+        ".packed",
+      ],
+      cwd,
+      pmBinPath,
+      signal,
+    });
+    expect(result.exitCode).toBe(0);
+    const entries = await unpackTar(
+      gunzipSync(
+        await fs.readFile(path.join(cwd, ".packed/packages/pkg-a-1.0.0.tgz")),
+      ),
+    );
+    expect(entries.map(({ header }) => header.name)).toContain(
+      "package/bin/cli.js",
+    );
+  });
+
   it("uses refreshed workspace versions in the tarball and preserves source manifests", async ({
     signal,
   }) => {
@@ -218,6 +265,52 @@ describe.each(bunCases)("$name workspace packing", (pm) => {
 });
 
 describe.each(bunCases)("$name CI authentication", (pm) => {
+  it("publishes resolved workspace dependencies without changing the source manifest", async ({
+    signal,
+  }) => {
+    await using stack = new AbortableAsyncDisposableStack(signal);
+    const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+    const registry = stack.use(await createRegistry());
+    const manifest = JSON.stringify({
+      name: "pkg-a",
+      version: "1.0.0",
+      files: ["index.js"],
+      dependencies: { "pkg-b": "workspace:*" },
+    });
+    const cwd = await pm.gitdir(
+      { pmBinPath, registry },
+      {
+        ...createPkgAFixture(),
+        "packages/pkg-a/package.json": manifest,
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          version: "2.4.0",
+        }),
+      },
+    );
+    const result = await runCliCommand({
+      command: "publish",
+      cwd,
+      pmBinPath,
+      signal,
+      env: { CI: "true", NPM_CONFIG_TOKEN: token },
+    });
+    expect(result.exitCode, result.stdout + result.stderr).toBe(0);
+    expect(registry.uploads).toHaveLength(2);
+    const manifests = await Promise.all(
+      registry.uploads.map(async (upload) => {
+        const [attachment] = Object.values(upload.body._attachments);
+        return readPackedManifest(Buffer.from(attachment.data, "base64"));
+      }),
+    );
+    expect(
+      manifests.find((manifest) => manifest.name === "pkg-a"),
+    ).toMatchObject({ name: "pkg-a", dependencies: { "pkg-b": "2.4.0" } });
+    expect(
+      await fs.readFile(path.join(cwd, "packages/pkg-a/package.json"), "utf8"),
+    ).toBe(manifest);
+  });
+
   it.for([
     "NPM_CONFIG_TOKEN",
     "project .npmrc",
@@ -254,6 +347,16 @@ describe.each(bunCases)("$name CI authentication", (pm) => {
         signal,
       });
       expect(packed.exitCode).toBe(0);
+      // A prebuilt artifact must use workspace auth even if the original
+      // manifest points to a build directory that is absent in this CI job.
+      await fs.writeFile(
+        path.join(cwd, "packages/pkg-a/package.json"),
+        JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+          publishConfig: { directory: "missing-dist" },
+        }),
+      );
       const env = {
         CI: "true",
         CHANGESETS_OUTPUT: path.join(cwd, "published.ndjson"),

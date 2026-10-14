@@ -13,7 +13,7 @@
       "ES2025.Collection",
       "ES2025.Iterator"
     ],
-    "types": ["node", "vitest/globals"]
+    "types": ["node"]
   },
   "include": ["./"],
   "exclude": []

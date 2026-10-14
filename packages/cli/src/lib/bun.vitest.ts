@@ -5,6 +5,13 @@ import type { PublishReleaseEntry } from "../commands/publish-plan/getPublishPla
 import * as bun from "./bun.ts";
 import type { PublishOptions } from "./types.ts";
 
+declare const vi: typeof import("vitest").vi;
+declare const it: typeof import("vitest").it;
+declare const describe: typeof import("vitest").describe;
+declare const expect: typeof import("vitest").expect;
+declare const beforeEach: typeof import("vitest").beforeEach;
+declare const afterEach: typeof import("vitest").afterEach;
+
 const { mockedExec } = vi.hoisted(() => ({ mockedExec: vi.fn<typeof exec>() }));
 vi.mock("tinyexec", () => ({ exec: mockedExec }));
 
@@ -130,15 +137,19 @@ describe("publishing", () => {
       );
       const pending = bun.publish(publishOptions);
       const stream = streamName === "stdout" ? stdout : stderr;
-      stream.write("Authenticate your ");
+      stream.write("\nAuthenticate your ");
       expect(kill).not.toHaveBeenCalled();
-      stream.write("account at https://registry.example.test/auth");
-      stream.write("\nAuthenticate your account at");
+      stream.write("account at (press ENTER to open in browser):\n");
+      stream.write(
+        "\nAuthenticate your account at (press ENTER to open in browser):\n",
+      );
 
       await expect(pending).resolves.toMatchObject({
         result: "failed:needs-2fa",
       });
       expect(kill).toHaveBeenCalledTimes(1);
+      expect(stdout.listenerCount("data")).toBe(0);
+      expect(stderr.listenerCount("data")).toBe(0);
       stdout.destroy();
       stderr.destroy();
     },
@@ -161,6 +172,18 @@ describe("publishing", () => {
       expected: "failed",
       code: "E401",
     },
+    {
+      output:
+        "409 Conflict: registry\n - You cannot publish over the previously published versions: 1.0.0.",
+      expected: "failed:already-published",
+      code: "E409",
+    },
+    {
+      output:
+        "error: prepublishOnly script failed: cannot publish over the previously published versions",
+      expected: "failed",
+      code: undefined,
+    },
   ])(
     "classifies $expected without treating every registry rejection as OTP",
     async ({ output, expected, code }) => {
@@ -180,13 +203,81 @@ describe("publishing", () => {
     mockedExec.mockResolvedValue({ exitCode: 0, stdout: "", stderr: "" });
     await bun.publish({
       ...publishOptions,
+      pkg: {
+        ...pkg,
+        packageJson: {
+          ...pkg.packageJson,
+          publishConfig: { directory: "missing-dist" },
+        },
+      },
       tarballPath: "/artifacts/pkg-a-1.0.0.tgz",
     });
     expect(mockedExec).toHaveBeenCalledWith(
       "bun",
       expect.arrayContaining(["publish", "/artifacts/pkg-a-1.0.0.tgz"]),
-      expect.anything(),
+      expect.objectContaining({
+        nodeOptions: expect.objectContaining({ cwd: pkg.dir }),
+      }),
     );
+  });
+
+  it("rejects publishing a different directory before invoking Bun", async () => {
+    await expect(
+      bun.publish({
+        ...publishOptions,
+        pkg: {
+          ...pkg,
+          packageJson: {
+            ...pkg.packageJson,
+            publishConfig: { directory: "dist" },
+          },
+        },
+      }),
+    ).resolves.toMatchObject({
+      result: "failed",
+      message: expect.stringContaining("publishConfig.directory"),
+    });
+    expect(mockedExec).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    "Enter OTP: ",
+    "This operation requires a one-time password.",
+    "invalid OTP",
+  ])("does not retry lifecycle output containing %s", async (stdout) => {
+    mockedExec.mockResolvedValue({
+      exitCode: 1,
+      stdout,
+      stderr: "error: prepublishOnly script failed",
+    });
+    await expect(bun.publish(publishOptions)).resolves.toMatchObject({
+      result: "failed",
+    });
+  });
+
+  it("does not stop lifecycle output mentioning web authentication", async () => {
+    const stdout = new PassThrough();
+    const { promise, resolve } = Promise.withResolvers<Output>();
+    const kill = vi.fn();
+    mockedExec.mockReturnValue(
+      Object.assign(promise, {
+        process: { stdout },
+        kill,
+      }) as unknown as ReturnType<typeof exec>,
+    );
+    const pending = bun.publish(publishOptions);
+    stdout.write(
+      "Authenticate your account at https://registry.example.test/auth\n",
+    );
+    resolve({
+      exitCode: 1,
+      stdout: "",
+      stderr: "error: prepublishOnly script failed",
+    });
+    await expect(pending).resolves.toMatchObject({ result: "failed" });
+    expect(kill).not.toHaveBeenCalled();
+    expect(stdout.listenerCount("data")).toBe(0);
+    stdout.destroy();
   });
 
   it("does not mistake a packed filename containing otp for an auth challenge", async () => {
@@ -307,6 +398,19 @@ describe("package info", () => {
 });
 
 describe("packing", () => {
+  it("rejects packing a different directory before invoking Bun", async () => {
+    await expect(
+      bun.pack({
+        pkg,
+        packDir: `${pkg.dir}/dist`,
+        outputDir: "/artifacts",
+        tarballPath: "/artifacts/pkg-a.tgz",
+      }),
+    ).resolves.toMatchObject({
+      error: { message: expect.stringContaining("publishConfig.directory") },
+    });
+    expect(mockedExec).not.toHaveBeenCalled();
+  });
   it("propagates a missing workspace version instead of reporting a tarball", async () => {
     mockedExec.mockResolvedValue({
       exitCode: 1,

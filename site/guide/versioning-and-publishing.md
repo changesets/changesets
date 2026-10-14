@@ -64,12 +64,16 @@ And you have released your changes! When you add more changesets again, repeat t
 Check out the [CI automation](./automating.md) guide to simplify versioning and publishing so that releasing is as simple as merging a PR. And the [Backporting Changes](./backporting-changes.md) guide if you need to release changes in previous versions.
 
 ::: tip Publish a different directory
-Changesets supports the `publishConfig.directory` option in the `package.json` to publish a different directory than the package root. This works the same way as [pnpm's support](https://pnpm.io/package_json#publishconfigdirectory), however, Changesets normalizes this to work in all package managers.
+Changesets supports the `publishConfig.directory` option in the `package.json` with npm and pnpm to publish a different directory than the package root. This works the same way as [pnpm's support](https://pnpm.io/package_json#publishconfigdirectory). Yarn and Bun do not support publishing a different directory through Changesets.
 :::
 
 ## Publishing with Bun
 
 Changesets detects Bun workspaces and uses `bun publish` and `bun pm pack`. Bun 1.3.1 or newer is required. Keep a `bun.lock` or `bun.lockb` in the workspace root so workspace discovery can identify the repository.
+
+The minimum version includes [Bun's fix for packing declared executables](https://bun.com/blog/bun-v1.3.1): older versions can omit a `bin` entry when its directory is excluded by the package's `files` list.
+
+Bun publishes from the workspace package directory so it can find the workspace's registry and authentication configuration. `publishConfig.directory` cannot select a different directory for direct publishing or packing. `publish --from-pack-dir` accepts prebuilt tarballs and uses the source workspace for authentication, even if that manifest has `publishConfig.directory` configured.
 
 Bun rewrites `workspace:*`, `workspace:^`, and `workspace:~` dependencies when packing and publishing. On Bun versions that resolve these ranges from the lockfile, the lockfile must reflect the current workspace versions. Otherwise a package can be published successfully with dependency versions from before the release.
 

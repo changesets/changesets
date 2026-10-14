@@ -1,4 +1,5 @@
 import path from "node:path";
+import { stripVTControlCharacters } from "node:util";
 import { exec } from "tinyexec";
 import { isAlreadyPublishedError } from "./common.ts";
 import type { PackageInfo, PublishResult, PublishTool } from "./types.ts";
@@ -8,7 +9,12 @@ type BunCommandError = {
   message?: string;
 };
 
-const webAuthPrompt = "Authenticate your account at";
+const webAuthPrompt =
+  "\nAuthenticate your account at (press ENTER to open in browser):";
+const directoryError = {
+  message:
+    "Bun does not support publishing a different directory with publishConfig.directory. Publish from the workspace package directory or supply a prebuilt tarball with --from-pack-dir.",
+};
 
 function sanitizeEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   return {
@@ -98,7 +104,14 @@ export const info: PublishTool["info"] = async ({ pkg }) => {
   return { published: true, info: result.info };
 };
 
-export const pack: PublishTool["pack"] = async ({ packDir, tarballPath }) => {
+export const pack: PublishTool["pack"] = async ({
+  pkg,
+  packDir,
+  tarballPath,
+}) => {
+  if (path.resolve(packDir) !== path.resolve(pkg.dir)) {
+    return { error: directoryError };
+  }
   const { exitCode, stdout, stderr } = await exec(
     "bun",
     ["pm", "pack", "--filename", tarballPath],
@@ -123,9 +136,15 @@ export const publish: PublishTool["publish"] = async ({
   interactive,
   otpCode,
 }) => {
-  const cwd = pkg.packageJson.publishConfig?.directory
-    ? path.resolve(pkg.dir, pkg.packageJson.publishConfig.directory)
-    : pkg.dir;
+  const resultBase = { name: release.name, version: release.version };
+  if (
+    !tarballPath &&
+    pkg.packageJson.publishConfig?.directory &&
+    path.resolve(pkg.dir, pkg.packageJson.publishConfig.directory) !==
+      path.resolve(pkg.dir)
+  ) {
+    return { ...resultBase, result: "failed", ...directoryError };
+  }
   const args = ["--access", release.access, "--tag", release.tag];
   // The captured attempt must report an OTP challenge instead of waiting for
   // browser authentication. Interactive retries keep Bun's default web flow.
@@ -142,36 +161,41 @@ export const publish: PublishTool["publish"] = async ({
     // Bun has no JSON publish mode and reports the EOF itself.
     ...(!interactive && { stdin: "" }),
     nodeOptions: {
-      cwd,
+      // Tarballs are already packed. Keep workspace registry/auth discovery
+      // even when the source manifest specifies a different publish directory.
+      cwd: pkg.dir,
       stdio: interactive ? "inherit" : "pipe",
       env: sanitizeEnv(process.env),
     },
   });
   let webAuthDetected = false;
-  let observedStdout = "";
-  let observedStderr = "";
-  if (!interactive) {
-    const detectWebAuth = () => {
+  const watchStream = () => {
+    let observed = "\n";
+    return (chunk: Buffer | string) => {
+      observed += chunk.toString();
       if (
         !webAuthDetected &&
-        (observedStdout.includes(webAuthPrompt) ||
-          observedStderr.includes(webAuthPrompt))
+        stripVTControlCharacters(observed).includes(webAuthPrompt)
       ) {
         webAuthDetected = true;
         publishProcess.kill();
       }
+      observed = observed.slice(-webAuthPrompt.length * 2);
     };
-    publishProcess.process?.stdout?.on("data", (chunk: Buffer | string) => {
-      observedStdout += chunk.toString();
-      detectWebAuth();
-    });
-    publishProcess.process?.stderr?.on("data", (chunk: Buffer | string) => {
-      observedStderr += chunk.toString();
-      detectWebAuth();
-    });
+  };
+  const watchStdout = watchStream();
+  const watchStderr = watchStream();
+  const child = publishProcess.process;
+  if (!interactive) {
+    child?.stdout?.on("data", watchStdout);
+    child?.stderr?.on("data", watchStderr);
   }
-  const { exitCode, stdout, stderr } = await publishProcess;
-  const resultBase = { name: release.name, version: release.version };
+  const { exitCode, stdout, stderr } = await Promise.resolve(
+    publishProcess,
+  ).finally(() => {
+    child?.stdout?.off("data", watchStdout);
+    child?.stderr?.off("data", watchStderr);
+  });
   const error = getBunError(stdout, stderr);
 
   if (webAuthDetected) {
@@ -188,7 +212,10 @@ export const publish: PublishTool["publish"] = async ({
       result: "published",
     } satisfies PublishResult;
   }
-  if (isAlreadyPublishedError(error.message ?? "")) {
+  if (
+    (error.code === "E403" || error.code === "E409") &&
+    isAlreadyPublishedError(error.message ?? "")
+  ) {
     return {
       ...resultBase,
       result: "failed:already-published",
@@ -197,9 +224,12 @@ export const publish: PublishTool["publish"] = async ({
   }
 
   if (
-    /\b(?:one-time pass(?:word)?|Enter OTP|failed to read OTP input|invalid OTP|OTP (?:required|invalid|expired))\b/i.test(
-      error.message ?? "",
-    )
+    (error.code === "E401" &&
+      /\b(?:one-time pass(?:word)?|invalid OTP|OTP (?:required|invalid|expired))\b/i.test(
+        stderr,
+      )) ||
+    (/(?:^|\n)\w+: failed to read OTP input\s*$/m.test(stderr) &&
+      stdout.includes("This operation requires a one-time password."))
   ) {
     return {
       ...resultBase,

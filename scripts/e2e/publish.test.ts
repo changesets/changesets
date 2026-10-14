@@ -2100,6 +2100,61 @@ describe("Publish command e2e", () => {
       },
     );
 
+    it.runIf("bun" in pm.bins)(
+      "recovers interactively after an inherited OTP is rejected",
+      async ({ signal }) => {
+        await using stack = new AbortableAsyncDisposableStack(signal);
+        const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+        const registry = stack.use(
+          await createTestRegistry({
+            packages: {
+              "pkg-a": { versions: ["0.0.1"], tags: { latest: "0.0.1" } },
+            },
+            auth: {
+              packages: {
+                "pkg-a": { token: CLIENT_AUTH_TOKEN, otp: { code: "654321" } },
+              },
+            },
+          }),
+        );
+        const cwd = await pm.gitdir(
+          createPmContext(registry, pmBinPath, CLIENT_AUTH_TOKEN),
+          createPkgAFixture(),
+        );
+        let output = "";
+        let otpWritten = false;
+        const result = await runCliCommand({
+          command: "publish",
+          cwd,
+          pmBinPath,
+          signal,
+          tty: true,
+          env: { NPM_CONFIG_OTP: "111111" },
+          onData(chunk, write) {
+            output += chunk;
+            if (!otpWritten && output.includes("Enter OTP:")) {
+              otpWritten = true;
+              write("654321\r");
+            }
+          },
+        });
+        expect(result.exitCode).toBe(0);
+        expect(otpWritten).toBe(true);
+        const requests = registry.requests.filter(
+          (request) =>
+            request.method === "PUT" && request.pathname === "/pkg-a",
+        );
+        expect(
+          requests.map(({ otpCode, statusCode }) => ({ otpCode, statusCode })),
+        ).toEqual([
+          { otpCode: "111111", statusCode: 401 },
+          { otpCode: undefined, statusCode: 401 },
+          { otpCode: "654321", statusCode: 201 },
+        ]);
+        await expect(tagExists("pkg-a@1.0.0", cwd)).resolves.toBe(true);
+      },
+    );
+
     it("retries interactively after an OTP auth challenge", async ({
       signal,
     }) => {
