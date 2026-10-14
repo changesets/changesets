@@ -1,7 +1,13 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import {
+  getChangedCatalogEntries,
+  parseCatalogProtocol,
+  parseCatalogs,
+  readCatalogs,
+} from "@changesets/catalogs";
 import { GitError } from "@changesets/errors";
-import type { Package } from "@changesets/types";
+import type { Package, Packages } from "@changesets/types";
 import { getPackages } from "@manypkg/get-packages";
 import picomatch from "picomatch";
 import { exec } from "tinyexec";
@@ -279,14 +285,27 @@ export async function getChangedPackagesSinceRef({
   cwd,
   ref,
   changedFilePatterns = ["**"],
+  detectCatalogChanges = true,
 }: {
   cwd: string;
   ref: string;
   changedFilePatterns?: readonly string[];
+  detectCatalogChanges?: boolean;
 }): Promise<Package[]> {
   const changedFiles = await getChangedFilesSince({ ref, cwd, fullPath: true });
+  const packages = await getPackages(cwd);
 
-  return (await getPackages(cwd)).packages
+  const packagesWithChangedCatalogEntries = detectCatalogChanges
+    ? await getPackagesWithChangedCatalogEntries({
+        cwd,
+        ref,
+        packages,
+        changedFiles,
+        changedFilePatterns,
+      })
+    : new Set<string>();
+
+  return packages.packages
     .toSorted((pkgA, pkgB) => pkgB.dir.length - pkgA.dir.length)
     .filter((pkg) => {
       const changedPackageFiles: string[] = [];
@@ -302,10 +321,104 @@ export async function getChangedPackagesSinceRef({
       }
 
       return (
-        changedPackageFiles.length > 0 &&
-        globMatchSome(changedPackageFiles, changedFilePatterns)
+        packagesWithChangedCatalogEntries.has(pkg.packageJson.name) ||
+        (changedPackageFiles.length > 0 &&
+          globMatchSome(changedPackageFiles, changedFilePatterns))
       );
     });
+}
+
+const DEPENDENCY_TYPES = [
+  "dependencies",
+  "devDependencies",
+  "peerDependencies",
+  "optionalDependencies",
+] as const;
+
+async function getPackagesWithChangedCatalogEntries({
+  cwd,
+  ref,
+  packages,
+  changedFiles,
+  changedFilePatterns,
+}: {
+  cwd: string;
+  ref: string;
+  packages: Packages;
+  changedFiles: readonly string[];
+  changedFilePatterns: readonly string[];
+}): Promise<Set<string>> {
+  const changed = new Set<string>();
+
+  // A catalog entry replaces a range in each package.json referencing it,
+  // so a config that excludes package.json should exclude catalog updates too
+  if (!globMatchSome(["package.json"], changedFilePatterns)) {
+    return changed;
+  }
+
+  const catalogs = await readCatalogs(packages.rootDir);
+
+  if (!catalogs.source) {
+    return changed;
+  }
+
+  const catalogPath = path.resolve(packages.rootDir, catalogs.source.filePath);
+
+  if (!changedFiles.includes(catalogPath)) {
+    return changed;
+  }
+
+  const repoRoot = await getRepoRoot({ cwd });
+  const previousContents = await getFileContentsAtRef({
+    cwd,
+    ref: await getDivergedCommit(cwd, ref),
+    filePath: path.relative(repoRoot, catalogPath).replace(/\\/g, "/"),
+  });
+
+  const changedEntries = getChangedCatalogEntries(
+    previousContents == null
+      ? new Map()
+      : parseCatalogs(previousContents, catalogs.source.format),
+    catalogs.entries,
+  );
+
+  if (changedEntries.length === 0) {
+    return changed;
+  }
+
+  for (const pkg of packages.packages) {
+    const referencesChangedEntry = changedEntries.some(
+      ({ catalogName, dependencyName }) =>
+        DEPENDENCY_TYPES.some((depType) => {
+          const range = pkg.packageJson[depType]?.[dependencyName];
+
+          return range != null && parseCatalogProtocol(range) === catalogName;
+        }),
+    );
+
+    if (referencesChangedEntry) {
+      changed.add(pkg.packageJson.name);
+    }
+  }
+
+  return changed;
+}
+
+async function getFileContentsAtRef({
+  cwd,
+  ref,
+  filePath,
+}: {
+  cwd: string;
+  ref: string;
+  filePath: string;
+}): Promise<string | undefined> {
+  const cmd = await exec("git", ["show", `${ref}:${filePath}`], {
+    nodeOptions: { cwd },
+  });
+
+  // A non-zero exit code means the file didn't exist at that ref
+  return cmd.exitCode === 0 ? cmd.stdout.toString() : undefined;
 }
 
 export async function tagExists(tagStr: string, cwd: string) {

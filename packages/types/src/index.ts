@@ -117,6 +117,8 @@ export type Config = {
   ignore: ReadonlyArray<string>;
   /** This is supposed to be used with pnpm's `link-workspace-packages: false` and Berry's `enableTransparentWorkspaces: false` */
   bumpVersionsWithWorkspaceProtocolOnly?: boolean;
+  /** Whether updating a catalog entry counts as a change to every package referencing it */
+  detectCatalogChanges?: boolean;
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: Required<ExperimentalOptions>;
   snapshot: {
     useCalculatedVersion: boolean;
@@ -147,6 +149,8 @@ export type WrittenConfig = {
   updateInternalDependencies?: "patch" | "minor";
   ignore?: ReadonlyArray<string>;
   bumpVersionsWithWorkspaceProtocolOnly?: boolean;
+  /** Whether updating a catalog entry counts as a change to every package referencing it */
+  detectCatalogChanges?: boolean;
   snapshot?: {
     useCalculatedVersion?: boolean;
     prereleaseTemplate?: string;
@@ -215,4 +219,35 @@ export interface Packages {
   tool: {
     type: "yarn" | "pnpm" | "lerna" | "bolt" | "root" | (string & {});
   };
+  /** When absent, `catalog:` ranges can't be resolved and are ignored. */
+  catalogs?: Catalogs;
+}
+
+export type CatalogFormat =
+  /** `catalog` / `catalogs` at the top level of `pnpm-workspace.yaml` */
+  | "pnpm-workspace"
+  /** `catalog` / `catalogs` at the top level of `.yarnrc.yml` */
+  | "yarnrc"
+  /** `catalog` / `catalogs` in `package.json`, at the root or under `workspaces` */
+  | "package-json";
+
+export interface CatalogSource {
+  format: CatalogFormat;
+  /** Relative to the workspace root */
+  filePath: string;
+}
+
+/** Catalog name -> dependency name -> version range */
+export type CatalogEntries = ReadonlyMap<string, ReadonlyMap<string, string>>;
+
+export interface Catalogs {
+  entries: CatalogEntries;
+  /** Where the entries were read from, or `undefined` when the workspace has no catalogs */
+  source: CatalogSource | undefined;
+}
+
+export interface CatalogEntryUpdate {
+  catalogName: string;
+  dependencyName: string;
+  value: string;
 }
