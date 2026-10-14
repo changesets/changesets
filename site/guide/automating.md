@@ -163,6 +163,39 @@ If you do not plan to publish your packages, or only using Changesets to manage 
 
 <<< ./_snippets/automating-version-only.yaml [.github/workflows/version.yml]
 
+### Bun authentication in CI
+
+When Bun is selected as the publisher, configure authentication for Bun before running Changesets. For the default npm registry, pass `NPM_CONFIG_TOKEN` to the publish step. Bun does not use `NPM_TOKEN` or `NODE_AUTH_TOKEN` directly as registry credentials.
+
+After setting up a supported Node.js version, Bun, and the repository's dependencies and build, the action step can use the [Bun version and release scripts](./versioning-and-publishing.md#publishing-with-bun):
+
+```yaml
+- name: Version or publish packages
+  uses: changesets/action@v2
+  with:
+    version-script: bun run version-packages
+    publish-script: bun run release
+  env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
+```
+
+Alternatively, configure the registry token in a project `.npmrc` and pass the referenced variable to the publish step:
+
+```ini [.npmrc]
+//registry.npmjs.org/:_authToken=${NPM_TOKEN}
+```
+
+For scoped or custom registries, use the registry's URL in the auth entry and configure the corresponding registry or scope. Bun also supports tokens in `bunfig.toml`; see [Bun's registry configuration](https://bun.com/docs/pm/scopes-registries) and [`.npmrc` documentation](https://bun.com/docs/pm/npmrc).
+
+`changesets/action@v2` does not create `.npmrc` files automatically. On Bun versions that do not read `NPM_CONFIG_USERCONFIG`, the temporary auth file created by `actions/setup-node` is insufficient: use `NPM_CONFIG_TOKEN` or a project `.npmrc` instead.
+
+CI cannot complete interactive two-factor authentication. Use credentials permitted to publish without an interactive challenge. For local publishing, pass `changeset publish --otp <code>` or use `NPM_CONFIG_OTP`; Changesets can retry interactively when a terminal is available. An OTP is a one-time password, not a registry access token.
+
+Keep the release script calling `changeset publish`, including for artifact publishing. Changesets creates Git tags and writes the structured output used by action v2 to push tags and create GitHub releases. A script that only calls `bun publish` does not provide that output.
+
+Bun token authentication does not imply support for npm trusted publishing or provenance. Check the capabilities of your Bun version before choosing a tokenless workflow.
+
 ## Additional Notes
 
 ### Understanding npm Authentication

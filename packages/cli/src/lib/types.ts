@@ -2,7 +2,7 @@ import type { Package } from "@changesets/types";
 import type { PublishReleaseEntry } from "../commands/publish-plan/getPublishPlan.ts";
 
 export type PublishTool = {
-  name: "npm" | "pnpm" | "yarn";
+  name: "bun" | "npm" | "pnpm" | "yarn";
   getOtpCode: (otp?: string) => string | null;
   info: (options: InfoOptions) => Promise<PackageInfoResult>;
   pack: (options: PackOptions) => Promise<PackResult>;
