@@ -5,7 +5,13 @@ import c from "@changesets/color";
 import { ExitError } from "@changesets/errors";
 import { readPreState } from "@changesets/pre";
 import { readChangesets } from "@changesets/read";
-import type { ComprehensiveRelease } from "@changesets/types";
+import { shouldSkipPackage } from "@changesets/should-skip-package";
+import type {
+  ComprehensiveRelease,
+  Config,
+  Packages,
+  ReleasePlan,
+} from "@changesets/types";
 import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import { readConfig } from "../../utils/read-config.ts";
@@ -35,6 +41,7 @@ export async function status(options?: StatusOptions) {
     config,
     preState,
   );
+  warnAboutSkippedReleases(releasePlan, packages, config);
   const changedPackages = await getVersionableChangedPackages(config, {
     cwd: packages.rootDir,
     ref: options?.since,
@@ -64,6 +71,52 @@ If this change doesn't need a release, run ${c.cyan("changeset add --empty")}.
   );
 
   return releasePlan;
+}
+
+/**
+ * A changeset naming an ignored package - or a private one, when
+ * `privatePackages.version` is off - is dropped from the plan without a trace.
+ * Typos already error, but a package that simply isn't going to be released
+ * doesn't, so point those changesets out.
+ */
+function warnAboutSkippedReleases(
+  releasePlan: ReleasePlan,
+  packages: Packages,
+  config: Config,
+) {
+  const packagesByName = new Map(
+    packages.packages.map((pkg) => [pkg.packageJson.name, pkg]),
+  );
+  const isSkipped = (name: string) =>
+    shouldSkipPackage(packagesByName.get(name)!, {
+      ignore: config.ignore,
+      allowPrivatePackages: config.privatePackages.version,
+    });
+
+  const changesetsWithSkippedPackages = releasePlan.changesets
+    .map((changeset) => ({
+      changeset,
+      skipped: changeset.releases
+        .map(({ name }) => name)
+        .filter((name) => isSkipped(name)),
+    }))
+    .filter(({ skipped }) => skipped.length > 0);
+
+  if (changesetsWithSkippedPackages.length === 0) {
+    return;
+  }
+
+  log.warn(
+    `
+The following changesets contain a package that is not going to be released as they are skipped:
+${changesetsWithSkippedPackages
+  .map(
+    ({ changeset, skipped }) =>
+      `  - ${c.blue(`.changeset/${changeset.id}.md`)} (${skipped.join(", ")})`,
+  )
+  .join("\n")}
+    `.trim(),
+  );
 }
 
 function printStatus(releases: ComprehensiveRelease[], verbose?: boolean) {
