@@ -102,16 +102,22 @@ async function installGithubChangelog(cwd: string): Promise<boolean> {
   }
 
   const devFlag = packageManager.name === "bun" ? "--dev" : "-D";
-  const command = resolveCommand(packageManager.agent, "add", [
-    devFlag,
-    GITHUB_CHANGELOG_PACKAGE,
-  ]);
+  const addArgs = [devFlag];
+  if (
+    packageManager.name === "pnpm" &&
+    existsSync(path.join(cwd, "pnpm-workspace.yaml"))
+  ) {
+    addArgs.push("-w");
+  }
+  addArgs.push(GITHUB_CHANGELOG_PACKAGE);
+  const command = resolveCommand(packageManager.agent, "add", addArgs);
   if (!command) {
     return false;
   }
 
   await exec(command.command, command.args, {
     nodePath: false,
+    throwOnError: true,
     nodeOptions: { cwd, stdio: "inherit" },
   });
 

@@ -240,28 +240,41 @@ describe("init", () => {
       command: "pnpm",
       args: ["add", "-D", "@changesets/changelog-github"],
     },
+    {
+      packageManager: "pnpm workspace",
+      lockfile: "pnpm-lock.yaml",
+      lockContents: "lockfileVersion: '9.0'",
+      workspaceManifest: "packages:\n  - packages/*\n",
+      command: "pnpm",
+      args: ["add", "-D", "-w", "@changesets/changelog-github"],
+    },
   ])(
     "should install the GitHub changelog package with $packageManager when requested",
-    async ({ lockfile, lockContents, command, args }) => {
+    async ({ lockfile, lockContents, workspaceManifest, command, args }) => {
       mockedUtils.askConfirm.mockImplementation(async (message) => {
         return (
           message.includes("GitHub integration") || message.includes("Install")
         );
       });
 
-      const cwd = await testdir({
+      const files: Record<string, string> = {
         "package.json": JSON.stringify({
           private: true,
           name: "root-pkg",
         }),
         [lockfile]: lockContents,
-      });
+      };
+      if (workspaceManifest) {
+        files["pnpm-workspace.yaml"] = workspaceManifest;
+      }
+      const cwd = await testdir(files);
       mockedExec.mockResolvedValue({ exitCode: 0, stdout: "", stderr: "" });
 
       await initializeCommand({ cwd });
 
       expect(mockedExec).toHaveBeenCalledWith(command, args, {
         nodePath: false,
+        throwOnError: true,
         nodeOptions: { cwd, stdio: "inherit" },
       });
     },
@@ -287,6 +300,11 @@ describe("init", () => {
 
     const { configPath } = getPaths(cwd);
     expect(existsSync(configPath)).toBe(true);
+    expect(mockedExec).toHaveBeenCalledWith(
+      "npm",
+      ["i", "-D", "@changesets/changelog-github"],
+      expect.objectContaining({ throwOnError: true }),
+    );
     expect(JSON.parse(await fs.readFile(configPath, "utf8")).changelog).toEqual(
       ["@changesets/changelog-github", { repo: "changesets/changesets" }],
     );
