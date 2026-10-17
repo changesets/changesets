@@ -3,12 +3,15 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { defaultWrittenConfig } from "@changesets/config";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
+import { exec } from "tinyexec";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as cli from "../../../utils/cli-utilities.ts";
 import { init as initializeCommand } from "../index.ts";
 
 vi.mock("../../../utils/cli-utilities.ts");
 const mockedUtils = vi.mocked(cli);
+vi.mock("tinyexec");
+const mockedExec = vi.mocked(exec);
 
 const getPaths = (cwd: string) => ({
   readmePath: path.join(cwd, ".changeset/README.md"),
@@ -220,6 +223,73 @@ describe("init", () => {
       "@changesets/changelog-github",
       { repo: "my-org/my-repo" },
     ]);
+  });
+
+  it.each([
+    {
+      packageManager: "npm",
+      lockfile: "package-lock.json",
+      lockContents: JSON.stringify({ lockfileVersion: 3 }),
+      command: "npm",
+      args: ["i", "-D", "@changesets/changelog-github"],
+    },
+    {
+      packageManager: "pnpm",
+      lockfile: "pnpm-lock.yaml",
+      lockContents: "lockfileVersion: '9.0'",
+      command: "pnpm",
+      args: ["add", "-D", "@changesets/changelog-github"],
+    },
+  ])(
+    "should install the GitHub changelog package with $packageManager when requested",
+    async ({ lockfile, lockContents, command, args }) => {
+      mockedUtils.askConfirm.mockImplementation(async (message) => {
+        return (
+          message.includes("GitHub integration") || message.includes("Install")
+        );
+      });
+
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          name: "root-pkg",
+        }),
+        [lockfile]: lockContents,
+      });
+      mockedExec.mockResolvedValue({ exitCode: 0, stdout: "", stderr: "" });
+
+      await initializeCommand({ cwd });
+
+      expect(mockedExec).toHaveBeenCalledWith(command, args, {
+        nodePath: false,
+        nodeOptions: { cwd, stdio: "inherit" },
+      });
+    },
+  );
+
+  it("should write the config if installing the GitHub changelog package fails", async () => {
+    mockedUtils.askConfirm.mockImplementation(async (message) => {
+      return (
+        message.includes("GitHub integration") || message.includes("Install")
+      );
+    });
+    mockedExec.mockRejectedValue(new Error("Install failed"));
+
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "root-pkg",
+      }),
+      "package-lock.json": JSON.stringify({ lockfileVersion: 3 }),
+    });
+
+    await initializeCommand({ cwd });
+
+    const { configPath } = getPaths(cwd);
+    expect(existsSync(configPath)).toBe(true);
+    expect(JSON.parse(await fs.readFile(configPath, "utf8")).changelog).toEqual(
+      ["@changesets/changelog-github", { repo: "changesets/changesets" }],
+    );
   });
 
   it("should be written with public access, commit enabled, and custom branch when chosen", async () => {
