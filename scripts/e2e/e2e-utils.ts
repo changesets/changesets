@@ -18,7 +18,7 @@ export type ExecResult = {
   stdout: string;
 };
 
-export type PmBins = Partial<Record<"npm" | "pnpm" | "yarn", string>>;
+export type PmBins = Partial<Record<"bun" | "npm" | "pnpm" | "yarn", string>>;
 
 export type TestRegistryConfig = {
   authToken?: string | null;
@@ -165,7 +165,7 @@ async function resolvePackageBin(packageName: string, command: keyof PmBins) {
 }
 
 async function resolvePackageManagerSpec(
-  packageManager: "npm" | "pnpm" | "yarn",
+  packageManager: "bun" | "npm" | "pnpm" | "yarn",
   packageName: string,
 ) {
   const packageJson = await readInstalledPackageJson(packageName);
@@ -189,6 +189,20 @@ export async function createPmBinEnv(
     // CI-specific tests can opt in through env when needed.
     CI: undefined,
     GITHUB_ACTIONS: undefined,
+    // tinyexec merges this with process.env. Credentials and OTPs must come
+    // from the fixture, rather than a developer's shell or the CI runner.
+    NPM_CONFIG_TOKEN: undefined,
+    npm_config_token: undefined,
+    BUN_CONFIG_TOKEN: undefined,
+    NPM_TOKEN: undefined,
+    NODE_AUTH_TOKEN: undefined,
+    NPM_CONFIG_OTP: undefined,
+    npm_config_otp: undefined,
+    PNPM_CONFIG_OTP: undefined,
+    pnpm_config_otp: undefined,
+    NPM_CONFIG_REGISTRY: undefined,
+    npm_config_registry: undefined,
+    BUN_CONFIG_REGISTRY: undefined,
     // Required by ConPTY-launched processes on Windows.
     SystemRoot: process.env.SystemRoot,
     ...env,
@@ -449,7 +463,50 @@ function createYarnBerryGitdir(packageName: string) {
   };
 }
 
+function createBunGitdir(packageName: string) {
+  return async (
+    { registry, pmBinPath }: PmGitdirContext,
+    fixture: Fixture = {},
+  ) => {
+    const packageManager = await resolvePackageManagerSpec("bun", packageName);
+
+    const cwd = await gitdir({
+      "package.json": JSON.stringify({
+        name: "bun-workspace-root",
+        packageManager,
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      ".npmrc": [
+        registry && `registry=${registry.url}`,
+        registry?.authToken &&
+          `//${registry.host}/:_authToken=${registry.authToken}`,
+      ].join("\n"),
+      ...fixture,
+    });
+    await exec("bun", ["install", "--lockfile-only", "--ignore-scripts"], {
+      nodePath: false,
+      nodeOptions: {
+        cwd,
+        env: await createPmBinEnv(cwd, pmBinPath),
+      },
+      throwOnError: true,
+    });
+    return cwd;
+  };
+}
+
 export const pmCases = [
+  {
+    name: "bun 1.3.1",
+    bins: { bun: "bun-min" },
+    gitdir: createBunGitdir("bun-min"),
+  },
+  {
+    name: "bun 1",
+    bins: { bun: "bun-1" },
+    gitdir: createBunGitdir("bun-1"),
+  },
   {
     name: "npm 10",
     bins: { npm: "npm-10" },

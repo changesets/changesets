@@ -2,6 +2,8 @@ import { configDefaults, defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
+    globals: true,
+    include: [...configDefaults.include, "**/*.vitest.ts"],
     // E2e tests have their own workspace and dependencies that are installed on demand.
     exclude: [...configDefaults.exclude, "scripts/e2e/**"],
     // the default is !process.env.CI which makes it hard to debug CI issues at times
