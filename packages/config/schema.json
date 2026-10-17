@@ -59,6 +59,13 @@
       "description": "Packages that should not be released.",
       "default": []
     },
+    "include": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Packages to include. All other packages are ignored. Cannot be combined with a nonempty ignore list."
+    },
     "fixed": {
       "type": "array",
       "items": {

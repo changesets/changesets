@@ -77,6 +77,10 @@ export const WrittenConfigSchema = v.object({
     "Packages that should not be released.",
     [],
   ),
+  include: rootKey(
+    v.array(v.string()),
+    "Packages to include. All other packages are ignored. Cannot be combined with a nonempty ignore list.",
+  ),
   fixed: rootKey(
     PackageGroupSchema,
     "Packages that should always be released together with the same version.",
@@ -180,6 +184,12 @@ export function normalizeWrittenConfig({
 
   if (writtenConfig.ignore != null) {
     config.ignore = globMatch(packageNames, writtenConfig.ignore);
+  }
+
+  if (writtenConfig.include != null) {
+    config.include = globMatch(packageNames, writtenConfig.include);
+    const included = new Set(config.include);
+    config.ignore = packageNames.filter((name) => !included.has(name));
   }
 
   if (writtenConfig.fixed != null) {
