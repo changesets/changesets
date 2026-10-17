@@ -7,11 +7,15 @@ import { defaultWrittenConfig } from "@changesets/config";
 import type { AccessType } from "@changesets/types";
 import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
+import { resolveCommand } from "package-manager-detector/commands";
+import { detect } from "package-manager-detector/detect";
+import { exec } from "tinyexec";
 import * as cli from "../../utils/cli-utilities.ts";
 
 const pkgPath = path.dirname(
   fileURLToPath(import.meta.resolve("@changesets/cli/package.json")),
 );
+const GITHUB_CHANGELOG_PACKAGE = "@changesets/changelog-github";
 
 export interface InitOptions {
   cwd?: string;
@@ -26,12 +30,11 @@ async function getInteractiveConfig() {
   );
 
   if (useGithub) {
-    const changelogChoice = "@changesets/changelog-github";
     const repo = await cli.askQuestion(
       "What is the GitHub repository? (e.g. org/repo)",
       { placeholder: "org/repo", notEmpty: true },
     );
-    config.changelog = [changelogChoice, { repo }];
+    config.changelog = [GITHUB_CHANGELOG_PACKAGE, { repo }];
   } else {
     config.changelog = "@changesets/cli/changelog";
   }
@@ -83,7 +86,42 @@ async function getInteractiveConfig() {
     }
   }
 
-  return `${JSON.stringify(sortedConfig, null, 2)}\n`;
+  return {
+    config: `${JSON.stringify(sortedConfig, null, 2)}\n`,
+    useGithub,
+  };
+}
+
+async function installGithubChangelog(cwd: string): Promise<boolean> {
+  const packageManager = await detect({ cwd });
+  if (
+    !packageManager ||
+    !["npm", "pnpm", "yarn", "bun"].includes(packageManager.name)
+  ) {
+    return false;
+  }
+
+  const devFlag = packageManager.name === "bun" ? "--dev" : "-D";
+  const addArgs = [devFlag];
+  if (
+    packageManager.name === "pnpm" &&
+    existsSync(path.join(cwd, "pnpm-workspace.yaml"))
+  ) {
+    addArgs.push("-w");
+  }
+  addArgs.push(GITHUB_CHANGELOG_PACKAGE);
+  const command = resolveCommand(packageManager.agent, "add", addArgs);
+  if (!command) {
+    return false;
+  }
+
+  await exec(command.command, command.args, {
+    nodePath: false,
+    throwOnError: true,
+    nodeOptions: { cwd, stdio: "inherit" },
+  });
+
+  return true;
 }
 
 export async function init(options?: InitOptions): Promise<void> {
@@ -110,7 +148,31 @@ Changeset commands can be run with no problems.
     await fs.mkdir(changesetBase, { recursive: true });
   }
 
-  const newConfigStr = await getInteractiveConfig();
+  const { config: newConfigStr, useGithub } = await getInteractiveConfig();
+  let githubPackageInstalled = false;
+
+  if (useGithub) {
+    const shouldInstall = await cli.askConfirm(
+      `Install ${GITHUB_CHANGELOG_PACKAGE} as a development dependency?`,
+      true,
+    );
+    if (shouldInstall) {
+      try {
+        githubPackageInstalled = await installGithubChangelog(packages.rootDir);
+      } catch {
+        githubPackageInstalled = false;
+      }
+      if (!githubPackageInstalled) {
+        log.info(
+          `Install ${GITHUB_CHANGELOG_PACKAGE} with your package manager before creating releases.`,
+        );
+      }
+    } else {
+      log.info(
+        `Install ${GITHUB_CHANGELOG_PACKAGE} with your package manager before creating releases.`,
+      );
+    }
+  }
 
   await fs.writeFile(path.resolve(changesetBase, "config.json"), newConfigStr);
 
@@ -127,6 +189,7 @@ ${c.green("Changesets")} initialization is complete.
 The ${c.blue(".changeset")} folder has been updated with:
 - ${c.blue("config.json")} (customized based on the provided preferences)
 - ${c.blue("README.md")} (a quick guide for using changesets)
+${githubPackageInstalled ? `- ${c.blue(GITHUB_CHANGELOG_PACKAGE)} (development dependency)` : ""}
     `.trim(),
   );
 }
