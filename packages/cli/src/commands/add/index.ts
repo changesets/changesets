@@ -113,16 +113,23 @@ ${(error as Error).toString()}
   );
 
   const finalLogMessageLines: string[] = [];
+  let committed = false;
 
   if (getAddMessage) {
     await git.add(
       path.resolve(changesetBase, `${changesetID}.md`),
       packages.rootDir,
     );
-    await git.commit(
+    committed = await git.commit(
       await getAddMessage(newChangeset, commitOpts),
       packages.rootDir,
     );
+    if (!committed) {
+      log.error("Changesets ran into trouble committing your files");
+    }
+  }
+
+  if (committed) {
     finalLogMessageLines.push(
       c.green(
         `${options?.empty ? "Empty " : ""}Changeset added and committed!`,
