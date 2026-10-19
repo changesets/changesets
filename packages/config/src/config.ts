@@ -108,6 +108,11 @@ export const WrittenConfigSchema = v.object({
     "Determines whether Changesets should only bump dependency ranges that use workspace protocol of packages that are part of the workspace.",
     false,
   ),
+  detectCatalogChanges: rootKey(
+    v.boolean(),
+    "Determines whether updating the version range of a catalog entry counts as a change to every package that references it through the `catalog:` protocol.",
+    true,
+  ),
   snapshot: rootKey(
     v.object({
       useCalculatedVersion: v.optional(

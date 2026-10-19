@@ -1,4 +1,9 @@
 import path from "node:path";
+import {
+  DEFAULT_CATALOG_NAME,
+  parseCatalogProtocol,
+  resolveCatalogRange,
+} from "@changesets/catalogs";
 import c from "@changesets/color";
 import type { Package, Packages, PackageJSON } from "@changesets/types";
 import Range from "semver/classes/range.js";
@@ -104,6 +109,31 @@ export function getDependencyGraph(
 
       const expected = match.packageJson.version;
       const rawDepRange = depRange;
+
+      const catalogName = parseCatalogProtocol(depRange);
+
+      if (catalogName != null) {
+        const resolvedRange = resolveCatalogRange(
+          depRange,
+          depName,
+          packages.catalogs,
+        );
+
+        if (resolvedRange == null) {
+          valid = false;
+          const catalog =
+            catalogName === DEFAULT_CATALOG_NAME
+              ? "the default catalog"
+              : `the "${catalogName}" catalog`;
+          // TODO: replace with returning errors/warnings
+          console.error(
+            `Package ${c.blue(name)} depends on ${c.blue(depName)} through ${c.red(rawDepRange)}, but ${catalog} has no entry for it`,
+          );
+          continue;
+        }
+        depRange = resolvedRange;
+      }
+
       const usesWorkspaceRange = depRange.startsWith("workspace:");
 
       if (usesWorkspaceRange) {
