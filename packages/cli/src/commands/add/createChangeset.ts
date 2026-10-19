@@ -81,16 +81,63 @@ function formatPkgNameAndVersion(pkgName: string, version: string) {
   return `${c.bold(pkgName)}@${c.bold(version)}`;
 }
 
-type OptionsFromCli = {
+// `true` is an option passed without a value. It stands for the detected
+// changed packages.
+export type BumpFlags = {
+  major?: Array<string | true>;
+  minor?: Array<string | true>;
+  patch?: Array<string | true>;
+};
+
+type OptionsFromCli = BumpFlags & {
   message?: string;
+};
+
+type ResolvedBumpFlags = {
   major?: string[];
   minor?: string[];
   patch?: string[];
 };
 
+export function usesDetectedPackages(bumpFlags: BumpFlags): boolean {
+  return [bumpFlags.major, bumpFlags.minor, bumpFlags.patch]
+    .flatMap((values) => values ?? [])
+    .includes(true);
+}
+
+// A named package keeps the release type it was named with, so the detected
+// list drops it rather than colliding with that option.
+function resolveBumpFlags(
+  bumpFlags: BumpFlags,
+  changedPackages: Array<string>,
+): ResolvedBumpFlags {
+  const flagValues = [bumpFlags.major, bumpFlags.minor, bumpFlags.patch];
+  const namedPackages = new Set(
+    flagValues
+      .flatMap((values) => values ?? [])
+      .filter((value) => value !== true),
+  );
+  const detectedPackages = changedPackages
+    .filter((pkgName) => !namedPackages.has(pkgName))
+    .sort((a, b) => a.localeCompare(b));
+
+  const [major, minor, patch] = flagValues.map(
+    (values) =>
+      values && [
+        ...new Set(
+          values.flatMap((value) =>
+            value === true ? detectedPackages : [value],
+          ),
+        ),
+      ],
+  );
+
+  return { major, minor, patch };
+}
+
 function validateSelectedPackageNames(
   pkgNames: Set<string>,
-  optionsFromCli: OptionsFromCli | undefined,
+  optionsFromCli: ResolvedBumpFlags,
   messages: string[],
 ) {
   for (const [flag, packageNamesFromCli] of [
@@ -112,7 +159,7 @@ function validateSelectedPackageNames(
 
 function validateDuplicatePackageNames(
   pkgNames: Set<string>,
-  optionsFromCli: OptionsFromCli | undefined,
+  optionsFromCli: ResolvedBumpFlags,
   messages: string[],
 ) {
   // Only raise duplicate errors for existing package names. Unknown packages are validated separately.
@@ -149,10 +196,11 @@ export async function createChangeset(
     const pkgNames = new Set(
       allPackages.map(({ packageJson }) => packageJson.name),
     );
+    const resolved = resolveBumpFlags(optionsFromCli, changedPackages);
 
     const messages: string[] = [];
-    validateSelectedPackageNames(pkgNames, optionsFromCli, messages);
-    validateDuplicatePackageNames(pkgNames, optionsFromCli, messages);
+    validateSelectedPackageNames(pkgNames, resolved, messages);
+    validateDuplicatePackageNames(pkgNames, resolved, messages);
 
     if (messages.length > 0) {
       log.error(messages.join("\n"));
@@ -160,13 +208,24 @@ export async function createChangeset(
     }
 
     for (const [type, packageNamesFromCli] of [
-      ["major", optionsFromCli?.major],
-      ["minor", optionsFromCli?.minor],
-      ["patch", optionsFromCli?.patch],
+      ["major", resolved.major],
+      ["minor", resolved.minor],
+      ["patch", resolved.patch],
     ] as const) {
       for (const pkgName of packageNamesFromCli ?? []) {
         releases.push({ name: pkgName, type });
       }
+    }
+
+    if (releases.length === 0) {
+      log.error(
+        `
+No changed packages found
+  ${c.italic("Name the packages on the option, or use `--since` to compare against a different ref")}
+  ${c.italic("Use `--empty` to write a changeset with no releases")}
+`.trim(),
+      );
+      throw new ExitError(1);
     }
   } else if (allPackages.length > 1) {
     const packagesToRelease = await getPackagesToRelease(
