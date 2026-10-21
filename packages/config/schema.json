@@ -45,6 +45,9 @@
           "const": "dprint"
         },
         {
+          "const": "biome"
+        },
+        {
           "const": false
         }
       ],

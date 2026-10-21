@@ -66,6 +66,7 @@ export const WrittenConfigSchema = v.object({
       v.literal("oxfmt"),
       v.literal("deno"),
       v.literal("dprint"),
+      v.literal("biome"),
       v.literal(false),
     ]),
     "The formatter to use to format changesets and changelogs. Set `false` to disable formatting. The default value of `auto` will auto-detect the formatter based on the project's configuration files.",

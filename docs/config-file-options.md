@@ -1,5 +1,5 @@
 > [!WARNING]
-> This documentation is outdated. View the up-to-date version at https://changesets.dev/guide/config
+> This documentation is outdated. View the up-to-date version at <https://changesets.dev/guide/config>
 
 # Configuring Changesets
 
@@ -291,4 +291,4 @@ Default value: `"auto"`
 
 The formatter to use to format changesets and changelogs. Set `false` to disable formatting. The default value of `"auto"` will auto-detect the formatter based on the project's configuration files. See the [`@changesets/format` documentation](https://github.com/changesets/format) for more details.
 
-Supported formatters include `"prettier"`, `"oxfmt"`, `"deno"`, and `"dprint"`.
+Supported formatters include `"prettier"`, `"oxfmt"`, `"deno"`, `"biome"`, and `"dprint"`.
