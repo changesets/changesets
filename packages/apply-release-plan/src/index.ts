@@ -50,8 +50,7 @@ async function getFormatter(
     config === "auto"
       ? await detectFormatter({
           cwd,
-          // Biome doesn't support formatting markdown files
-          order: defaultDetectOrder.filter((f) => f !== "biome"),
+          order: [...defaultDetectOrder],
         })
       : config;
   if (!formatter) return async () => {};

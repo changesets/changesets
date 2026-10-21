@@ -1,5 +1,5 @@
 > [!WARNING]
-> This documentation is outdated. View the up-to-date version at <https://changesets.dev/guide/config>
+> This documentation is outdated. View the up-to-date version at https://changesets.dev/guide/config
 
 # Configuring Changesets
 

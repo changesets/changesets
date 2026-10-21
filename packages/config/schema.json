@@ -42,10 +42,10 @@
           "const": "deno"
         },
         {
-          "const": "dprint"
+          "const": "biome"
         },
         {
-          "const": "biome"
+          "const": "dprint"
         },
         {
           "const": false
