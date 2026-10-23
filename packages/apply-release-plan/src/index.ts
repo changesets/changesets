@@ -2,11 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { defaultConfig } from "@changesets/config";
-import {
-  defaultDetectOrder,
-  detect as detectFormatter,
-  format,
-} from "@changesets/format";
+import { detect as detectFormatter, format } from "@changesets/format";
 import * as git from "@changesets/git";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import type {
@@ -50,7 +46,6 @@ async function getFormatter(
     config === "auto"
       ? await detectFormatter({
           cwd,
-          order: [...defaultDetectOrder],
         })
       : config;
   if (!formatter) return async () => {};

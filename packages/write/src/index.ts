@@ -1,10 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import {
-  defaultDetectOrder,
-  detect as detectFormatter,
-  format,
-} from "@changesets/format";
+import { detect as detectFormatter, format } from "@changesets/format";
 import type { Changeset, Config } from "@changesets/types";
 import { humanId } from "human-id";
 
@@ -18,7 +14,6 @@ async function getFormatter(
     config === "auto"
       ? await detectFormatter({
           cwd,
-          order: [...defaultDetectOrder],
         })
       : config;
   if (!formatter) return async () => {};
