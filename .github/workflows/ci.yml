@@ -78,7 +78,7 @@ jobs:
     steps:
       - uses: $/.github/actions/ci-setup
         with:
-          node-version: ${{ matrix.node_version != 24 && matrix.node_version || '' }}
+          node-version: ${{ matrix.node_version }}
           download-dist: true
 
       - name: Check Git version
@@ -112,13 +112,18 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
 
   e2e:
-    name: E2E tests
+    name: "E2E tests using Node ${{ matrix.node_version }}"
     needs: [build]
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        node_version: [24, 26]
     steps:
       - uses: $/.github/actions/ci-setup
         with:
+          node-version: ${{ matrix.node_version }}
           download-dist: true
           install-e2e: true
 
