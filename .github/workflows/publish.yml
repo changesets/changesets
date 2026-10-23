@@ -85,7 +85,6 @@ jobs:
     steps:
       - uses: $/.github/actions/ci-setup
         with:
-          node-version: 24
           skip-cache: true # avoid cache poisoning attacks
 
       - name: Build artifacts
@@ -110,7 +109,6 @@ jobs:
     steps:
       - uses: $/.github/actions/ci-setup
         with:
-          node-version: 24
           skip-cache: true # avoid cache poisoning attacks
 
       - name: Build artifacts

@@ -78,7 +78,7 @@ jobs:
     steps:
       - uses: $/.github/actions/ci-setup
         with:
-          node-version: ${{ matrix.node_version }}
+          node-version: ${{ matrix.node_version != 24 && matrix.node_version || '' }}
           download-dist: true
 
       - name: Check Git version
@@ -119,7 +119,6 @@ jobs:
     steps:
       - uses: $/.github/actions/ci-setup
         with:
-          node-version: 24
           download-dist: true
           install-e2e: true
 
