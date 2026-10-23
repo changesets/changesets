@@ -38,6 +38,6 @@
     "node": "^22.11 || ^24 || >=26"
   },
   "inlinedDependencies": {
-    "valibot": "1.4.2"
+    "valibot": "1.5.0"
   }
 }

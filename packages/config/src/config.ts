@@ -65,6 +65,7 @@ export const WrittenConfigSchema = v.object({
       v.literal("prettier"),
       v.literal("oxfmt"),
       v.literal("deno"),
+      v.literal("biome"),
       v.literal("dprint"),
       v.literal(false),
     ]),
