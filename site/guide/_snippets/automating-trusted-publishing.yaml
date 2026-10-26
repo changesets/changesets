@@ -90,7 +90,7 @@ jobs:
         run: npm install
 
       - name: Build packages
-        run: npm build
+        run: npm run build
 
       - name: Pack packages
         id: pack

@@ -42,6 +42,9 @@
           "const": "deno"
         },
         {
+          "const": "biome"
+        },
+        {
           "const": "dprint"
         },
         {

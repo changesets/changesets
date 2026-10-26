@@ -134,7 +134,7 @@ Example:
 
 ## format
 
-- **Type:** `"auto" | "prettier" | "oxfmt" | "deno" | "dprint" | false`
+- **Type:** `"auto" | "prettier" | "oxfmt" | "deno" | "biome" | "dprint" | false`
 - **Default:** `"auto"`
 
 The code formatter to use for generated changeset files and changelogs. If set to `false`, no formatting will be applied.
