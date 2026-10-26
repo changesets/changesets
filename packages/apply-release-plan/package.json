@@ -1,6 +1,6 @@
 {
   "name": "@changesets/apply-release-plan",
-  "version": "8.1.1",
+  "version": "8.1.2",
   "description": "Takes a release plan and applies it to packages",
   "license": "MIT",
   "repository": {
