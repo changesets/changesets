@@ -15,6 +15,7 @@ export async function getVersionableChangedPackages(
   const changedPackages = await getChangedPackagesSinceRef({
     ref: ref ?? config.baseBranch,
     changedFilePatterns: config.changedFilePatterns,
+    detectCatalogChanges: config.detectCatalogChanges,
     cwd,
   });
   return changedPackages.filter(

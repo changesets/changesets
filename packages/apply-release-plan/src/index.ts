@@ -1,11 +1,13 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { updateCatalogEntries } from "@changesets/catalogs";
 import { defaultConfig } from "@changesets/config";
 import { detect as detectFormatter, format } from "@changesets/format";
 import * as git from "@changesets/git";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import type {
+  Catalogs,
   ChangelogFunctions,
   ComprehensiveRelease,
   Packages,
@@ -18,6 +20,7 @@ import { resolve } from "import-meta-resolve";
 import { editJson, type EditJsonOperation } from "./edit-json.ts";
 import { getChangelogEntry } from "./get-changelog-entry.ts";
 import {
+  getCatalogEntryUpdates,
   getDependencyVersionEdits,
   type DependencyUpdateOptions,
 } from "./version-package.ts";
@@ -67,6 +70,29 @@ async function updatePackageJson(dir: string, edits: EditJsonOperation[]) {
   return pkgJsonPath;
 }
 
+async function updateCatalog(
+  packages: Packages,
+  updates: ReturnType<typeof getCatalogEntryUpdates>,
+) {
+  const source = packages.catalogs?.source;
+
+  if (updates.length === 0 || !source) {
+    return;
+  }
+
+  const catalogPath = path.resolve(packages.rootDir, source.filePath);
+  const raw = await fs.readFile(catalogPath, "utf8");
+  const updated = updateCatalogEntries(raw, source.format, updates);
+
+  if (updated === raw) {
+    return;
+  }
+
+  await fs.writeFile(catalogPath, updated);
+
+  return catalogPath;
+}
+
 export async function applyReleasePlan(
   releasePlan: ReleasePlan,
   packages: Packages,
@@ -103,6 +129,7 @@ export async function applyReleasePlan(
     config,
     cwd,
     contextDir,
+    packages.catalogs,
   );
 
   if (releasePlan.preState?.mode === "exit" && snapshot == null) {
@@ -171,6 +198,14 @@ export async function applyReleasePlan(
     }
   }
 
+  const catalogPath = await updateCatalog(
+    packages,
+    getCatalogEntryUpdates(packages, versionsToUpdate, dependencyUpdateOptions),
+  );
+  if (catalogPath) {
+    touchedFiles.push(catalogPath);
+  }
+
   if (filesToFormat.length > 0) {
     const formatter = await getFormatter(config.format, cwd);
     await formatter(filesToFormat);
@@ -235,6 +270,7 @@ async function getNewChangelogEntry(
   config: Config,
   cwd: string,
   contextDir: string,
+  catalogs: Catalogs | undefined,
 ) {
   if (!config.changelog) {
     return Promise.resolve(
@@ -301,6 +337,7 @@ async function getNewChangelogEntry(
           onlyUpdatePeerDependentsWhenOutOfRange:
             config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
               .onlyUpdatePeerDependentsWhenOutOfRange,
+          catalogs,
         },
       );
 
