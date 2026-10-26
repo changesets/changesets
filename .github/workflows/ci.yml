@@ -48,12 +48,12 @@ jobs:
       security-events: write # allow writing security events
     steps:
       - name: Checkout repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
       - name: Run zizmor
-        uses: zizmorcore/zizmor-action@3dc1ecc9bcb9e94e9b2c709687979e1298497054 # v0.6.2
+        uses: zizmorcore/zizmor-action@cc914d7f3750a2d13d75c7f184a1060aa0e9d482 # v0.6.4
         with:
           persona: pedantic
           annotations: true
@@ -111,6 +111,24 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
+  e2e:
+    name: E2E tests
+    needs: [build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: $/.github/actions/ci-setup
+        with:
+          node-version: 24
+          download-dist: true
+          install-e2e: true
+
+      - name: Typecheck E2E tests
+        run: pnpm --filter=@changesets/e2e types:check
+
+      - name: Run E2E tests
+        run: pnpm test:e2e
+
   typecheck:
     name: Typecheck
     needs: [build]
@@ -144,7 +162,7 @@ jobs:
     name: CI OK
     runs-on: ubuntu-latest
     if: always()
-    needs: [lint-workflows, build, test, typecheck, lint]
+    needs: [lint-workflows, build, test, e2e, typecheck, lint]
     steps:
       - name: Exit with error if some jobs are not successful
         run: exit 1

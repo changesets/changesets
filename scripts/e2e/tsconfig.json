@@ -1,0 +1,20 @@
+{
+  "extends": "@tsconfig/node24/tsconfig.json",
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "strict": true,
+    "noEmit": true,
+    "lib": [
+      "ES2024",
+      "ES2025.Promise",
+      "ESNext.Array",
+      "ES2025.Collection",
+      "ES2025.Iterator"
+    ],
+    "types": ["node"]
+  },
+  "include": ["./"],
+  "exclude": []
+}

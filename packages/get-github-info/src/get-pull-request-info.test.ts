@@ -1,5 +1,6 @@
 import nock from "nock";
 import { expect, test, beforeEach, afterEach, vi } from "vitest";
+import { clearCache } from "./dataloader.ts";
 import { getPullRequestInfo } from "./get-pull-request-info.ts";
 
 const apiPath = `/graphql`;
@@ -10,6 +11,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  clearCache();
   vi.unstubAllEnvs();
   nock.cleanAll();
   nock.enableNetConnect();

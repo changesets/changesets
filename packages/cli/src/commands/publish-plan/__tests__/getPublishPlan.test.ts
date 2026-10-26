@@ -61,22 +61,24 @@ describe("getPublishPlan", () => {
     const config = await readConfig(cwd);
     const result = await getPublishPlan(cwd, config.config!);
 
-    expect(result).toEqual([
+    expect(result).toMatchInlineSnapshot(`
       [
-        {
-          kind: "publish",
-          name: "pkg-a",
-          version: "1.0.0",
-          access: "restricted",
-          tag: "latest",
-        },
-        {
-          kind: "tag-only",
-          name: "pkg-b",
-          version: "1.0.0",
-        },
-      ],
-    ]);
+        [
+          {
+            "access": "restricted",
+            "kind": "publish",
+            "name": "pkg-a",
+            "tag": "latest",
+            "version": "1.0.0",
+          },
+          {
+            "kind": "tag-only",
+            "name": "pkg-b",
+            "version": "1.0.0",
+          },
+        ],
+      ]
+    `);
   });
 
   it("skips ignored public packages", async () => {
@@ -144,33 +146,35 @@ describe("getPublishPlan", () => {
     const config = await readConfig(cwd);
     const result = await getPublishPlan(cwd, config.config!);
 
-    expect(result).toEqual([
+    expect(result).toMatchInlineSnapshot(`
       [
-        {
-          kind: "publish",
-          name: "pkg-b",
-          version: "1.0.0",
-          access: "restricted",
-          tag: "latest",
-        },
-      ],
-      [
-        {
-          kind: "publish",
-          name: "pkg-a",
-          version: "1.0.0",
-          access: "restricted",
-          tag: "latest",
-        },
-      ],
-      [
-        {
-          kind: "tag-only",
-          name: "pkg-c",
-          version: "1.0.0",
-        },
-      ],
-    ]);
+        [
+          {
+            "access": "restricted",
+            "kind": "publish",
+            "name": "pkg-b",
+            "tag": "latest",
+            "version": "1.0.0",
+          },
+        ],
+        [
+          {
+            "access": "restricted",
+            "kind": "publish",
+            "name": "pkg-a",
+            "tag": "latest",
+            "version": "1.0.0",
+          },
+        ],
+        [
+          {
+            "kind": "tag-only",
+            "name": "pkg-c",
+            "version": "1.0.0",
+          },
+        ],
+      ]
+    `);
   });
 
   it("keeps cyclic dependencies in one chunk", async () => {
@@ -204,24 +208,26 @@ describe("getPublishPlan", () => {
     const config = await readConfig(cwd);
     const result = await getPublishPlan(cwd, config.config!);
 
-    expect(result).toEqual([
+    expect(result).toMatchInlineSnapshot(`
       [
-        {
-          kind: "publish",
-          name: "pkg-a",
-          version: "1.0.0",
-          access: "restricted",
-          tag: "latest",
-        },
-        {
-          kind: "publish",
-          name: "pkg-b",
-          version: "1.0.0",
-          access: "restricted",
-          tag: "latest",
-        },
-      ],
-    ]);
+        [
+          {
+            "access": "restricted",
+            "kind": "publish",
+            "name": "pkg-a",
+            "tag": "latest",
+            "version": "1.0.0",
+          },
+          {
+            "access": "restricted",
+            "kind": "publish",
+            "name": "pkg-b",
+            "tag": "latest",
+            "version": "1.0.0",
+          },
+        ],
+      ]
+    `);
   });
 
   it("uses latest tag when all published versions are prereleases for the current pre tag", async () => {
@@ -256,17 +262,19 @@ describe("getPublishPlan", () => {
     const config = await readConfig(cwd);
     const result = await getPublishPlan(cwd, config.config!);
 
-    expect(result).toEqual([
+    expect(result).toMatchInlineSnapshot(`
       [
-        {
-          kind: "publish",
-          name: "pkg-a",
-          version: "1.0.0-next.3",
-          access: "restricted",
-          tag: "latest",
-        },
-      ],
-    ]);
+        [
+          {
+            "access": "restricted",
+            "kind": "publish",
+            "name": "pkg-a",
+            "tag": "latest",
+            "version": "1.0.0-next.3",
+          },
+        ],
+      ]
+    `);
   });
 
   it("includes a package when it is published but the local version is not", async () => {
@@ -295,16 +303,18 @@ describe("getPublishPlan", () => {
     const config = await readConfig(cwd);
     const result = await getPublishPlan(cwd, config.config!);
 
-    expect(result).toEqual([
+    expect(result).toMatchInlineSnapshot(`
       [
-        {
-          kind: "publish",
-          name: "pkg-a",
-          version: "1.1.0",
-          access: "restricted",
-          tag: "latest",
-        },
-      ],
-    ]);
+        [
+          {
+            "access": "restricted",
+            "kind": "publish",
+            "name": "pkg-a",
+            "tag": "latest",
+            "version": "1.1.0",
+          },
+        ],
+      ]
+    `);
   });
 });

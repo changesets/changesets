@@ -103,14 +103,18 @@ export async function getChangelogEntry(
     patch: await Promise.all(changelogLines.patch),
   };
 
-  return [
+  const renderedLines = [
     `## ${release.newVersion}`,
     generateMarkdownForVersionType("major", resolvedChangelogLines.major),
     generateMarkdownForVersionType("minor", resolvedChangelogLines.minor),
     generateMarkdownForVersionType("patch", resolvedChangelogLines.patch),
-  ]
-    .filter((line) => line)
-    .join("\n\n");
+  ].filter((line) => line);
+
+  if (renderedLines.length === 1) {
+    renderedLines.push("No changes in this release.");
+  }
+
+  return renderedLines.join("\n\n");
 }
 
 // Exported for test only

@@ -1,5 +1,11 @@
 # @changesets/git
 
+## 4.0.1
+
+### Patch Changes
+
+- [#2277](https://github.com/changesets/changesets/pull/2277) [`059f70a`](https://github.com/changesets/changesets/commit/059f70a82075a65108913eaecfc3b995565ce07b) Thanks [@trueberryless](https://github.com/trueberryless)! - Fix commit mismatch on similar changeset files.
+
 ## 4.0.0
 
 ### Major Changes

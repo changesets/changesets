@@ -13,10 +13,8 @@ import { tagExists } from "@changesets/git";
 import { packTar, type TarSource } from "modern-tar/fs";
 import { exec } from "tinyexec";
 import { describe, expect, it } from "vitest";
-import { AsyncDisposableStack } from "../../../ponyfills/async-disposable-stack.ts";
 import {
   AbortableAsyncDisposableStack,
-  cliPackageRoot,
   createPkgAFixture,
   createTempDir,
   getFreePort,
@@ -24,7 +22,8 @@ import {
   pmCases,
   runCliCommand,
   type TestRegistryConfig,
-} from "../../__tests__/e2e-utils.ts";
+  e2ePackageRoot,
+} from "./e2e-utils.ts";
 
 type RegistryRequestRecord = {
   bodyJson?: unknown;
@@ -250,6 +249,11 @@ function normalizeOtpPrompts(message: string) {
       // A PTY may omit the line break between the echoed code and the package
       // manager's output. Ensure any result starts on its own line.
       .replace(/(Enter OTP: \d{6})(?=[^\d\s])/g, "$1\n")
+      // pnpm 12 may leave duplicate completed prompts after VT stripping.
+      .replace(
+        /((?:\? )?This operation requires a one-time password\.\nEnter OTP: \d{6}\n)(?:\1)+/g,
+        "$1",
+      )
   );
 }
 
@@ -291,6 +295,10 @@ function sanitizePublishLog(message: unknown, registryUrl: string) {
     .replace(
       /logs can be found here: .*?\.log/g,
       "logs can be found here: [yarn-prepack-log]",
+    )
+    .replace(
+      /(?:[A-Za-z]:)?(?:[\\/][^\\/\r\n]+)*[\\/]fs-fixture-[^\\/\r\n]+[\\/]packages[\\/]pkg-a/g,
+      "[fixture-dir]/packages/pkg-a",
     )
     .replace(/^npm notice shasum: .+$/gm, "npm notice shasum: [shasum]")
     .replace(
@@ -688,7 +696,7 @@ log:
 
   const execResult = stack.use(
     execChild(
-      path.join(cliPackageRoot, "node_modules", ".bin", "pnpr"),
+      path.join(e2ePackageRoot, "node_modules", ".bin", "pnpr"),
       [
         "--config",
         config,
@@ -701,7 +709,7 @@ log:
       ],
       {
         nodeOptions: {
-          cwd: cliPackageRoot,
+          cwd: e2ePackageRoot,
           stdio: ["ignore", "pipe", "pipe"],
         },
       },
@@ -948,7 +956,7 @@ function createPmContext(
   };
 }
 
-describe("Publish command e2e", { tags: ["slow"] }, () => {
+describe("Publish command e2e", () => {
   describe.each(pmCases)("$name", (pm) => {
     it("publishes a new version of a package", async ({ signal }) => {
       await using stack = new AbortableAsyncDisposableStack(signal);
@@ -1610,9 +1618,9 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
           })),
         )
         .toEqual(
-          // Most package managers fail locally when no token is configured. pnpm 11
+          // Most package managers fail locally when no token is configured. pnpm 11+
           // still sends the publish request and lets the registry reject it.
-          pm.name === "pnpm 11"
+          pm.name === "pnpm 11" || pm.name === "pnpm 12"
             ? [{ authorization: undefined, statusCode: 401 }]
             : [],
         );
@@ -1758,8 +1766,9 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
       );
       expect.soft(publishRequests.map((request) => request.statusCode)).toEqual(
         // npm 11+ rejects an already-published version during its local
-        // preflight. Other clients send the PUT and receive the registry's 403.
-        pm.name !== "npm 11" && pm.name !== "npm 12" ? [403] : [],
+        // preflight, including when pnpm 10 delegates to npm. Other clients
+        // send the PUT and receive the registry's 403.
+        ["npm 11", "npm 12", "pnpm 10 + npm 12"].includes(pm.name) ? [] : [403],
       );
     });
 
@@ -1890,7 +1899,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
           command: "publish",
           cwd,
           env: {
-            [pm.name.startsWith("pnpm 11")
+            [pm.name === "pnpm 11" || pm.name === "pnpm 12"
               ? "PNPM_CONFIG_OTP"
               : "NPM_CONFIG_OTP"]: "654321",
           },

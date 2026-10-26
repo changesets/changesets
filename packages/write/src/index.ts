@@ -1,10 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import {
-  defaultDetectOrder,
-  detect as detectFormatter,
-  format,
-} from "@changesets/format";
+import { detect as detectFormatter, format } from "@changesets/format";
 import type { Changeset, Config } from "@changesets/types";
 import { humanId } from "human-id";
 
@@ -18,8 +14,6 @@ async function getFormatter(
     config === "auto"
       ? await detectFormatter({
           cwd,
-          // Biome doesn't support formatting markdown files
-          order: defaultDetectOrder.filter((f) => f !== "biome"),
         })
       : config;
   if (!formatter) return async () => {};
@@ -54,7 +48,7 @@ ${releases.map((release) => `"${release.name}": ${release.type}`).join("\n")}
 ---
 
 ${summary}
-  `;
+`;
 
   await fs.mkdir(path.dirname(newChangesetPath), { recursive: true });
   await fs.writeFile(newChangesetPath, changesetContents);

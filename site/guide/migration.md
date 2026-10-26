@@ -245,15 +245,43 @@ Update to `changesets/action@v2` in your GitHub Actions workflows to support Cha
 <!-- prettier-ignore -->
 ```yaml [.github/workflows/publish.yml]
 # ...
-        uses: changesets/action/publish@v1 # [!code --]
-        uses: changesets/action/publish@v2 # [!code ++]
+        uses: changesets/action@v1 # [!code --]
+        uses: changesets/action@v2 # [!code ++]
 # ...
 ```
-
-The v2 action contains some breaking changes that you should review in the [v2.0.0 release notes](https://github.com/changesets/action/releases/tag/v2.0.0).
 
 ### Review your workflow setup
 
 While the existing action should work as before, the v2 action exposes more sub-actions that allow you to better customize, compose, and secure your GitHub Actions workflows.
 
-Check the new [Automating Changesets](./automating.md) guide and consider adopting the new setup recommendations.
+For instance, if you are using [npm trusted publishing (provenance)](https://docs.npmjs.com/trusted-publishers), it is recommended to migrate to these sub-actions to tighten publish permissions. Check the new [Automating Changesets guide](./automating.md) for the new setup recommendations.
+
+### Update inputs
+
+If you passed any inputs, make sure to update them accordingly:
+
+<!-- prettier-ignore -->
+```yaml [.github/workflows/publish.yml]
+# ...
+        uses: changesets/action@v1 # [!code --]
+        with: # [!code --]
+          version: pnpm run version # [!code --]
+          publish: pnpm run publish # [!code --]
+          commit: "ci: release" # [!code --]
+          title: "ci: release" # [!code --]
+        uses: changesets/action@v2 # [!code ++]
+        with: # [!code ++]
+          version-script: pnpm run version # [!code ++]
+          publish-script: pnpm run publish # [!code ++]
+          commit-message: "ci: release" # [!code ++]
+          pr-title: "ci: release" # [!code ++]
+# ...
+```
+
+In case you had set a custom `GITHUB_TOKEN` environment variable, pass it via the `github-token` input now. If you rely on the local Git state for subsequent steps, make sure to set `push-with-git-cli: true` as well.
+
+For the full list of breaking changes, check out the [v2.0.0 release notes](https://github.com/changesets/action/releases/tag/v2.0.0) in the [action repository](https://github.com/changesets/action).
+
+## You're all set!
+
+That covers all the major updates. Good luck with your migration to v3, and happy releasing!

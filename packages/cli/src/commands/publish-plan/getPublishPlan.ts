@@ -211,13 +211,11 @@ export async function getUntaggedPrivatePackages(
     .filter(
       (pkg) => pkg.packageJson.private && !shouldSkipPackage(pkg, options),
     )
-    .map(
-      (pkg): TagReleaseEntry => ({
-        kind: "tag-only",
-        name: pkg.packageJson.name,
-        version: pkg.packageJson.version,
-      }),
-    );
+    .map((pkg): TagReleaseEntry => ({
+      kind: "tag-only",
+      name: pkg.packageJson.name,
+      version: pkg.packageJson.version,
+    }));
 
   return (await splitByTagStatus(cwd, tool, taggableReleases)).untagged;
 }

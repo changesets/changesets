@@ -1,5 +1,19 @@
 # @changesets/get-release-plan
 
+## 5.0.2
+
+### Patch Changes
+
+- Updated dependencies [[`e522996`](https://github.com/changesets/changesets/commit/e522996c676f911bf43203d8787e17b6e81e4fdf)]:
+  - @changesets/config@4.0.1
+
+## 5.0.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @changesets/read@1.0.1
+
 ## 5.0.0
 
 ### Major Changes

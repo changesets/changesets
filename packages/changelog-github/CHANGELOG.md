@@ -1,5 +1,12 @@
 # @changesets/changelog-github
 
+## 1.0.1
+
+### Patch Changes
+
+- Updated dependencies [[`4d7b4fb`](https://github.com/changesets/changesets/commit/4d7b4fbd013f009f03cccbbfc8d7a708d836bd79)]:
+  - @changesets/get-github-info@1.0.1
+
 ## 1.0.0
 
 ### Major Changes

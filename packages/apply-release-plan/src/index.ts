@@ -2,11 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { defaultConfig } from "@changesets/config";
-import {
-  defaultDetectOrder,
-  detect as detectFormatter,
-  format,
-} from "@changesets/format";
+import { detect as detectFormatter, format } from "@changesets/format";
 import * as git from "@changesets/git";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
 import type {
@@ -50,8 +46,6 @@ async function getFormatter(
     config === "auto"
       ? await detectFormatter({
           cwd,
-          // Biome doesn't support formatting markdown files
-          order: defaultDetectOrder.filter((f) => f !== "biome"),
         })
       : config;
   if (!formatter) return async () => {};
@@ -354,11 +348,13 @@ async function updateChangelog(
   // Require just 2 version numbers here, assuming `## 1.1` is a valid version heading.
   // Our version headings start with ##, we are more permissive here though.
   // Note: we also need to handle prerelease versions here but that's already covered by the regex.
-  const isVersionHeading = /^#{1,6}\s+\d+\.\d+/.test(fileData);
+  const firstVersionHeaderIndex = fileData.search(/^#{1,6}\s+\d+\.\d+/m);
 
   let newChangelog: string;
-  if (isVersionHeading) {
-    newChangelog = templateString.trimStart() + fileData;
+  if (firstVersionHeaderIndex >= 0) {
+    const prefix = fileData.slice(0, firstVersionHeaderIndex);
+    const suffix = fileData.slice(firstVersionHeaderIndex);
+    newChangelog = prefix + templateString.trimStart() + "\n" + suffix;
   } else {
     const index = fileData.indexOf("\n");
     newChangelog =

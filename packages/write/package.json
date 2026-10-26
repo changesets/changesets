@@ -1,6 +1,6 @@
 {
   "name": "@changesets/write",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Writes a changeset to a file",
   "license": "MIT",
   "repository": {
@@ -17,9 +17,9 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
-    "@changesets/format": "^0.1.1",
+    "@changesets/format": "^0.1.2",
     "@changesets/types": "workspace:^",
-    "human-id": "^4.2.0"
+    "human-id": "^4.2.1"
   },
   "devDependencies": {
     "@changesets/parse": "workspace:*",

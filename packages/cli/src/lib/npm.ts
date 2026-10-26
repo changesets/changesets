@@ -87,7 +87,10 @@ function formatJsonError(error: unknown): NpmCommandError | undefined {
   };
 }
 
-function getNpmError(stdout: string, stderr: string): NpmCommandError {
+export function getCommandError(
+  stdout: string,
+  stderr: string,
+): NpmCommandError {
   // NPM's --json output can be included alongside lifecycle scripts' output, like `prepublish` and `postpublish`, in terminal.
   // Lifecycle scripts can contain JSON but `--json` output is always printed at the end so this should work
   // historical notes:
@@ -107,7 +110,7 @@ function getNpmError(stdout: string, stderr: string): NpmCommandError {
 
 export const name = "npm" satisfies PublishTool["name"];
 
-function parseInfoResult({
+export function parseInfoResult({
   exitCode,
   stdout,
   stderr,
@@ -116,7 +119,7 @@ function parseInfoResult({
   | { error: NpmCommandError }
   | undefined {
   if (exitCode !== 0) {
-    return { error: getNpmError(stdout, stderr) };
+    return { error: getCommandError(stdout, stderr) };
   }
   if (!stdout) {
     // Successful empty stdout means the package manager found no matching data but the package does exist in the registry.
@@ -240,7 +243,7 @@ export const pack: PublishTool["pack"] = async ({
     },
   );
   if (exitCode !== 0) {
-    return { error: getNpmError(stdout, stderr) };
+    return { error: getCommandError(stdout, stderr) };
   }
 
   // npm is the only package manager that doesn't support an explicit output path for the tarball
