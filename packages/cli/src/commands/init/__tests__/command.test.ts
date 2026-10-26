@@ -2,13 +2,16 @@ import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { defaultWrittenConfig } from "@changesets/config";
+import * as git from "@changesets/git";
 import { silenceLogsInBlock, testdir } from "@changesets/test-utils";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as cli from "../../../utils/cli-utilities.ts";
 import { init as initializeCommand } from "../index.ts";
 
 vi.mock("../../../utils/cli-utilities.ts");
+vi.mock("@changesets/git");
 const mockedUtils = vi.mocked(cli);
+const mockedGit = vi.mocked(git);
 
 const getPaths = (cwd: string) => ({
   readmePath: path.join(cwd, ".changeset/README.md"),
@@ -18,6 +21,7 @@ const getPaths = (cwd: string) => ({
 beforeEach(() => {
   vi.resetAllMocks();
   vi.restoreAllMocks();
+  mockedGit.getDefaultBranchName.mockResolvedValue(undefined);
 
   mockedUtils.askList.mockImplementation(async (message) => {
     if (message.includes("published")) {
@@ -223,6 +227,7 @@ describe("init", () => {
   });
 
   it("should be written with public access, commit enabled, and custom branch when chosen", async () => {
+    mockedGit.getDefaultBranchName.mockResolvedValue("trunk");
     mockedUtils.askConfirm.mockResolvedValue(true);
     mockedUtils.askList.mockImplementation(async (message) => {
       if (message.includes("published")) {
@@ -275,6 +280,28 @@ describe("init", () => {
     const config = JSON.parse(await fs.readFile(configPath, "utf8"));
 
     expect(config.baseBranch).toBe("main");
+  });
+
+  it("should use origin's default branch when the base branch is left empty", async () => {
+    mockedGit.getDefaultBranchName.mockResolvedValue("trunk");
+
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "root-pkg",
+      }),
+    });
+
+    await initializeCommand({ cwd });
+
+    const { configPath } = getPaths(cwd);
+    const config = JSON.parse(await fs.readFile(configPath, "utf8"));
+
+    expect(config.baseBranch).toBe("trunk");
+    expect(mockedUtils.askQuestion).toHaveBeenCalledWith(
+      "Which base branch should be used?",
+      { placeholder: "trunk" },
+    );
   });
 
   it("should be written with consistently ordered properties", async () => {
