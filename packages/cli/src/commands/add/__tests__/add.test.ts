@@ -257,6 +257,48 @@ describe("Add command", () => {
     );
   });
 
+  it("should report a failed commit without claiming success", async () => {
+    const cwd = await gitdir({
+      "package.json": JSON.stringify({
+        name: "single-package",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify({
+        ...defaultConfig,
+        commit: [
+          path.resolve(
+            import.meta.dirname,
+            "..",
+            "..",
+            "..",
+            "commit",
+            "index.ts",
+          ),
+          null,
+        ],
+      }),
+    });
+    const commitSpy = vi.spyOn(git, "commit").mockResolvedValue(false);
+    const loggerErrorSpy = vi.spyOn(clack.log, "error");
+    const loggerSuccessSpy = vi.spyOn(clack.log, "success");
+
+    await addChangeset({ cwd, empty: true });
+
+    expect(commitSpy).toHaveBeenCalledOnce();
+    expect(loggerSuccessSpy).toHaveBeenCalledOnce();
+    const successOutput = stripVTControlCharacters(
+      loggerSuccessSpy.mock.calls[0][0],
+    );
+    expect(successOutput).not.toContain("added and committed");
+    expect(successOutput).toContain(
+      "Empty Changeset added - you can now commit it!",
+    );
+    expect(loggerErrorSpy).toHaveBeenCalledWith(
+      "Changesets ran into trouble committing your files",
+    );
+    expect(await getChangesets(cwd)).toHaveLength(1);
+  });
+
   it("should create empty changeset when empty flag is passed in", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
