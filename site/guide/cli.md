@@ -28,6 +28,23 @@ Once confirmed, the changeset will be written in the `.changeset` folder. If the
 
 If you have [CI that blocks merges](./automating.md#blocking) without a changeset, pass `--empty` to create an empty changeset.
 
+### Selecting packages without prompts
+
+`--major`, `--minor` and `--patch` take a comma-separated list of packages and can be repeated. With `--message`, `add` runs without prompting.
+
+```bash
+$ changeset add --major pkg-a --patch pkg-b,pkg-c -m 'Remove the deprecated API'
+```
+
+Without a list, the option releases the detected changed packages, the set the prompt groups under `changed packages`. Packages you name are left out of that set, so this majors `pkg-a` and patches every other changed package.
+
+```bash
+$ changeset add --patch -m 'Fix the export types'
+$ changeset add --major pkg-a --patch -m 'Remove the deprecated API'
+```
+
+Detection diffs the working tree against [`baseBranch`](./config.md#basebranch), so an uncommitted edit counts, but a new file only counts once it is added to git. If nothing is detected, the command exits with an error instead of writing a changeset with no releases.
+
 ### Changing the base branch
 
 When prompting for packages to release, Changesets will detect and suggest the changed packages since the last commit on [`baseBranch`](./config.md#basebranch). If you want to use a different base branch, tag, or git ref, you can change it with the `--since [branch]` option.
