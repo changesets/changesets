@@ -81,6 +81,52 @@ describe("publish-plan", () => {
     `);
   });
 
+  it("includes only selected public releases and private tags", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        name: "repo",
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      ".changeset/config.json": JSON.stringify({
+        include: ["pkg-a", "pkg-b"],
+        privatePackages: { version: true, tag: true },
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+        private: true,
+      }),
+      "packages/pkg-c/package.json": JSON.stringify({
+        name: "pkg-c",
+        version: "1.0.0",
+      }),
+      "packages/pkg-d/package.json": JSON.stringify({
+        name: "pkg-d",
+        version: "1.0.0",
+        private: true,
+      }),
+    });
+    mockedInfo.mockResolvedValue({ published: false });
+    mockedGit.getAllTags.mockResolvedValue(new Set());
+    mockedGit.remoteTagExists.mockResolvedValue(false);
+
+    const result = await publishPlan({ cwd });
+
+    expect(result.flat()).toEqual([
+      expect.objectContaining({ name: "pkg-a", kind: "publish" }),
+      expect.objectContaining({ name: "pkg-b", kind: "tag-only" }),
+    ]);
+    expect(
+      mockedInfo.mock.calls.map(([{ pkg }]) => pkg.packageJson.name),
+    ).toEqual(["pkg-a"]);
+  });
+
   it("returns empty arrays when there is nothing to publish or tag", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
