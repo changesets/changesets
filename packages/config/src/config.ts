@@ -109,6 +109,11 @@ export const WrittenConfigSchema = v.object({
     "Determines whether Changesets should only bump dependency ranges that use workspace protocol of packages that are part of the workspace.",
     false,
   ),
+  runVersionScripts: rootKey(
+    v.boolean(),
+    "Determines whether `changeset version` runs the `preversion` and `postversion` scripts of the packages it versions.",
+    true,
+  ),
   snapshot: rootKey(
     v.object({
       useCalculatedVersion: v.optional(

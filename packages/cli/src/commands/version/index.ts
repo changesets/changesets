@@ -9,9 +9,12 @@ import * as git from "@changesets/git";
 import { readPreState } from "@changesets/pre";
 import { readChangesets } from "@changesets/read";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
-import type { Config, Packages } from "@changesets/types";
+import type { Config, Packages, ReleasePlan } from "@changesets/types";
 import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
+import { resolveCommand } from "package-manager-detector/commands";
+import { detect } from "package-manager-detector/detect";
+import { exec } from "tinyexec";
 import { getCommitFunctions } from "../../commit/getCommitFunctions.ts";
 import { importantWarning } from "../../utils/cli-utilities.ts";
 import { readConfig } from "../../utils/read-config.ts";
@@ -116,6 +119,8 @@ You can then run ${c.cyan("changeset version")} again to do a normal release.
 
   const contextDir = path.dirname(fileURLToPath(import.meta.url));
 
+  await runVersionScripts("preversion", releasePlan, packages, releaseConfig);
+
   const [...touchedFiles] = await applyReleasePlan(
     releasePlan,
     packages,
@@ -153,6 +158,50 @@ You can then run ${c.cyan("changeset version")} again to do a normal release.
     log.success(
       "All files have been updated. Review them and commit at your leisure",
     );
+  }
+
+  await runVersionScripts("postversion", releasePlan, packages, releaseConfig);
+}
+
+async function runVersionScripts(
+  script: "preversion" | "postversion",
+  releasePlan: ReleasePlan,
+  packages: Packages,
+  config: Config,
+) {
+  if (config.runVersionScripts === false) {
+    return;
+  }
+
+  const packagesWithScript = releasePlan.releases.flatMap((release) => {
+    if (release.type === "none") {
+      return [];
+    }
+    const pkg = packages.packages.find(
+      (pkg) => pkg.packageJson.name === release.name,
+    );
+    return pkg?.packageJson.scripts?.[script] ? [pkg] : [];
+  });
+
+  if (packagesWithScript.length === 0) {
+    return;
+  }
+
+  const agent = (await detect({ cwd: packages.rootDir }))?.agent ?? "npm";
+  const { command, args } = resolveCommand(agent, "run", [script])!;
+
+  // Run the scripts one at a time so their output doesn't interleave
+  for (const pkg of packagesWithScript) {
+    const { exitCode } = await exec(command, args, {
+      nodePath: false,
+      nodeOptions: { cwd: pkg.dir, stdio: "inherit" },
+    });
+    if (exitCode !== 0) {
+      log.error(
+        `The ${c.cyan(script)} script of ${c.blue(pkg.packageJson.name)} failed.`,
+      );
+      throw new ExitError(1);
+    }
   }
 }
 

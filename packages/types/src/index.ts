@@ -78,6 +78,7 @@ export type PackageJSON = {
   devDependencies?: { [key: string]: string };
   optionalDependencies?: { [key: string]: string };
   resolutions?: { [key: string]: string };
+  scripts?: { [key: string]: string };
   private?: boolean;
   publishConfig?: {
     access?: AccessType;
@@ -117,6 +118,8 @@ export type Config = {
   ignore: ReadonlyArray<string>;
   /** This is supposed to be used with pnpm's `link-workspace-packages: false` and Berry's `enableTransparentWorkspaces: false` */
   bumpVersionsWithWorkspaceProtocolOnly?: boolean;
+  /** Whether `changeset version` runs the `preversion` and `postversion` scripts of the packages it versions */
+  runVersionScripts?: boolean;
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: Required<ExperimentalOptions>;
   snapshot: {
     useCalculatedVersion: boolean;
@@ -147,6 +150,8 @@ export type WrittenConfig = {
   updateInternalDependencies?: "patch" | "minor";
   ignore?: ReadonlyArray<string>;
   bumpVersionsWithWorkspaceProtocolOnly?: boolean;
+  /** Whether `changeset version` runs the `preversion` and `postversion` scripts of the packages it versions */
+  runVersionScripts?: boolean;
   snapshot?: {
     useCalculatedVersion?: boolean;
     prereleaseTemplate?: string;

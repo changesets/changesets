@@ -15,7 +15,8 @@ Changesets keeps its configuration in `.changeset/config.json`. The default conf
   "privatePackages": { "version": false, "tag": false },
   "updateInternalDependencies": "patch",
   "ignore": [],
-  "bumpVersionsWithWorkspaceProtocolOnly": false
+  "bumpVersionsWithWorkspaceProtocolOnly": false,
+  "runVersionScripts": true
 }
 ```
 
@@ -232,6 +233,17 @@ These restrictions exist to ensure your repository or published code do not end 
 - **Note:** Only applicable in monorepos.
 
 Whether to only bump dependency ranges that use the `workspace:` protocol of packages that are part of the workspace.
+
+## runVersionScripts
+
+- **Type:** `boolean`
+- **Default:** `true`
+
+Whether `changeset version` should run the `preversion` and `postversion` scripts of the packages it versions, like `npm version` does. Set `false` to skip them.
+
+The `preversion` script runs before any files are changed, and the `postversion` script runs after the new versions and changelogs are written (and committed, if [`commit`](#commit) is enabled). The scripts are run with the project's package manager from each package's directory, one package at a time. If a script fails, `changeset version` stops with an error.
+
+The `version` script itself is not run, as it is often the script that calls `changeset version`.
 
 ## snapshot
 

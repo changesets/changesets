@@ -51,6 +51,7 @@ describe("readConfig", () => {
           "tag": false,
           "version": false,
         },
+        "runVersionScripts": true,
         "snapshot": {
           "useCalculatedVersion": false,
         },
@@ -132,6 +133,7 @@ describe("defaultConfig", () => {
           "tag": false,
           "version": false,
         },
+        "runVersionScripts": true,
         "snapshot": {
           "useCalculatedVersion": false,
         },
@@ -368,6 +370,11 @@ describe("validateConfig", () => {
         expected: { ...defaultConfig, updateInternalDependencies: "patch" },
       },
       {
+        name: "runVersionScripts: false",
+        config: { runVersionScripts: false },
+        expected: { ...defaultConfig, runVersionScripts: false },
+      },
+      {
         name: "updateInternalDependents",
         config: {
           ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: {
@@ -571,6 +578,12 @@ describe("validateConfig", () => {
       {
         name: "snapshot.useCalculatedVersion: non-boolean",
         config: { snapshot: { useCalculatedVersion: "not true" } },
+        errors: ["Expected boolean"],
+      },
+      // runVersionScripts
+      {
+        name: "runVersionScripts: non-boolean",
+        config: { runVersionScripts: "false" },
         errors: ["Expected boolean"],
       },
       // changedFilePatterns

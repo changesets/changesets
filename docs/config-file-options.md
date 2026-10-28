@@ -16,6 +16,7 @@ Changesets has a minimal amount of configuration options. Mostly these are for w
   "updateInternalDependencies": "patch",
   "ignore": [],
   "bumpVersionsWithWorkspaceProtocolOnly": false,
+  "runVersionScripts": true,
   "changedFilePatterns": ["**"],
   "format": "auto",
   "privatePackages": { "version": false, "tag": false }
@@ -184,6 +185,12 @@ For more details on these functions and information on how to write your own see
 Default value: `false`
 
 Determines whether Changesets should only bump dependency ranges that use workspace protocol of packages that are part of the workspace.
+
+## `runVersionScripts` (optional boolean)
+
+Default value: `true`
+
+Determines whether `changeset version` runs the `preversion` and `postversion` scripts of the packages it versions, like `npm version` does. `preversion` runs before any files are changed and `postversion` runs after the new versions and changelogs are written (and committed, if `commit` is enabled). Set it to `false` to skip them.
 
 ## `snapshot` (object or undefined)
 
