@@ -136,6 +136,11 @@
       "description": "Determines whether Changesets should only bump dependency ranges that use workspace protocol of packages that are part of the workspace.",
       "default": false
     },
+    "gitTagFormat": {
+      "type": "string",
+      "pattern": "\\{version\\}",
+      "description": "A template for the names of git tags created by Changesets. The template can use the following variable patterns: {name}, {version}. Defaults to \"{name}@{version}\" in monorepos and \"v{version}\" in single-package repositories."
+    },
     "snapshot": {
       "type": "object",
       "properties": {

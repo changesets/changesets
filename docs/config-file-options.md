@@ -185,6 +185,18 @@ Default value: `false`
 
 Determines whether Changesets should only bump dependency ranges that use workspace protocol of packages that are part of the workspace.
 
+## `gitTagFormat` (optional string)
+
+Default value: `undefined` (tags are named `{name}@{version}` in monorepos and `v{version}` in single-package repositories)
+
+A template for the names of the git tags created by `changeset publish` and `changeset git-tag`, using the `{name}` and `{version}` placeholders. `{version}` is always required, and `{name}` is required in monorepos. Changesets also uses this template to check which packages have already been tagged.
+
+```json
+{
+  "gitTagFormat": "{name}/v{version}"
+}
+```
+
 ## `snapshot` (object or undefined)
 
 Default value: `undefined`
