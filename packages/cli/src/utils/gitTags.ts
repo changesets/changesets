@@ -12,9 +12,11 @@ export function buildGitTag(
   gitTagFormat: string | undefined,
 ) {
   if (gitTagFormat != null) {
-    return gitTagFormat
-      .replaceAll("{name}", name)
-      .replaceAll("{version}", version);
+    // a single pass with a replacer function, so that `$` patterns in the values
+    // aren't interpreted and a value containing `{version}` isn't substituted again
+    return gitTagFormat.replace(/\{(name|version)\}/g, (_, key: string) =>
+      key === "name" ? name : version,
+    );
   }
   return tool.type !== "root" ? `${name}@${version}` : `v${version}`;
 }
