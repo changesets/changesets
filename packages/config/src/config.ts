@@ -109,6 +109,16 @@ export const WrittenConfigSchema = v.object({
     "Determines whether Changesets should only bump dependency ranges that use workspace protocol of packages that are part of the workspace.",
     false,
   ),
+  gitTagFormat: rootKey(
+    v.pipe(
+      v.string(),
+      v.regex(
+        /\{version\}/,
+        'Invalid format: The git tag format must include the "{version}" variable pattern.',
+      ),
+    ),
+    'A template for the names of git tags created by Changesets. The template can use the following variable patterns: {name}, {version}. Defaults to "{name}@{version}" in monorepos and "v{version}" in single-package repositories.',
+  ),
   snapshot: rootKey(
     v.object({
       useCalculatedVersion: v.optional(

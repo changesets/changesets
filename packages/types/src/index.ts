@@ -117,6 +117,8 @@ export type Config = {
   ignore: ReadonlyArray<string>;
   /** This is supposed to be used with pnpm's `link-workspace-packages: false` and Berry's `enableTransparentWorkspaces: false` */
   bumpVersionsWithWorkspaceProtocolOnly?: boolean;
+  /** A template for the names of created git tags, using the `{name}` and `{version}` variable patterns */
+  gitTagFormat?: string;
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: Required<ExperimentalOptions>;
   snapshot: {
     useCalculatedVersion: boolean;
@@ -147,6 +149,7 @@ export type WrittenConfig = {
   updateInternalDependencies?: "patch" | "minor";
   ignore?: ReadonlyArray<string>;
   bumpVersionsWithWorkspaceProtocolOnly?: boolean;
+  gitTagFormat?: string;
   snapshot?: {
     useCalculatedVersion?: boolean;
     prereleaseTemplate?: string;

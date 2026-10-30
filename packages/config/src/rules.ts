@@ -183,6 +183,16 @@ const noPrivateTagWithoutPrivateVersion: Rule = ({ config, errors }) => {
   }
 };
 
+const gitTagFormatIncludesName: Rule = ({ config, packages, errors }) => {
+  if (config.gitTagFormat == null || packages.tool.type === "root") return;
+
+  if (!config.gitTagFormat.includes("{name}")) {
+    errors.push(
+      `gitTagFormat: Invalid format: The git tag format must include the "{name}" variable pattern in monorepos, otherwise packages released at the same version would get the same tag.`,
+    );
+  }
+};
+
 const rules: Rule[] = [
   fixedGroupsExist,
   noDuplicateFixedPackages,
@@ -191,6 +201,7 @@ const rules: Rule[] = [
   noFixedAndLinkedPackages,
   alsoSkipDependentsOfSkipped,
   noPrivateTagWithoutPrivateVersion,
+  gitTagFormatIncludesName,
 ];
 
 export function validateConfigByRules(

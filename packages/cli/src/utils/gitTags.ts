@@ -9,7 +9,15 @@ type Release = {
 export function buildGitTag(
   tool: Packages["tool"],
   { name, version }: Release,
+  gitTagFormat: string | undefined,
 ) {
+  if (gitTagFormat != null) {
+    // a single pass with a replacer function, so that `$` patterns in the values
+    // aren't interpreted and a value containing `{version}` isn't substituted again
+    return gitTagFormat.replace(/\{(name|version)\}/g, (_, key: string) =>
+      key === "name" ? name : version,
+    );
+  }
   return tool.type !== "root" ? `${name}@${version}` : `v${version}`;
 }
 
@@ -17,6 +25,7 @@ export async function splitByTagStatus<T extends Release>(
   cwd: string,
   tool: Packages["tool"],
   releases: readonly T[],
+  gitTagFormat: string | undefined,
 ): Promise<{ untagged: T[]; existing: T[] }> {
   if (releases.length === 0) {
     return { untagged: [], existing: [] };
@@ -25,7 +34,7 @@ export async function splitByTagStatus<T extends Release>(
   const localTags = await git.getAllTags(cwd);
   const tagStatuses = await Promise.all(
     releases.map(async (release) => {
-      const tagName = buildGitTag(tool, release);
+      const tagName = buildGitTag(tool, release, gitTagFormat);
       return localTags.has(tagName) || (await git.remoteTagExists(tagName));
     }),
   );

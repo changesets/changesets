@@ -166,6 +166,83 @@ describe("git-tag command", () => {
     });
   });
 
+  describe("gitTagFormat", () => {
+    it("tags packages using the configured format", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "package-lock.json": "",
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "@scope/pkg-a",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify({
+          gitTagFormat: "{name}/v{version}",
+        }),
+      });
+
+      mockedGit.getAllTags.mockResolvedValueOnce(new Set());
+
+      await gitTag({ cwd });
+
+      expect(mockedGit.tag).toHaveBeenCalledExactlyOnceWith(
+        "@scope/pkg-a/v1.0.0",
+        cwd,
+      );
+    });
+
+    it("skips packages whose tag in the configured format already exists", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "package-lock.json": "",
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify({
+          gitTagFormat: "{name}_{version}",
+        }),
+      });
+
+      mockedGit.getAllTags.mockResolvedValueOnce(new Set(["pkg-a_1.0.0"]));
+
+      await gitTag({ cwd });
+
+      expect(mockedGit.tag).toHaveBeenCalledExactlyOnceWith("pkg-b_1.0.0", cwd);
+    });
+
+    it("can drop the v prefix in a single package repo", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          name: "root-only",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify({
+          gitTagFormat: "{version}",
+          privatePackages: {
+            version: true,
+            tag: true,
+          },
+        }),
+      });
+      mockedGit.getAllTags.mockResolvedValueOnce(new Set());
+
+      await gitTag({ cwd });
+
+      expect(mockedGit.tag).toHaveBeenCalledExactlyOnceWith("1.0.0", cwd);
+    });
+  });
+
   describe("single package repo", () => {
     it("uses a simplified version-only tag", async () => {
       const cwd = await testdir({
