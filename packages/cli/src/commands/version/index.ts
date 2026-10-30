@@ -32,20 +32,12 @@ export async function version(options: VersionOptions) {
   const config = await readConfig(packages);
 
   const messages: string[] = [];
-  let ignore: readonly string[] | undefined;
 
-  if (options.ignore != null) {
-    if (config.ignore.length > 0) {
-      messages.push(
-        "It looks like you are trying to use the `--ignore` option while ignore is defined in the config file. This is currently not allowed, you can only use one of them at a time.",
-      );
-    } else {
-      ignore = options.ignore;
-    }
-  }
   const releaseConfig = {
     ...config,
-    ignore: ignore ?? config.ignore,
+    ignore: options.ignore
+      ? [...new Set([...config.ignore, ...options.ignore])]
+      : config.ignore,
     snapshot: {
       ...config.snapshot,
       prereleaseTemplate:
