@@ -15,8 +15,8 @@
     "@lydell/node-pty": "1.2.0-beta.15",
     "@pnpm/pnpr": "0.1.0-alpha.8",
     "@tsconfig/node24": "^24.0.5",
-    "@types/node": "^26.4.1",
-    "modern-tar": "^0.8.5",
+    "@types/node": "^26.6.5",
+    "modern-tar": "^0.8.6",
     "npm-10": "npm:npm@^10.9.8",
     "npm-11": "npm:npm@^11.0.0",
     "npm-12": "npm:npm@^12.0.1",
@@ -25,7 +25,7 @@
     "pnpm-12": "npm:pnpm@^12.4.1",
     "tinyexec": "^1.3.1",
     "typescript": "^6.0.3",
-    "vitest": "^5.0.0",
+    "vitest": "^5.0.5",
     "yarn-4": "npm:@yarnpkg/cli-dist@^4.5.2"
   },
   "engines": {

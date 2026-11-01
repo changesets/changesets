@@ -48,7 +48,7 @@
     "@oxc-node/core": "^0.1.1",
     "@tsconfig/node22": "^22.0.6",
     "@tsconfig/node24": "^24.0.5",
-    "@types/node": "^26.4.1",
+    "@types/node": "^26.6.5",
     "@types/semver": "^7.8.0",
     "@vitest/coverage-v8": "^5.0.0",
     "@vitest/eslint-plugin": "^1.6.27",
@@ -63,7 +63,7 @@
     "tsdown": "^0.23.0",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.70.0",
-    "vitest": "^5.0.0"
+    "vitest": "^5.0.5"
   },
   "lint-staged": {
     "*.{js,jsx,mjs,cjs,ts,tsx,mts,cts,json,json5,yaml,yml,css,scss,md}": [
