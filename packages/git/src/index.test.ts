@@ -605,6 +605,32 @@ describe("git", { tags: ["slow"] }, () => {
         path.resolve(cwd, "packages/pkg-c/c.js"),
       ]);
     });
+
+    it("should not quote paths with non-ASCII characters", async () => {
+      const cwd = await gitdir({
+        "packages/pkg-a/a.js": 'export default "a"',
+      });
+      // git's default, set explicitly so a user-level `core.quotePath=false` can't hide the problem
+      await exec("git", ["config", "core.quotePath", "true"], {
+        nodeOptions: { cwd },
+      });
+
+      const ref = await getCurrentCommitId({ cwd });
+
+      await outputFile(
+        path.join(cwd, "packages/pkg-a/日本語.js"),
+        'export default "updated a"',
+      );
+      await add("packages/pkg-a/日本語.js", cwd);
+      await commit("add 日本語.js", cwd);
+
+      expect(await getChangedFilesSince({ ref, cwd })).toEqual([
+        "packages/pkg-a/日本語.js",
+      ]);
+      expect(await getChangedFilesSince({ ref, cwd, fullPath: true })).toEqual([
+        path.resolve(cwd, "packages/pkg-a/日本語.js"),
+      ]);
+    });
   });
 
   describe("getChangedPackagesSinceRef", () => {
@@ -838,6 +864,46 @@ describe("git", { tags: ["slow"] }, () => {
         "pkg-a",
       ]);
     });
+
+    it("should return package as changed when the changed file has non-ASCII characters in its name", async () => {
+      const cwd = await gitdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "package-lock.json": "",
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+        }),
+      });
+      await exec("git", ["config", "core.quotePath", "true"], {
+        nodeOptions: { cwd },
+      });
+
+      await exec("git", ["checkout", "-b", "new-branch"], {
+        nodeOptions: { cwd },
+      });
+
+      const newFilePath = "packages/pkg-a/src/café.js";
+
+      await outputFile(
+        path.join(cwd, newFilePath),
+        "export const answer = 42;",
+      );
+
+      await add(newFilePath, cwd);
+      await commit("add café.js", cwd);
+
+      const changedPackages = await getChangedPackagesSinceRef({
+        cwd,
+        ref: "main",
+        changedFilePatterns: ["src/**"],
+      });
+
+      expect(changedPackages.map((pkg) => pkg.packageJson.name)).toEqual([
+        "pkg-a",
+      ]);
+    });
   });
 
   describe("getChangedChangesetFilesSinceRef", () => {
@@ -968,6 +1034,44 @@ describe("git", { tags: ["slow"] }, () => {
         ref: "main",
       });
       expect(files).toEqual([`.changeset/${changesetId}.md`]);
+    });
+
+    it("should get the changeset file when the project directory has non-ASCII characters in its name", async () => {
+      const cwd = await gitdir({
+        "プロジェクト/package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "プロジェクト/package-lock.json": "",
+        "プロジェクト/packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+        }),
+        "プロジェクト/.changeset/config.json": JSON.stringify({}),
+      });
+      await exec("git", ["config", "core.quotePath", "true"], {
+        nodeOptions: { cwd },
+      });
+      const projectDir = path.join(cwd, "プロジェクト");
+
+      const changesetId = await writeChangeset(
+        {
+          releases: [
+            {
+              name: "pkg-a",
+              type: "minor",
+            },
+          ],
+          summary: "Awesome summary",
+        },
+        projectDir,
+      );
+      await add(".changeset", projectDir);
+
+      const files = await getChangedChangesetFilesSinceRef({
+        cwd: projectDir,
+        ref: "main",
+      });
+      expect(files).toEqual([`プロジェクト/.changeset/${changesetId}.md`]);
     });
   });
 });

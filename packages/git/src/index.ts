@@ -216,9 +216,10 @@ export async function getChangedFilesSince({
 }): Promise<Array<string>> {
   const divergedAt = await getDivergedCommit(cwd, ref);
   // Now we can find which files we added
+  // `-z` keeps git from quoting and escaping paths with non-ASCII characters (`core.quotePath`)
   const cmd = await exec(
     "git",
-    ["diff", "--name-only", "--no-relative", divergedAt],
+    ["diff", "--name-only", "-z", "--no-relative", divergedAt],
     { nodeOptions: { cwd } },
   );
   if (cmd.exitCode !== 0) {
@@ -229,8 +230,7 @@ export async function getChangedFilesSince({
 
   const files = cmd.stdout
     .toString()
-    .trim()
-    .split("\n")
+    .split("\0")
     .filter((a) => a);
   if (!fullPath) return files;
 
@@ -251,7 +251,14 @@ export async function getChangedChangesetFilesSinceRef({
     // Now we can find which files we added
     const cmd = await exec(
       "git",
-      ["diff", "--name-only", "--diff-filter=d", "--no-relative", divergedAt],
+      [
+        "diff",
+        "--name-only",
+        "-z",
+        "--diff-filter=d",
+        "--no-relative",
+        divergedAt,
+      ],
       {
         nodeOptions: { cwd },
       },
@@ -262,8 +269,7 @@ export async function getChangedChangesetFilesSinceRef({
 
     const files = cmd.stdout
       .toString()
-      .trim()
-      .split("\n")
+      .split("\0")
       .filter(
         (file) =>
           rootChangesetsRegex.test(file) || preChangesetsRegex.test(file),
