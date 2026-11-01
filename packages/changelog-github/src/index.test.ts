@@ -78,7 +78,7 @@ vi.mock(
   },
 );
 
-const getChangeset = (content: string, commit: string | undefined) => {
+const createChangeset = (content: string, commit: string | undefined) => {
   return [
     {
       ...parse(
@@ -108,7 +108,7 @@ const data = {
 
 it("uses GITHUB_REPOSITORY when repo option is absent", async () => {
   vi.stubEnv("GITHUB_REPOSITORY", data.repo);
-  const [changeset, releaseType] = getChangeset("", data.commit);
+  const [changeset, releaseType] = createChangeset("", data.commit);
 
   expect(await getReleaseLine(changeset, releaseType, null)).toEqual(
     `\n\n- [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something\n`,
@@ -118,7 +118,7 @@ it("uses GITHUB_REPOSITORY when repo option is absent", async () => {
 it("uses explicit repo option before GITHUB_REPOSITORY", async () => {
   vi.stubEnv("GITHUB_REPOSITORY", "other/repo");
 
-  expect(await getReleaseLine(...getChangeset("", data.commit))).toEqual(
+  expect(await getReleaseLine(...createChangeset("", data.commit))).toEqual(
     `\n\n- [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something\n`,
   );
 });
@@ -168,7 +168,7 @@ describe.each([data.commit, "wrongcommit", undefined])(
         test.each(["with #", "without #"] as const)("%s", async (kind) => {
           expect(
             await getReleaseLine(
-              ...getChangeset(
+              ...createChangeset(
                 `${keyword}: ${kind === "with #" ? "#" : ""}${data.pull}`,
                 commitFromChangeset,
               ),
@@ -182,7 +182,7 @@ describe.each([data.commit, "wrongcommit", undefined])(
     test("override commit with commit keyword", async () => {
       expect(
         await getReleaseLine(
-          ...getChangeset(`commit: ${data.commit}`, commitFromChangeset),
+          ...createChangeset(`commit: ${data.commit}`, commitFromChangeset),
         ),
       ).toEqual(
         `\n\n- [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something\n`,
@@ -197,7 +197,7 @@ describe.each(["author", "user"])(
     test.each(["with @", "without @"] as const)("%s", async (kind) => {
       expect(
         await getReleaseLine(
-          ...getChangeset(
+          ...createChangeset(
             `${keyword}: ${kind === "with @" ? "@" : ""}other`,
             data.commit,
           ),
@@ -211,7 +211,9 @@ describe.each(["author", "user"])(
 
 it("linkifies bare issue references", async () => {
   expect(
-    await getReleaseLine(...getChangeset("fixes #1234 and #5678", data.commit)),
+    await getReleaseLine(
+      ...createChangeset("fixes #1234 and #5678", data.commit),
+    ),
   ).toMatchInlineSnapshot(`
     "
 
@@ -223,7 +225,7 @@ it("linkifies bare issue references", async () => {
 it("does not double-linkify existing markdown links", async () => {
   expect(
     await getReleaseLine(
-      ...getChangeset(
+      ...createChangeset(
         "see [#1234](https://github.com/emotion-js/emotion/issues/1234)",
         data.commit,
       ),
@@ -239,7 +241,7 @@ it("does not double-linkify existing markdown links", async () => {
 it("does not linkify issue-like refs inside link text", async () => {
   expect(
     await getReleaseLine(
-      ...getChangeset("see [fix for #99](https://example.com)", data.commit),
+      ...createChangeset("see [fix for #99](https://example.com)", data.commit),
     ),
   ).toMatchInlineSnapshot(`
     "
@@ -250,7 +252,7 @@ it("does not linkify issue-like refs inside link text", async () => {
 });
 
 it("does not linkify when preceded by a word character", async () => {
-  expect(await getReleaseLine(...getChangeset("foo#123", data.commit)))
+  expect(await getReleaseLine(...createChangeset("foo#123", data.commit)))
     .toMatchInlineSnapshot(`
       "
 
@@ -260,7 +262,7 @@ it("does not linkify when preceded by a word character", async () => {
 });
 
 it("does not linkify #0", async () => {
-  expect(await getReleaseLine(...getChangeset("see #0", data.commit)))
+  expect(await getReleaseLine(...createChangeset("see #0", data.commit)))
     .toMatchInlineSnapshot(`
       "
 
@@ -270,7 +272,7 @@ it("does not linkify #0", async () => {
 });
 
 it("linkifies issue ref at the start of a line", async () => {
-  expect(await getReleaseLine(...getChangeset("#42 was fixed", data.commit)))
+  expect(await getReleaseLine(...createChangeset("#42 was fixed", data.commit)))
     .toMatchInlineSnapshot(`
       "
 
@@ -280,7 +282,7 @@ it("linkifies issue ref at the start of a line", async () => {
 });
 
 it("linkifies issue ref after punctuation", async () => {
-  expect(await getReleaseLine(...getChangeset("fixed (#99)", data.commit)))
+  expect(await getReleaseLine(...createChangeset("fixed (#99)", data.commit)))
     .toMatchInlineSnapshot(`
       "
 
@@ -292,7 +294,7 @@ it("linkifies issue ref after punctuation", async () => {
 it("handles mixed linked and bare refs", async () => {
   expect(
     await getReleaseLine(
-      ...getChangeset(
+      ...createChangeset(
         "fixes [#1](https://github.com/emotion-js/emotion/issues/1) and #2",
         data.commit,
       ),
@@ -306,8 +308,9 @@ it("handles mixed linked and bare refs", async () => {
 });
 
 it("linkifies issue ref followed by a dot", async () => {
-  expect(await getReleaseLine(...getChangeset("this fixes #42.", data.commit)))
-    .toMatchInlineSnapshot(`
+  expect(
+    await getReleaseLine(...createChangeset("this fixes #42.", data.commit)),
+  ).toMatchInlineSnapshot(`
       "
 
       - [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something
@@ -318,7 +321,7 @@ it("linkifies issue ref followed by a dot", async () => {
 it("with multiple authors", async () => {
   expect(
     await getReleaseLine(
-      ...getChangeset(
+      ...createChangeset(
         ["author: @Andarist", "author: @mitchellhamilton"].join("\n"),
         data.commit,
       ),
@@ -332,7 +335,7 @@ it("with multiple authors", async () => {
 });
 
 it("disables thanks if disableThanks is enabled", async () => {
-  const [changeset, releaseType, options] = getChangeset(
+  const [changeset, releaseType, options] = createChangeset(
     "author: @Andarist",
     data.commit,
   );
