@@ -21,9 +21,13 @@
     "yaml": "^2.9.0"
   },
   "devDependencies": {
-    "outdent": "^0.8.0"
+    "outdent": "^0.8.0",
+    "valibot": "^1.5.0"
   },
   "engines": {
     "node": "^22.11 || ^24 || >=26"
+  },
+  "inlinedDependencies": {
+    "valibot": "1.5.0"
   }
 }

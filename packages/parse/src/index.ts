@@ -1,51 +1,14 @@
-import type { Release, VersionType } from "@changesets/types";
+import type { Release } from "@changesets/types";
+import { safeParse } from "valibot";
 import * as yaml from "yaml";
+import { FrontMatterSchema } from "./frontmatter.ts";
 
 const mdRegex = /\s*---([^]*?)\r?\n\s*---(\s*(?:\n|$)[^]*)/;
 
 const EXAMPLE_FORMAT = `---\n"package-name": patch\n---`;
 
-const validVersionTypes: readonly VersionType[] = [
-  "major",
-  "minor",
-  "patch",
-  "none",
-];
-
 function truncate(s: string, max = 200): string {
   return s.length > max ? s.slice(0, max) + "..." : s;
-}
-
-function validateReleases(releases: Release[], contents: string): void {
-  for (const release of releases) {
-    if (typeof release.name !== "string" || release.name.trim() === "") {
-      throw new Error(
-        `could not parse changeset - invalid package name in frontmatter.\n` +
-          `Expected a non-empty string for package name, but got: ${JSON.stringify(
-            release.name,
-          )}\n` +
-          `Changeset contents:\n${truncate(contents)}`,
-      );
-    }
-
-    if (typeof release.type !== "string") {
-      throw new Error(
-        `could not parse changeset - invalid release type for package "${release.name}".\n` +
-          `Expected a string for release type, but got: ${typeof release.type}\n` +
-          `Changeset contents:\n${truncate(contents)}`,
-      );
-    }
-
-    if (!validVersionTypes.includes(release.type)) {
-      throw new Error(
-        `could not parse changeset - invalid version type ${JSON.stringify(
-          release.type,
-        )} for package "${release.name}".\n` +
-          `Valid version types are: ${validVersionTypes.join(", ")}\n` +
-          `Changeset contents:\n${truncate(contents)}`,
-      );
-    }
-  }
 }
 
 export function parseChangesetFile(contents: string): {
@@ -54,18 +17,18 @@ export function parseChangesetFile(contents: string): {
 } {
   const trimmedContents = contents.trim();
 
-  if (!trimmedContents) {
+  if (trimmedContents.length === 0) {
     throw new Error(
-      `could not parse changeset - file is empty.\n` +
+      `Could not parse changeset: file is empty.\n` +
         `Changesets must have frontmatter with package names and version types.\n` +
         `Example:\n${EXAMPLE_FORMAT}\n\nYour changeset summary here.`,
     );
   }
 
   const execResult = mdRegex.exec(contents);
-  if (!execResult) {
+  if (execResult == null) {
     throw new Error(
-      `could not parse changeset - missing or invalid frontmatter.\n` +
+      `Could not parse changeset: missing or invalid frontmatter.\n` +
         `Changesets must start with frontmatter delimited by "---".\n` +
         `Example:\n${EXAMPLE_FORMAT}\n\nYour changeset summary here.\n` +
         `Received content:\n${truncate(trimmedContents)}`,
@@ -79,7 +42,7 @@ export function parseChangesetFile(contents: string): {
     yamlStuff = yaml.parse(roughReleases);
   } catch (e) {
     throw new Error(
-      `could not parse changeset - invalid YAML in frontmatter.\n` +
+      `Could not parse changeset: invalid YAML in frontmatter.\n` +
         `The frontmatter between the "---" delimiters must be valid YAML.\n` +
         `YAML error: ${e instanceof Error ? e.message : String(e)}\n` +
         `Frontmatter content:\n${roughReleases}`,
@@ -87,24 +50,28 @@ export function parseChangesetFile(contents: string): {
     );
   }
 
-  let releases: Release[] = [];
-  if (yamlStuff) {
-    if (typeof yamlStuff !== "object" || Array.isArray(yamlStuff)) {
-      throw new Error(
-        `could not parse changeset - frontmatter must be an object mapping package names to version types.\n` +
-          `Expected format:\n${EXAMPLE_FORMAT}\n` +
-          `Received:\n${roughReleases}`,
-      );
-    }
-
-    releases = Object.entries(yamlStuff).map(([name, type]) => ({
-      name,
-      type,
-    }));
+  const result = safeParse(FrontMatterSchema, yamlStuff);
+  if (!result.success) {
+    const issueLines = result.issues
+      .map(
+        (issue) =>
+          `${issue.path?.map((p) => p.key)?.join(".") || "."}: ${issue.message}`,
+      )
+      .join("\n");
+    throw new Error(
+      `Could not parse changeset:\n${issueLines}\n\nReceived:\n${contents}`,
+    );
   }
 
-  validateReleases(releases, contents);
+  if (result.output == null) {
+    return { releases: [], summary: "" };
+  }
 
+  const { _: _overrides, ...releasesByName } = result.output;
+  const releases = Object.entries(releasesByName).map(([key, value]) => ({
+    name: key,
+    type: value,
+  }));
   return { releases, summary };
 }
 

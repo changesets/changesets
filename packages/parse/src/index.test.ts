@@ -236,7 +236,7 @@ describe("parsing a changeset", () => {
     `;
 
     expect(() => parse(changesetMd)).toThrowErrorMatchingInlineSnapshot(`
-      [Error: could not parse changeset - missing or invalid frontmatter.
+      [Error: Could not parse changeset: missing or invalid frontmatter.
       Changesets must start with frontmatter delimited by "---".
       Example:
       ---
@@ -262,9 +262,10 @@ describe("parsing a changeset", () => {
     `;
 
     expect(() => parse(changesetMd)).toThrowErrorMatchingInlineSnapshot(`
-      [Error: could not parse changeset - invalid package name in frontmatter.
-      Expected a non-empty string for package name, but got: ""
-      Changeset contents:
+      [Error: Could not parse changeset:
+      .: Package name can't be empty.
+
+      Received:
       ---
       : minor
       ---
@@ -275,7 +276,7 @@ describe("parsing a changeset", () => {
 
   it("should throw when file is completely empty", () => {
     expect(() => parse("")).toThrowErrorMatchingInlineSnapshot(`
-      [Error: could not parse changeset - file is empty.
+      [Error: Could not parse changeset: file is empty.
       Changesets must have frontmatter with package names and version types.
       Example:
       ---
@@ -285,7 +286,7 @@ describe("parsing a changeset", () => {
       Your changeset summary here.]
     `);
     expect(() => parse("   ")).toThrowErrorMatchingInlineSnapshot(`
-      [Error: could not parse changeset - file is empty.
+      [Error: Could not parse changeset: file is empty.
       Changesets must have frontmatter with package names and version types.
       Example:
       ---
@@ -295,7 +296,7 @@ describe("parsing a changeset", () => {
       Your changeset summary here.]
     `);
     expect(() => parse("\n\n")).toThrowErrorMatchingInlineSnapshot(`
-      [Error: could not parse changeset - file is empty.
+      [Error: Could not parse changeset: file is empty.
       Changesets must have frontmatter with package names and version types.
       Example:
       ---
@@ -309,7 +310,7 @@ describe("parsing a changeset", () => {
   it("should throw when frontmatter is missing", () => {
     const changesetMd = "Just some content without frontmatter";
     expect(() => parse(changesetMd)).toThrowErrorMatchingInlineSnapshot(`
-      [Error: could not parse changeset - missing or invalid frontmatter.
+      [Error: Could not parse changeset: missing or invalid frontmatter.
       Changesets must start with frontmatter delimited by "---".
       Example:
       ---
@@ -331,9 +332,10 @@ describe("parsing a changeset", () => {
     `;
 
     expect(() => parse(changesetMd)).toThrowErrorMatchingInlineSnapshot(`
-      [Error: could not parse changeset - invalid version type "invalid-type" for package "cool-package".
-      Valid version types are: major, minor, patch, none
-      Changeset contents:
+      [Error: Could not parse changeset:
+      cool-package: Invalid change type
+
+      Received:
       ---
       "cool-package": invalid-type
       ---
@@ -351,9 +353,10 @@ describe("parsing a changeset", () => {
     `;
 
     expect(() => parse(changesetMd)).toThrowErrorMatchingInlineSnapshot(`
-      [Error: could not parse changeset - invalid package name in frontmatter.
-      Expected a non-empty string for package name, but got: ""
-      Changeset contents:
+      [Error: Could not parse changeset:
+      .: Package name can't be empty.
+
+      Received:
       ---
       "": minor
       ---
