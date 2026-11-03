@@ -1,9 +1,9 @@
 import * as v from "valibot";
+import { escapeRegExp } from "./regexp-escape.ts";
 
 const stripPrefix = (prefix: string) =>
   v.transform((str: string): string =>
-    // TODO: RegExp.escape is node 24+ only
-    str.replace(new RegExp(`^${RegExp.escape(prefix)}?`), ""),
+    str.replace(new RegExp(`^${escapeRegExp(prefix)}?`), ""),
   );
 export const StringWithoutPrefix = (prefix: string) =>
   v.pipe(v.string(), stripPrefix(prefix));
