@@ -15,7 +15,7 @@ export default defineConfig(
       "**/coverage/**",
       "**/node_modules/**",
       "packages/cli/bin.js",
-      "site/.vitepress/cache/**",
+      "docs/.vitepress/cache/**",
       "**/*.snap",
     ],
   },
@@ -103,8 +103,8 @@ export default defineConfig(
     files: [
       "**/index.ts", // to be removed in next release (v4) when we are dropping default export
       "**/*config.*", // config files often return default exports
-      "site/**/*.data.ts",
-      "site/**/*.paths.ts",
+      "docs/**/*.data.ts",
+      "docs/**/*.paths.ts",
     ],
     rules: {
       "import-lite/no-default-export": "off",
