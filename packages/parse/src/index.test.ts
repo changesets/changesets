@@ -227,6 +227,23 @@ describe("parsing a changeset", () => {
     });
   });
 
+  it("should not treat the _ options key as a package", () => {
+    const changesetMd = outdent`---
+    _:
+      pr: 1337
+    "cool-package": minor
+    ---
+
+    Nice simple summary
+    `;
+
+    const changeset = parse(changesetMd);
+    expect(changeset).toEqual({
+      releases: [{ name: "cool-package", type: "minor" }],
+      summary: "Nice simple summary",
+    });
+  });
+
   it("should throw if the frontmatter is followed by non-whitespace characters on the same line", () => {
     const changesetMd = outdent`---
     "cool-package": minor

@@ -33,7 +33,15 @@ const PackageNameSchema = v.pipe(
   v.string(),
   v.minLength(2, "Package name can't be empty."),
 );
-const PackagesSchema = v.record(PackageNameSchema, VersionTypeSchema);
+const PackagesSchema = v.pipe(
+  v.record(v.string(), v.any()),
+  // exclude `_` from being validated as a package
+  v.transform((input) => {
+    const { _, ...packages } = input;
+    return packages;
+  }),
+  v.record(PackageNameSchema, VersionTypeSchema),
+);
 
 export const FrontMatterSchema = v.nullable(
   v.intersect([OptionsSchema, PackagesSchema]),

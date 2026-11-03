@@ -48,6 +48,7 @@ it("should parse a frontmatter with _ key", () => {
   const changesetMd = outdent`
     _:
       pr: 1337
+    "cool-package": minor
   `;
 
   const data = parse(changesetMd);
@@ -62,4 +63,64 @@ it("should parse a frontmatter with _ key", () => {
       "cool-package": "minor",
     }
   `);
+});
+
+it("should parse a frontmatter with only the _ key", () => {
+  const changesetMd = outdent`
+    _:
+      author: "@someone"
+      commit: "#abc123"
+  `;
+
+  const data = parse(changesetMd);
+  const { output, issues } = v.safeParse(FrontMatterSchema, data);
+
+  expect(issues).toBeUndefined();
+  expect(output).toStrictEqual({
+    _: { author: "someone", commit: "abc123" },
+  });
+});
+
+it("should report invalid options in the _ key", () => {
+  const changesetMd = outdent`
+    _:
+      pr: not-a-number
+      unknown: true
+    "cool-package": minor
+  `;
+
+  const data = parse(changesetMd);
+  const { issues } = v.safeParse(FrontMatterSchema, data);
+
+  expect(
+    issues?.map((issue) => ({
+      path: v.getDotPath(issue),
+      type: issue.type,
+    })),
+  ).toStrictEqual([
+    { path: "_.pr", type: "number" },
+    { path: "_.unknown", type: "strict_object" },
+  ]);
+});
+
+it("should report invalid packages next to the _ key", () => {
+  const changesetMd = outdent`
+    _:
+      pr: 1337
+    "cool-package": invalid-type
+    "": minor
+  `;
+
+  const data = parse(changesetMd);
+  const { issues } = v.safeParse(FrontMatterSchema, data);
+
+  expect(
+    issues?.map((issue) => ({
+      path: v.getDotPath(issue),
+      message: issue.message,
+    })),
+  ).toStrictEqual([
+    { path: "cool-package", message: "Invalid change type" },
+    { path: "", message: "Package name can't be empty." },
+  ]);
 });
