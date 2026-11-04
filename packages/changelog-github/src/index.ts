@@ -7,6 +7,17 @@ import { buildReleaseLineTokens, renderTemplate } from "./render-template.ts";
 
 const ISSUE_REF_REGEX = /\[.*?\]\(.*?\)|\B#([1-9]\d*)\b/g;
 
+export const INLINE_OVERRIDE_KEYWORDS = {
+  pull: ["pr", "pull", "pull request"],
+  commit: ["commit"],
+  author: ["author", "user"],
+} as const;
+
+const inlineOverrideRegex = new RegExp(
+  `^\\s*(${Object.values(INLINE_OVERRIDE_KEYWORDS).flat().join("|")}):\\s*(.+)`,
+  "gm",
+);
+
 // "match what you skip, capture what you want": the left alternative
 // consumes markdown links so the right alternative only matches bare refs
 function linkifyIssueRefs(
@@ -104,21 +115,41 @@ const changelogFunctions: ChangelogFunctions = {
     let commitFromSummary: string | undefined;
     const usersFromSummary: string[] = [];
 
+    type Keyword =
+      (typeof INLINE_OVERRIDE_KEYWORDS)[keyof typeof INLINE_OVERRIDE_KEYWORDS][number];
     const replacedChangelog = changeset.summary
-      .replace(/^\s*(?:pr|pull|pull\s+request):\s*#?(\d+)/im, (_, pr) => {
-        const num = Number(pr);
-        if (!isNaN(num)) prFromSummary = num;
-        return "";
-      })
-      .replace(/^\s*commit:\s*([^\s]+)/im, (_, commit) => {
-        commitFromSummary = commit;
-        return "";
-      })
-      .replace(/^\s*(?:author|user):\s*@?([^\s]+)/gim, (_, user) => {
-        usersFromSummary.push(user);
-        return "";
+      .replace(inlineOverrideRegex, (_, type: Keyword, value: string) => {
+        switch (type) {
+          case "pr":
+          case "pull":
+          case "pull request": {
+            const num = Number(value.replace(/^#/, ""));
+            if (!isNaN(num)) prFromSummary = num;
+            return "";
+          }
+
+          case "commit":
+            commitFromSummary = value;
+            return "";
+
+          case "author":
+          case "user":
+            usersFromSummary.push(value.replace(/^@/, ""));
+            return "";
+        }
       })
       .trim();
+
+    // TODO[>=4]: drop inline override support
+    if (
+      prFromSummary != null ||
+      commitFromSummary != null ||
+      usersFromSummary.length > 0
+    ) {
+      console.warn(
+        "Overrides in the Changeset body are deprecated. Use frontmatter overrides instead.\nhttps://changesets.dev/guide/writing-changesets#overrides-changesets-changelog-github-only",
+      );
+    }
 
     const [firstLine, ...futureLines] = replacedChangelog
       .split("\n")
