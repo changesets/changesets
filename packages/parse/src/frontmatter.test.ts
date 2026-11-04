@@ -120,7 +120,10 @@ it("should report invalid packages next to the _ key", () => {
       message: issue.message,
     })),
   ).toStrictEqual([
-    { path: "cool-package", message: "Invalid change type" },
+    {
+      path: "cool-package",
+      message: "Invalid change type (valid ones are major, minor, patch, none)",
+    },
     { path: "", message: "Package name can't be empty." },
   ]);
 });

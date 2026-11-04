@@ -350,7 +350,7 @@ describe("parsing a changeset", () => {
 
     expect(() => parse(changesetMd)).toThrowErrorMatchingInlineSnapshot(`
       [Error: Could not parse changeset:
-      cool-package: Invalid change type
+      cool-package: Invalid change type (valid ones are major, minor, patch, none)
 
       Received:
       ---

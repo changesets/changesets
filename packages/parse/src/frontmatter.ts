@@ -25,13 +25,13 @@ const OptionsSchema = v.object({
 
 const VersionTypeSchema = v.picklist(
   ["major", "minor", "patch", "none"],
-  "Invalid change type",
+  "Invalid change type (valid ones are major, minor, patch, none)",
 );
 
-// TODO: what is the minimum length of a package name?
 const PackageNameSchema = v.pipe(
   v.string(),
-  v.minLength(2, "Package name can't be empty."),
+  v.nonEmpty("Package name can't be empty."),
+  v.maxLength(214, "Package name can't exceed 214 characters."),
 );
 const PackagesSchema = v.pipe(
   v.record(v.string(), v.any()),
