@@ -57,6 +57,7 @@ export default defineConfig(
       ],
 
       "e18e/prefer-static-regex": "off",
+      "e18e/ban-dependencies": ["error", { allowed: ["semver"] }],
 
       "@typescript-eslint/consistent-type-exports": [
         "error",
