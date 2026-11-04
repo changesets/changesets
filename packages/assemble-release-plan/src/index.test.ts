@@ -968,6 +968,81 @@ describe("assembleReleasePlan", () => {
       expect(releases[0].newVersion).toEqual("2.0.0-next.1");
       expect(releases[0].type).toEqual("minor");
     });
+
+    it("should start the prerelease number over when the tag changes", () => {
+      setup.updatePackage("pkg-a", "2.0.0-beta.3");
+
+      setup.changesets = [];
+      setup.addChangeset({
+        id: "minor-bumping-one",
+        releases: [{ name: "pkg-a", type: "minor" }],
+      });
+
+      const { releases } = assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        {
+          ...defaultConfig,
+        },
+        {
+          tag: "rc",
+          mode: "pre",
+        },
+      );
+
+      expect(releases.length).toEqual(1);
+      expect(releases[0].newVersion).toEqual("2.0.0-rc.0");
+    });
+
+    it("should start the prerelease number over for a fixed group when the tag changes", () => {
+      setup.updatePackage("pkg-a", "2.0.0-beta.3");
+      setup.updatePackage("pkg-b", "2.0.0-beta.3");
+
+      setup.changesets = [];
+      setup.addChangeset({
+        id: "minor-bumping-one",
+        releases: [{ name: "pkg-a", type: "minor" }],
+      });
+
+      const { releases } = assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        {
+          ...defaultConfig,
+          fixed: [["pkg-a", "pkg-b"]],
+        },
+        {
+          tag: "rc",
+          mode: "pre",
+        },
+      );
+
+      expect(releases.length).toEqual(2);
+      expect(releases[0].newVersion).toEqual("2.0.0-rc.0");
+      expect(releases[1].newVersion).toEqual("2.0.0-rc.0");
+    });
+
+    it("should bump a package that only had a prerelease under an earlier tag when exiting pre-release mode", () => {
+      setup.updatePackage("pkg-a", "1.0.1-beta.0");
+
+      setup.changesets = [];
+
+      const { releases } = assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        {
+          ...defaultConfig,
+        },
+        {
+          tag: "rc",
+          mode: "exit",
+        },
+      );
+
+      expect(releases.length).toEqual(1);
+      expect(releases[0].name).toEqual("pkg-a");
+      expect(releases[0].newVersion).toEqual("1.0.1");
+    });
   });
 
   describe("workspace protocol", () => {

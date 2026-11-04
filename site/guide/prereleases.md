@@ -105,6 +105,8 @@ During prerelease mode, you may want to change the tag for different stages of t
 }
 ```
 
+The prerelease number starts over for the new tag, so a package at `1.0.0-alpha.3` is versioned as `1.0.0-beta.0` next.
+
 ::: info Prerelease mode on a separate branch
 You do not need to rename the branch for the new tag. Prerelease only uses the specified tag for versions and dist-tags.
 :::

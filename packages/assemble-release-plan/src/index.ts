@@ -24,8 +24,13 @@ type SnapshotReleaseParameters = {
   commit?: string | undefined;
 };
 
-function getPreVersion(version: string) {
+function getPreVersion(version: string, tag: string | undefined) {
   const parsed = semverParse(version)!;
+  // A prerelease under another tag (e.g. `1.0.0-beta.3` after switching to `rc`)
+  // doesn't count towards the current tag, so its number starts over at 0
+  if (tag != null && parsed.prerelease[0] !== tag) {
+    return 0;
+  }
   let preVersion = parsed.prerelease[1] ?? -1;
   if (typeof preVersion !== "number") {
     throw new InternalError("preVersion is not a number");
@@ -287,6 +292,7 @@ function getHighestPreVersion(
   groupKind: "linked" | "fixed",
   packageGroup: PackageGroup,
   packagesByName: Map<string, Package>,
+  tag: string | undefined,
 ): number {
   let highestPreVersion = 0;
   for (const pkgName of packageGroup) {
@@ -298,7 +304,7 @@ function getHighestPreVersion(
       )}`,
     );
     highestPreVersion = Math.max(
-      getPreVersion(pkg.packageJson.version),
+      getPreVersion(pkg.packageJson.version, tag),
       highestPreVersion,
     );
   }
@@ -316,6 +322,9 @@ function getPreInfo(
 
   // Populate preVersion
   // preVersion is the map between package name and its next pre version number.
+  // Exiting pre mode only needs to know whether a package had a prerelease at all,
+  // so the tag is only matched in pre mode.
+  const tag = preState.mode === "pre" ? preState.tag : undefined;
   const preVersions = new Map<string, number>();
   for (const [, pkg] of packagesByName) {
     if (
@@ -328,7 +337,7 @@ function getPreInfo(
     }
     preVersions.set(
       pkg.packageJson.name,
-      getPreVersion(pkg.packageJson.version),
+      getPreVersion(pkg.packageJson.version, tag),
     );
   }
   for (const fixedGroup of config.fixed) {
@@ -336,6 +345,7 @@ function getPreInfo(
       "fixed",
       fixedGroup,
       packagesByName,
+      tag,
     );
     for (const fixedPackage of fixedGroup) {
       preVersions.set(fixedPackage, highestPreVersion);
@@ -346,6 +356,7 @@ function getPreInfo(
       "linked",
       linkedGroup,
       packagesByName,
+      tag,
     );
     for (const linkedPackage of linkedGroup) {
       preVersions.set(linkedPackage, highestPreVersion);
