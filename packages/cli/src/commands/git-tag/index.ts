@@ -37,6 +37,7 @@ export async function gitTag(options?: GitTagOptions) {
 
   const results = await createGitTags({
     packages,
+    gitTagFormat: config.gitTagFormat,
     releases,
     reporter,
   });
@@ -45,5 +46,5 @@ export async function gitTag(options?: GitTagOptions) {
     return;
   }
 
-  s.stop(formatGitTagResults(packages.tool, results));
+  s.stop(formatGitTagResults(packages.tool, results, config.gitTagFormat));
 }
