@@ -17,9 +17,9 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
-    "@changesets/format": "^0.1.2",
+    "@changesets/format": "^0.1.3",
     "@changesets/types": "workspace:^",
-    "human-id": "^4.2.1"
+    "human-id": "^4.2.2"
   },
   "devDependencies": {
     "@changesets/parse": "workspace:*",
