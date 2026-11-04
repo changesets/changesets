@@ -65,6 +65,17 @@ The `--ignore` flag allows you to skip packages from being published. This allow
 $ changeset version --ignore pkg-a --ignore pkg-b
 ```
 
+### Including packages
+
+Use `--include` to version only the listed packages. All other packages follow the same `ignore` behavior described above, so their changesets remain pending. A changeset containing both included and excluded packages is rejected without being partially consumed.
+
+```bash
+$ changeset version --include pkg-a --include pkg-b
+$ changeset version --include pkg-a,pkg-b
+```
+
+The flag accepts exact package names. Unknown names and empty argument values are errors. It cannot be combined with `--ignore`, a configured `include` list, or a nonempty configured `ignore` list. This flag affects only the current version command; use the [`include` configuration](./config.md#include) for a persistent selection with glob support.
+
 ### Snapshot releases
 
 You can use the `--snapshot` flag to create a [snapshot release](./snapshot-releases.md), meant for testing purposes only. The suffix for snapshot releases can be customized with `--snapshot-prerelease-template <template>`, which works the same way as the [`snapshot.prereleaseTemplate`](./config.md#snapshotprereleasetemplate) option.

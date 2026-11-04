@@ -19,6 +19,17 @@ const invalidPathOrGlobMessage = (pkgOrGlob: string) =>
 
 type Rule = (ctx: ValidationContext) => void;
 
+const noIncludeAndIgnore: Rule = ({ writtenConfig, errors }) => {
+  if (
+    writtenConfig.include != null &&
+    (writtenConfig.ignore?.length ?? 0) > 0
+  ) {
+    errors.push(
+      'Invalid combination: "include" and "ignore" cannot be used together.',
+    );
+  }
+};
+
 const fixedGroupsExist: Rule = ({
   config,
   writtenConfig,
@@ -184,6 +195,7 @@ const noPrivateTagWithoutPrivateVersion: Rule = ({ config, errors }) => {
 };
 
 const rules: Rule[] = [
+  noIncludeAndIgnore,
   fixedGroupsExist,
   noDuplicateFixedPackages,
   linkedGroupsExist,

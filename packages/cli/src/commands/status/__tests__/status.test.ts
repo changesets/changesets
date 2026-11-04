@@ -490,51 +490,54 @@ describe("status", { tags: ["slow"] }, () => {
     `);
   });
 
-  it("should not exit early with a non-zero error code when only changed packages are ignored", async () => {
-    const cwd = await gitdir({
-      "package.json": JSON.stringify({
-        private: true,
-        name: "root-pkg",
-        workspaces: ["packages/*"],
-      }),
-      "package-lock.json": "",
-      "packages/pkg-a/package.json": JSON.stringify({
-        name: "pkg-a",
-        version: "1.0.0",
-      }),
-      "packages/pkg-a/src/a.js": 'export default "a"',
-      "packages/pkg-b/package.json": JSON.stringify({
-        name: "pkg-b",
-        version: "1.0.0",
-      }),
-      "packages/pkg-b/src/b.js": 'export default "b"',
-      ".changeset/config.json": JSON.stringify({
-        ignore: ["pkg-b"],
-      }),
-    });
+  it.each([{ ignore: ["pkg-b"] }, { include: ["pkg-a"] }])(
+    "returns an empty plan when changed packages are skipped with %j",
+    async (selection) => {
+      const cwd = await gitdir({
+        "package.json": JSON.stringify({
+          private: true,
+          name: "root-pkg",
+          workspaces: ["packages/*"],
+        }),
+        "package-lock.json": "",
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+        "packages/pkg-a/src/a.js": 'export default "a"',
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          version: "1.0.0",
+        }),
+        "packages/pkg-b/src/b.js": 'export default "b"',
+        ".changeset/config.json": JSON.stringify({
+          ...selection,
+        }),
+      });
 
-    vi.spyOn(process, "exit").mockImplementation((() => {}) as never);
+      vi.spyOn(process, "exit").mockImplementation((() => {}) as never);
 
-    await exec("git", ["checkout", "-b", "new-branch"], {
-      nodeOptions: { cwd },
-    });
+      await exec("git", ["checkout", "-b", "new-branch"], {
+        nodeOptions: { cwd },
+      });
 
-    await outputFile(
-      path.join(cwd, "packages/pkg-b/b.js"),
-      'export default "updated b"',
-    );
-    await git.add(".", cwd);
-    await git.commit("updated b", cwd);
+      await outputFile(
+        path.join(cwd, "packages/pkg-b/b.js"),
+        'export default "updated b"',
+      );
+      await git.add(".", cwd);
+      await git.commit("updated b", cwd);
 
-    const releaseObj = await status({ cwd, since: "main" });
+      const releaseObj = await status({ cwd, since: "main" });
 
-    expect(process.exit).not.toHaveBeenCalled();
-    expect(releaseObj).toEqual({
-      changesets: [],
-      releases: [],
-      preState: undefined,
-    });
-  });
+      expect(process.exit).not.toHaveBeenCalled();
+      expect(releaseObj).toEqual({
+        changesets: [],
+        releases: [],
+        preState: undefined,
+      });
+    },
+  );
 
   it("should not exit early with a non-zero error code when only changed packages are private and versioning for private packages is turned off", async () => {
     const cwd = await gitdir({

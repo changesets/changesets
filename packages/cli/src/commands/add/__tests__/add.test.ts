@@ -456,41 +456,44 @@ describe("Add command", () => {
     );
   });
 
-  it("should not include ignored packages in the prompt", async () => {
-    const cwd = await testdir({
-      "package.json": JSON.stringify({
-        private: true,
-        name: "root-pkg",
-        workspaces: ["packages/*"],
-      }),
-      "package-lock.json": "",
-      "packages/pkg-a/package.json": JSON.stringify({
-        name: "pkg-a",
-        version: "1.0.3",
-      }),
-      "packages/pkg-b/package.json": JSON.stringify({
-        name: "pkg-b",
-        version: "1.2.0",
-      }),
-      "packages/pkg-c/package.json": JSON.stringify({
-        name: "pkg-c",
-        version: "2.0.0",
-      }),
-      ".changeset/config.json": JSON.stringify({
-        ...defaultConfig,
-        ignore: ["pkg-b"],
-      }),
-    });
+  it.each([{ ignore: ["pkg-b"] }, { include: ["pkg-a", "pkg-c"] }])(
+    "omits skipped packages from the prompt with %j",
+    async (selection) => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          name: "root-pkg",
+          workspaces: ["packages/*"],
+        }),
+        "package-lock.json": "",
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.3",
+        }),
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          version: "1.2.0",
+        }),
+        "packages/pkg-c/package.json": JSON.stringify({
+          name: "pkg-c",
+          version: "2.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify({
+          ...defaultConfig,
+          ...selection,
+        }),
+      });
 
-    mockUserResponses({ releases: { "pkg-a": "patch" } });
-    await addChangeset({ cwd });
-    const choices =
-      mockedUtils.askMultiselect.mock.calls[0][1]["unchanged packages"];
-    expect(choices).toMatchObject([
-      { label: "pkg-a", value: "pkg-a" },
-      { label: "pkg-c", value: "pkg-c" },
-    ]);
-  });
+      mockUserResponses({ releases: { "pkg-a": "patch" } });
+      await addChangeset({ cwd });
+      const choices =
+        mockedUtils.askMultiselect.mock.calls[0][1]["unchanged packages"];
+      expect(choices).toStrictEqual([
+        { label: "pkg-a", value: "pkg-a" },
+        { label: "pkg-c", value: "pkg-c" },
+      ]);
+    },
+  );
 
   it("should not include private packages without a version in the prompt", async () => {
     const cwd = await testdir({

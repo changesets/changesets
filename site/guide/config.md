@@ -204,6 +204,26 @@ The dependency range will only be updated if the package (that contains the depe
 
 :::
 
+## include
+
+- **Type:** `string[]`
+- **Default:** Not set
+- **Note:** Only applicable in monorepos.
+
+Select the packages Changesets should include. All other packages follow the [`ignore`](#ignore) behavior, including its safety restrictions. Supports the same [picomatch patterns](https://github.com/micromatch/picomatch), including negated patterns.
+
+```json
+{
+  "include": ["@my-scope/*", "!@my-scope/internal"]
+}
+```
+
+Omitting `include` leaves package selection unchanged. An empty array, or patterns that match no packages, selects no packages. `include` cannot be combined with a nonempty `ignore` array.
+
+This configuration applies wherever Changesets uses `ignore`, including adding changesets, checking status, versioning, publishing, and creating tags. To select packages only for one version command, use [`version --include`](./cli.md#including-packages). CLI `--include` and `--ignore` cannot override a configured `include` list.
+
+Changesets that contain both included and excluded packages are rejected as a whole. Excluded changesets are kept for a later release. Excluded packages keep their versions, but their dependency ranges can still be updated according to the existing `ignore` behavior.
+
 ## ignore
 
 - **Type:** `string[]`

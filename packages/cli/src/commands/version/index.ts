@@ -20,6 +20,7 @@ import { ensureChangesetFolder } from "../shared.ts";
 export interface VersionOptions {
   cwd?: string;
   ignore?: string[];
+  include?: string[];
   snapshot?: string | boolean;
   snapshotPrereleaseTemplate?: string;
 }
@@ -35,12 +36,34 @@ export async function version(options: VersionOptions) {
   let ignore: readonly string[] | undefined;
 
   if (options.ignore != null) {
-    if (config.ignore.length > 0) {
+    if (config.include != null) {
+      messages.push(
+        "The `--ignore` option cannot be used while include is defined in the config file.",
+      );
+    } else if (config.ignore.length > 0) {
       messages.push(
         "It looks like you are trying to use the `--ignore` option while ignore is defined in the config file. This is currently not allowed, you can only use one of them at a time.",
       );
     } else {
       ignore = options.ignore;
+    }
+  }
+
+  if (options.include != null) {
+    if (options.ignore != null) {
+      messages.push(
+        "The `--include` and `--ignore` options cannot be used together.",
+      );
+    }
+    if (config.include != null || config.ignore.length > 0) {
+      messages.push(
+        "The `--include` option cannot be used while include or ignore is defined in the config file.",
+      );
+    } else {
+      const included = new Set(options.include);
+      ignore = packages.packages
+        .map((pkg) => pkg.packageJson.name)
+        .filter((name) => !included.has(name));
     }
   }
   const releaseConfig = {
@@ -56,7 +79,8 @@ export async function version(options: VersionOptions) {
     commit: options.snapshot ? false : config.commit,
   };
 
-  validateIgnoredPackageNames(packages, options.ignore, messages);
+  validatePackageNames(packages, options.ignore, "ignore", messages);
+  validatePackageNames(packages, options.include, "include", messages);
   validateSkippedDependents(packages, releaseConfig, messages);
 
   if (messages.length > 0) {
@@ -156,25 +180,26 @@ You can then run ${c.cyan("changeset version")} again to do a normal release.
   }
 }
 
-function validateIgnoredPackageNames(
+function validatePackageNames(
   packages: Packages,
-  ignoreFromCli: string[] | undefined,
+  namesFromCli: string[] | undefined,
+  option: "ignore" | "include",
   messages: string[],
 ) {
-  if (!ignoreFromCli) {
+  if (!namesFromCli) {
     return;
   }
   const pkgNames = new Set(
     packages.packages.map(({ packageJson }) => packageJson.name),
   );
 
-  for (const pkgName of ignoreFromCli) {
+  for (const pkgName of namesFromCli) {
     if (pkgNames.has(pkgName)) {
       continue;
     }
 
     messages.push(
-      `The package ${c.blue(pkgName)} is passed to the \`--ignore\` option but it is not found in the project. You may have misspelled the package name.`,
+      `The package ${c.blue(pkgName)} is passed to the \`--${option}\` option but it is not found in the project. You may have misspelled the package name.`,
     );
   }
 }
