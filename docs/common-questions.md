@@ -15,7 +15,9 @@ We use random human readable names by default for these files to avoid collision
 
 ## Changesets are automatically removed
 
-When `changeset version` or equivalent command is run, all the changeset files are removed. This is so we only ever use a changeset once. This makes the `.changeset` folder a very bad place to store any other information.
+When `changeset version` or equivalent command is run, the changeset files are removed once they have been applied. This is so we only ever use a changeset once. This makes the `.changeset` folder a very bad place to store any other information.
+
+A changeset that names only packages that are skipped — private packages that are not versioned because of the `privatePackages.version` setting, or packages listed in `ignore` — is kept in `.changeset` instead, because nothing was released for it. Delete those files by hand when you no longer need them, or they will keep the folder from being empty.
 
 ## Changesets are markdown files with YAML front matter
 
