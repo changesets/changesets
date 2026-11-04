@@ -140,6 +140,17 @@ const changelogFunctions: ChangelogFunctions = {
       })
       .trim();
 
+    // TODO[>=4]: drop inline override support
+    if (
+      prFromSummary != null ||
+      commitFromSummary != null ||
+      usersFromSummary.length > 0
+    ) {
+      console.warn(
+        "Overrides in the Changeset body are deprecated. Use frontmatter overrides instead.\nhttps://changesets.dev/guide/writing-changesets#overrides-changesets-changelog-github-only",
+      );
+    }
+
     const [firstLine, ...futureLines] = replacedChangelog
       .split("\n")
       .map((l) => l.trimEnd());
