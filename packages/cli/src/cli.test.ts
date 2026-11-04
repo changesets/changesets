@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { cli } from "./cli.ts";
 import { add } from "./commands/add/index.ts";
+import { check } from "./commands/check/index.ts";
 import { gitTag } from "./commands/git-tag/index.ts";
 import { init } from "./commands/init/index.ts";
 import { pack } from "./commands/pack/index.ts";
@@ -17,6 +18,7 @@ vi.mock("./commands/publish/index.ts");
 vi.mock("./commands/publish-plan/index.ts");
 vi.mock("./commands/pack/index.ts");
 vi.mock("./commands/status/index.ts");
+vi.mock("./commands/check/index.ts");
 vi.mock("./commands/git-tag/index.ts");
 vi.mock("./commands/pre/index.ts");
 
@@ -260,6 +262,16 @@ const tests: CommandTest[] = [
           verbose: true,
           output: "status.json",
         },
+      },
+    ],
+  },
+  {
+    command: "check",
+    fn: check,
+    cases: [
+      {
+        args: [],
+        options: {},
       },
     ],
   },
