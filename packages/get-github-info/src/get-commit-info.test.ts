@@ -2,6 +2,7 @@ import nock from "nock";
 import { expect, test, beforeEach, afterEach, vi } from "vitest";
 import { clearCache } from "./dataloader.ts";
 import { getCommitInfo } from "./get-commit-info.ts";
+import { getPullRequestInfo } from "./get-pull-request-info.ts";
 
 const apiPath = `/graphql`;
 
@@ -35,16 +36,57 @@ test("handles missing commit data", async () => {
     },
   })
     .post(apiPath)
-    .reply(
-      200,
-      JSON.stringify({ data: { repo__0: { commit__a085003: null } } }),
-    );
+    .reply(200, JSON.stringify({ data: { repo__0: { commit__0: null } } }));
 
   const result = await getCommitInfo({
     commit: "a085003",
     repo: "emotion-js/emotion",
   });
   expect(result).toBeUndefined();
+});
+
+test("does not interpolate commit expressions into GraphQL aliases", async () => {
+  const commit =
+    ':sshUrl}pwn:repository(owner:"target-org",name:"private-target-repo"){sshUrl,isPrivate,extra';
+  let githubQuery = "";
+
+  nock("https://api.github.com", {
+    reqheaders: {
+      Authorization: `Token ${process.env.GITHUB_TOKEN}`,
+    },
+  })
+    .post(apiPath, ({ query }) => {
+      githubQuery = query;
+      return true;
+    })
+    .reply(
+      200,
+      JSON.stringify({
+        data: {
+          repo__0: {
+            commit__0: null,
+            pull__1613: {
+              url: "https://github.com/emotion-js/emotion/pull/1613",
+              author: null,
+              mergeCommit: null,
+            },
+          },
+        },
+      }),
+    );
+
+  const [commitResult, pullResult] = await Promise.all([
+    getCommitInfo({ commit, repo: "emotion-js/emotion" }),
+    getPullRequestInfo({ pull: 1613, repo: "emotion-js/emotion" }),
+  ]);
+
+  expect(commitResult).toBeUndefined();
+  expect(pullResult?.pull.number).toBe(1613);
+  expect(githubQuery).toContain(
+    `commit__0: object(expression: ${JSON.stringify(commit)})`,
+  );
+  expect(githubQuery).not.toContain(`commit__${commit}:`);
+  expect(githubQuery).toContain("pull__1613: pullRequest(number: 1613)");
 });
 
 test("associated with multiple PRs with only one merged", async () => {
@@ -64,7 +106,7 @@ test("associated with multiple PRs with only one merged", async () => {
       JSON.stringify({
         data: {
           repo__0: {
-            commit__a085003: {
+            commit__0: {
               commitUrl:
                 "https://github.com/emotion-js/emotion/commit/a085003d4c8ca284c116668d7217fb747802ed85",
               associatedPullRequests: {
@@ -158,7 +200,7 @@ test("associated with multiple PRs with only one merged", async () => {
         owner: "emotion-js",
         name: "emotion"
       ) {
-        commit__a085003: object(expression: "a085003") {
+        commit__0: object(expression: "a085003") {
           ... on Commit {
             ...CommitFragment
           }
@@ -206,7 +248,7 @@ test("associated with multiple PRs with multiple merged gets the one that was me
       JSON.stringify({
         data: {
           repo__0: {
-            commit__a085003: {
+            commit__0: {
               commitUrl:
                 "https://github.com/emotion-js/emotion/commit/a085003d4c8ca284c116668d7217fb747802ed85",
               associatedPullRequests: {
@@ -300,7 +342,7 @@ test("associated with multiple PRs with multiple merged gets the one that was me
         owner: "emotion-js",
         name: "emotion"
       ) {
-        commit__a085003: object(expression: "a085003") {
+        commit__0: object(expression: "a085003") {
           ... on Commit {
             ...CommitFragment
           }
@@ -348,7 +390,7 @@ test("gets the author of the associated pull request if it exists rather than th
       JSON.stringify({
         data: {
           repo__0: {
-            commit__c7e9c69: {
+            commit__0: {
               commitUrl:
                 "https://github.com/JedWatson/react-select/commit/c7e9c697dada15ce3ff9a767bf914ad890080433",
               associatedPullRequests: {
@@ -406,7 +448,7 @@ test("gets the author of the associated pull request if it exists rather than th
         owner: "JedWatson",
         name: "react-select"
       ) {
-        commit__c7e9c69: object(expression: "c7e9c69") {
+        commit__0: object(expression: "c7e9c69") {
           ... on Commit {
             ...CommitFragment
           }
@@ -455,7 +497,7 @@ test("uses custom GITHUB_GRAPHQL_URL when set", async () => {
       JSON.stringify({
         data: {
           repo__0: {
-            commit__a085003: {
+            commit__0: {
               commitUrl:
                 "https://custom.github.com/emotion-js/emotion/commit/a085003d4c8ca284c116668d7217fb747802ed85",
               associatedPullRequests: {
@@ -512,7 +554,7 @@ test("uses custom GITHUB_GRAPHQL_URL when set", async () => {
           owner: "emotion-js",
           name: "emotion"
         ) {
-          commit__a085003: object(expression: "a085003") {
+          commit__0: object(expression: "a085003") {
             ... on Commit {
               ...CommitFragment
             }
