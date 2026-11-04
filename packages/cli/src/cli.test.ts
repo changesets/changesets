@@ -109,6 +109,41 @@ const tests: CommandTest[] = [
           patch: ["pkg-a", "pkg-b"],
         },
       },
+      {
+        // A bump flag with no value stands for the detected changed packages.
+        args: ["--patch"],
+        options: {
+          patch: [true],
+        },
+      },
+      {
+        // The value is optional, so the next flag is not taken as the value.
+        args: ["--patch", "-m", "hello"],
+        options: {
+          patch: [true],
+          message: "hello",
+        },
+      },
+      {
+        // Named and detected packages combine.
+        args: ["--patch", "pkg-a", "--patch"],
+        options: {
+          patch: ["pkg-a", true],
+        },
+      },
+      {
+        args: ["--major", "--minor", "pkg-b", "--patch", "pkg-c"],
+        options: {
+          major: [true],
+          minor: ["pkg-b"],
+          patch: ["pkg-c"],
+        },
+      },
+      {
+        // The negated form turns the option off rather than naming a package.
+        args: ["--no-patch"],
+        options: {},
+      },
     ],
   },
   {
