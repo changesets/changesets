@@ -64,7 +64,7 @@ export function parseChangesetFile(contents: string): {
   }
 
   if (result.output == null) {
-    return { releases: [], summary: "" };
+    return { releases: [], summary: summary ?? "" };
   }
 
   const { _: _overrides, ...releasesByName } = result.output;
