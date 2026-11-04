@@ -57,7 +57,7 @@
     "eslint-plugin-n": "^18.5.0",
     "lint-staged": "^17.6.0",
     "oxfmt": "^0.75.0",
-    "pkg-pr-new": "^0.0.88",
+    "pkg-pr-new": "^0.0.92",
     "publint": "^0.3.25",
     "tsdown": "^0.23.3",
     "typescript": "^6.0.3",
