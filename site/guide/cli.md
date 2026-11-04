@@ -54,6 +54,10 @@ $ git commit -m "Version packages"
 
 :::
 
+### Lifecycle scripts
+
+Like `npm version`, the `version` command runs the `preversion` and `postversion` scripts of the packages it versions. See the [`runVersionScripts`](./config.md#runversionscripts) option for details, or to turn this off.
+
 ### Ignoring packages
 
 The `--ignore` flag allows you to skip packages from being published. This allows you to run partial publishes of the repository. This extends the [`ignore`](./config.md#ignore) option with the same safety rails:

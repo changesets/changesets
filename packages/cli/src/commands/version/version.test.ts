@@ -4075,3 +4075,181 @@ Nice simple summary, much wow
     expect(mockedLogger.error).not.toHaveBeenCalled();
   });
 });
+
+describe("version scripts", { tags: ["slow"] }, () => {
+  const writeVersionTo = (file: string) =>
+    `node -e "require('fs').writeFileSync('${file}', require('./package.json').version)"`;
+
+  it("should run preversion and postversion scripts of released packages", async () => {
+    const scripts = {
+      preversion: writeVersionTo("preversion.txt"),
+      postversion: writeVersionTo("postversion.txt"),
+    };
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        scripts,
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+        scripts,
+      }),
+      ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
+    });
+    await writeChangesets(
+      [
+        {
+          summary: "This is a summary",
+          releases: [{ name: "pkg-a", type: "minor" }],
+        },
+      ],
+      cwd,
+    );
+
+    await version({ cwd });
+
+    expect(await getFile("pkg-a", "preversion.txt", cwd)).toBe("1.0.0");
+    expect(await getFile("pkg-a", "postversion.txt", cwd)).toBe("1.1.0");
+    // pkg-b is not being released so its scripts should not run
+    await expect(
+      fs.access(await getFilePath("pkg-b", "preversion.txt", cwd)),
+    ).rejects.toThrow();
+    await expect(
+      fs.access(await getFilePath("pkg-b", "postversion.txt", cwd)),
+    ).rejects.toThrow();
+  });
+
+  it("should run postversion scripts after committing", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        scripts: {
+          postversion: writeVersionTo("postversion.txt"),
+        },
+      }),
+      ".changeset/config.json": JSON.stringify({
+        ...modifiedDefaultConfig,
+        commit: ["@changesets/cli/commit", null],
+      }),
+    });
+    await writeChangesets(
+      [
+        {
+          summary: "This is a summary",
+          releases: [{ name: "pkg-a", type: "patch" }],
+        },
+      ],
+      cwd,
+    );
+    const postversionPath = await getFilePath("pkg-a", "postversion.txt", cwd);
+    let postversionRanBeforeCommit: boolean | undefined;
+    mockedGit.commit.mockImplementationOnce(async () => {
+      postversionRanBeforeCommit = await fs.access(postversionPath).then(
+        () => true,
+        () => false,
+      );
+      return true;
+    });
+
+    await version({ cwd });
+
+    expect(postversionRanBeforeCommit).toBe(false);
+    expect(await fs.readFile(postversionPath, "utf8")).toBe("1.0.1");
+  });
+
+  it("should not run version scripts when runVersionScripts is false", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        scripts: {
+          preversion: writeVersionTo("preversion.txt"),
+          postversion: writeVersionTo("postversion.txt"),
+        },
+      }),
+      ".changeset/config.json": JSON.stringify({
+        ...modifiedDefaultConfig,
+        runVersionScripts: false,
+      }),
+    });
+    await writeChangesets(
+      [
+        {
+          summary: "This is a summary",
+          releases: [{ name: "pkg-a", type: "minor" }],
+        },
+      ],
+      cwd,
+    );
+
+    await version({ cwd });
+
+    expect((await getPkgJSON("pkg-a", cwd)).version).toBe("1.1.0");
+    await expect(
+      fs.access(await getFilePath("pkg-a", "preversion.txt", cwd)),
+    ).rejects.toThrow();
+    await expect(
+      fs.access(await getFilePath("pkg-a", "postversion.txt", cwd)),
+    ).rejects.toThrow();
+  });
+
+  it("should not version packages when a preversion script fails", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        scripts: {
+          preversion: 'node -e "process.exit(1)"',
+          postversion: writeVersionTo("postversion.txt"),
+        },
+      }),
+      ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
+    });
+    const [changesetId] = await writeChangesets(
+      [
+        {
+          summary: "This is a summary",
+          releases: [{ name: "pkg-a", type: "minor" }],
+        },
+      ],
+      cwd,
+    );
+
+    await expect(version({ cwd })).rejects.toThrow(ExitError);
+
+    expect(mockedLogger.error).toHaveBeenCalledOnce();
+    expect(stripVTControlCharacters(mockedLogger.error.mock.calls[0][0])).toBe(
+      "The preversion script of pkg-a failed.",
+    );
+    expect((await getPkgJSON("pkg-a", cwd)).version).toBe("1.0.0");
+    await expect(
+      fs.access(path.join(cwd, ".changeset", `${changesetId}.md`)),
+    ).resolves.toBeUndefined();
+    await expect(
+      fs.access(await getFilePath("pkg-a", "postversion.txt", cwd)),
+    ).rejects.toThrow();
+  });
+});
