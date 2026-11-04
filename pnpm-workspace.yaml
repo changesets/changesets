@@ -1,7 +1,7 @@
 packages:
   - packages/*
   - scripts/*
-  - site
+  - docs
 
 allowBuilds:
   "@pnpm/pnpr": true
