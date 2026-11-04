@@ -22,6 +22,7 @@
     "generate-json-schema": "node scripts/generate-json-schema.ts"
   },
   "dependencies": {
+    "@changesets/catalogs": "workspace:^",
     "@changesets/get-dependents-graph": "workspace:^",
     "@changesets/should-skip-package": "workspace:^",
     "@changesets/types": "workspace:^",

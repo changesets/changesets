@@ -233,6 +233,19 @@ These restrictions exist to ensure your repository or published code do not end 
 
 Whether to only bump dependency ranges that use the `workspace:` protocol of packages that are part of the workspace.
 
+## detectCatalogChanges
+
+- **Type:** `boolean`
+- **Default:** `true`
+- **Related:** [Catalogs](./catalogs.md)
+- **Note:** Only applicable in monorepos using catalogs.
+
+Whether updating the version range of a catalog entry counts as a change to every package that references it through the `catalog:` protocol, for the purposes of `changeset add` and `changeset status`.
+
+Editing a dependency range in a package's own `package.json` marks that package as changed, because the file lives inside the package. A catalog lives at the root of the workspace, so without this option an updated entry would go unnoticed. Set this to `false` if you'd rather catalog updates never ask for a changeset.
+
+This option has no effect on packages inside your workspace that are referenced through a catalog. Those are always resolved and released as if the range had been written out in full.
+
 ## snapshot
 
 - **Type:** `{ useCalculatedVersion?: boolean; prereleaseTemplate?: string }`

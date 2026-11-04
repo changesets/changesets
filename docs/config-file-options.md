@@ -185,6 +185,16 @@ Default value: `false`
 
 Determines whether Changesets should only bump dependency ranges that use workspace protocol of packages that are part of the workspace.
 
+## `detectCatalogChanges` (optional boolean)
+
+Default value: `true`
+
+Determines whether updating the version range of a catalog entry (pnpm's `pnpm-workspace.yaml`, Yarn's `.yarnrc.yml` or Bun's `package.json`) counts as a change to every package that references it through the `catalog:` protocol, for the purposes of `changeset add` and `changeset status`.
+
+Editing a dependency range in a package's own `package.json` marks that package as changed, because the file lives inside the package. A catalog lives at the root of the workspace, so without this option an updated entry would go unnoticed. Set this to `false` if you'd rather catalog updates never ask for a changeset.
+
+This option has no effect on packages inside your workspace that are referenced through a catalog. Those are always resolved and released as if the range had been written out in full.
+
 ## `snapshot` (object or undefined)
 
 Default value: `undefined`

@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { withCatalogs } from "@changesets/catalogs";
 import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import { readConfig } from "../../utils/read-config.ts";
@@ -21,7 +22,7 @@ export async function publishPlan(
 ): Promise<PublishPlan> {
   const cwd = options?.cwd ?? process.cwd();
 
-  const packages = await getPackages(cwd);
+  const packages = await withCatalogs(await getPackages(cwd));
   await ensureChangesetFolder(packages.rootDir);
   const config = await readConfig(packages);
   const plan = await getPublishPlan(packages.rootDir, config, {
