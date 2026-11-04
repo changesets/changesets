@@ -58,7 +58,7 @@
     "@changesets/color": "workspace:^",
     "@changesets/test-utils": "workspace:*",
     "@types/semver": "^7.8.0",
-    "human-id": "^4.2.1",
+    "human-id": "^4.2.2",
     "outdent": "^0.8.0"
   },
   "engines": {

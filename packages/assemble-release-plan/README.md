@@ -9,10 +9,10 @@ Usage
 
 ```ts
 import assembleReleasePlan from "@changesets/assemble-release-plan";
-import { readChangesets } from "@changesets/read";
 import { readConfig } from "@changesets/config";
-import { getPackages } from "@manypkg/get-packages";
 import { readPreState } from "@changesets/pre";
+import { readChangesets } from "@changesets/read";
+import { getPackages } from "@manypkg/get-packages";
 
 const packages = await getPackages(cwd);
 const preState = await readPreState(cwd);

@@ -20,7 +20,7 @@
     "dataloader": "^2.2.3"
   },
   "devDependencies": {
-    "nock": "^14.0.16"
+    "nock": "^15.0.5"
   },
   "engines": {
     "node": "^22.11 || ^24 || >=26"
