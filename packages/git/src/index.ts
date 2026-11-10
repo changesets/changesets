@@ -293,10 +293,13 @@ export async function getChangedPackagesSinceRef({
 
       for (let i = changedFiles.length - 1; i >= 0; i--) {
         const file = changedFiles[i];
-        const isFileInPkg = !path.relative(pkg.dir, file).startsWith("..");
-        if (isFileInPkg) {
+        const relativeFile = path.relative(pkg.dir, file);
+        if (
+          relativeFile !== ".." &&
+          !relativeFile.startsWith(`..${path.sep}`) &&
+          !path.isAbsolute(relativeFile)
+        ) {
           changedFiles.splice(i, 1);
-          const relativeFile = file.slice(pkg.dir.length + 1);
           changedPackageFiles.push(relativeFile);
         }
       }
