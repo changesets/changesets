@@ -267,6 +267,17 @@ describe("git", { tags: ["slow"] }, () => {
       expect(commitHash).toEqual([headSha]);
     });
 
+    it("treats paths that look like refs or options as files", async () => {
+      const cwd = await gitdir({ "a.js": "a", "--all": "b" });
+      await exec("git", ["branch", "a.js"], { nodeOptions: { cwd } });
+
+      const headSha = await getCurrentCommitId({ cwd });
+
+      await expect(
+        getCommitsThatAddFiles(["a.js", "--all"], { cwd }),
+      ).resolves.toEqual([headSha, headSha]);
+    });
+
     describe("with shallow clone", () => {
       // Roughly how many commits will the deepening algorithm
       // deepen each time?  We use this to set up test data to
