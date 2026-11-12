@@ -51,6 +51,9 @@ export async function getChangelogEntry(
     }
   });
   const dependentReleases = releases.filter((rel) => {
+    // a package without a release keeps its version, so depending on it is not an update
+    if (rel.type === "none") return false;
+
     const dependencyVersionRange = release.packageJson.dependencies?.[rel.name];
     const peerDependencyVersionRange =
       release.packageJson.peerDependencies?.[rel.name];
