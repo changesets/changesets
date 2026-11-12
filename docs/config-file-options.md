@@ -197,6 +197,14 @@ When `changesets version --snapshot` is used, the default behavior is to use `0.
 
 Setting `useCalculatedVersion: true` will change the default behavior and will use the calculated version, based on the changeset files.
 
+### `baseVersion` (optional string)
+
+Default value: `0.0.0`
+
+The fixed base version used for snapshot releases instead of `0.0.0`. It must be a plain `MAJOR.MINOR.PATCH` version such as `0.0.1`. This is useful when another tool in your pipeline doesn't accept `0.0.0` as a version.
+
+It has no effect when `useCalculatedVersion` is `true`.
+
 ### `prereleaseTemplate` (optional string)
 
 Default value: `undefined` (see note below)

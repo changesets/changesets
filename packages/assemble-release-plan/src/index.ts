@@ -87,6 +87,7 @@ function getSnapshotVersion(
   release: InternalRelease,
   preInfo: PreInfo | undefined,
   useCalculatedVersion: boolean,
+  defaultBaseVersion: string,
   snapshotSuffix: string,
 ): string {
   if (release.type === "none") {
@@ -101,10 +102,11 @@ function getSnapshotVersion(
    * but it'll actually resolve to 1.0.0-canary-hash. Using 0.0.0 solves this problem because it won't conflict with other versions.
    *
    * You can set `snapshot.useCalculatedVersion` flag to true to use calculated versions if you don't care about the above problem.
+   * Tools that can't handle `0.0.0` can set `snapshot.baseVersion` to a different fixed version, e.g. `0.0.1`.
    */
   const baseVersion = useCalculatedVersion
     ? incrementVersion(release, preInfo)
-    : `0.0.0`;
+    : defaultBaseVersion;
 
   return `${baseVersion}-${snapshotSuffix}`;
 }
@@ -226,6 +228,7 @@ export function assembleReleasePlan(
               incompleteRelease,
               preInfo,
               config.snapshot.useCalculatedVersion,
+              config.snapshot.baseVersion ?? "0.0.0",
               snapshotSuffix,
             )
           : getNewVersion(incompleteRelease, preInfo),

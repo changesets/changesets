@@ -50,6 +50,44 @@ describe("assembleReleasePlan", () => {
     expect(releases[0].newVersion).toMatch(/0\.0\.0-\d{14}/);
   });
 
+  it("should use snapshot.baseVersion instead of 0.0.0", () => {
+    const { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.packages,
+      {
+        ...defaultConfig,
+        snapshot: { ...defaultConfig.snapshot, baseVersion: "0.0.1" },
+      },
+      undefined,
+      {
+        tag: "foo",
+      },
+    );
+
+    expect(releases[0].newVersion).toMatch(/^0\.0\.1-foo-\d{14}$/);
+  });
+
+  it("should ignore snapshot.baseVersion when useCalculatedVersion is enabled", () => {
+    const { releases } = assembleReleasePlan(
+      setup.changesets,
+      setup.packages,
+      {
+        ...defaultConfig,
+        snapshot: {
+          ...defaultConfig.snapshot,
+          useCalculatedVersion: true,
+          baseVersion: "0.0.1",
+        },
+      },
+      undefined,
+      {
+        tag: "foo",
+      },
+    );
+
+    expect(releases[0].newVersion).not.toMatch(/^0\.0\.1-/);
+  });
+
   it("should assemble plan for basic setup with snapshot and tag", () => {
     const { releases } = assembleReleasePlan(
       setup.changesets,
