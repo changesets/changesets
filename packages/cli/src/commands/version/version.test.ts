@@ -153,7 +153,7 @@ describe("running version in a simple project", () => {
     );
   });
 
-  it("should throw if `--ignore` flag is used while ignore array is also defined in the config file", async () => {
+  it("should combine the `--ignore` flag with the ignore array from the config file", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
         private: true,
@@ -163,13 +163,72 @@ describe("running version in a simple project", () => {
       "packages/pkg-a/package.json": JSON.stringify({
         name: "pkg-a",
         version: "1.0.0",
-        dependencies: {
-          "pkg-b": "1.0.0",
-        },
       }),
       "packages/pkg-b/package.json": JSON.stringify({
         name: "pkg-b",
         version: "1.0.0",
+      }),
+      "packages/pkg-c/package.json": JSON.stringify({
+        name: "pkg-c",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify({
+        ...modifiedDefaultConfig,
+        ignore: ["pkg-a"],
+      }),
+      ".changeset/change-a.md": `---
+"pkg-a": minor
+---
+
+Change to pkg-a
+`,
+      ".changeset/change-b.md": `---
+"pkg-b": minor
+---
+
+Change to pkg-b
+`,
+      ".changeset/change-c.md": `---
+"pkg-c": minor
+---
+
+Change to pkg-c
+`,
+    });
+
+    await version({ cwd, ignore: ["pkg-b"] });
+
+    expect((await getPkgJSON("pkg-a", cwd)).version).toBe("1.0.0");
+    expect((await getPkgJSON("pkg-b", cwd)).version).toBe("1.0.0");
+    expect((await getPkgJSON("pkg-c", cwd)).version).toBe("1.1.0");
+
+    const changesetDir = await fs.readdir(path.join(cwd, ".changeset"));
+    expect(changesetDir).toContain("change-a.md");
+    expect(changesetDir).toContain("change-b.md");
+    expect(changesetDir).not.toContain("change-c.md");
+  });
+
+  it("should throw if dependents of packages ignored by the `--ignore` flag are not ignored when the config file also has an ignore array", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      "packages/pkg-c/package.json": JSON.stringify({
+        name: "pkg-c",
+        version: "1.0.0",
+        dependencies: {
+          "pkg-b": "1.0.0",
+        },
       }),
       ".changeset/config.json": JSON.stringify({
         ...modifiedDefaultConfig,
@@ -184,7 +243,44 @@ describe("running version in a simple project", () => {
     expect(mockedLogger.error).toHaveBeenCalledOnce();
     const arg = mockedLogger.error.mock.calls[0][0];
     expect(stripVTControlCharacters(arg)).toEqual(
-      `It looks like you are trying to use the \`--ignore\` option while ignore is defined in the config file. This is currently not allowed, you can only use one of them at a time.`,
+      `The package pkg-c depends on the skipped package pkg-b (either by \`ignore\` option or by \`privatePackages.version\`), but pkg-c is not being skipped. Please pass pkg-c to the --ignore flag.`,
+    );
+  });
+
+  it("should throw on a mixed changeset when the `--ignore` flag is combined with the ignore array from the config file", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+      }),
+      "packages/pkg-c/package.json": JSON.stringify({
+        name: "pkg-c",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify({
+        ...modifiedDefaultConfig,
+        ignore: ["pkg-a"],
+      }),
+      ".changeset/mixed.md": `---
+"pkg-b": minor
+"pkg-c": minor
+---
+
+Change to pkg-b and pkg-c
+`,
+    });
+
+    await expect(version({ cwd, ignore: ["pkg-b"] })).rejects.toThrow(
+      "Mixed changesets that contain both ignored and not ignored packages are not allowed",
     );
   });
 
