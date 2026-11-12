@@ -100,7 +100,7 @@ export default defineConfig({
       alt: "Changesets logo",
     },
     editLink: {
-      pattern: "https://github.com/changesets/changesets/edit/main/site/:path",
+      pattern: "https://github.com/changesets/changesets/edit/main/docs/:path",
     },
     socialLinks: [
       { icon: "discord", link: "https://chat.changesets.dev" },
