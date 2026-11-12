@@ -4,6 +4,7 @@ import c from "@changesets/color";
 import { ExitError } from "@changesets/errors";
 import * as git from "@changesets/git";
 import { shouldSkipPackage } from "@changesets/should-skip-package";
+import type { Config, Package } from "@changesets/types";
 import { writeChangeset } from "@changesets/write";
 import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
@@ -25,6 +26,17 @@ export interface AddOptions {
   major?: string[];
   minor?: string[];
   patch?: string[];
+}
+
+// Mirrors the checks in `shouldSkipPackage` so we can tell users why a package they asked for is skipped
+function getSkipReason({ packageJson }: Package, config: Config): string {
+  if (config.ignore.includes(packageJson.name)) {
+    return "it is listed in the `ignore` option of the config";
+  }
+  if (packageJson.private && !config.privatePackages.version) {
+    return "it is private and `privatePackages.version` is not enabled in the config";
+  }
+  return "its package.json doesn't have a `version` field";
 }
 
 export async function add(options?: AddOptions): Promise<void> {
@@ -88,6 +100,12 @@ ${(error as Error).toString()}
       );
     }
 
+    const skippedPackages = new Map(
+      packages.packages
+        .filter((pkg) => !versionablePackages.includes(pkg))
+        .map((pkg) => [pkg.packageJson.name, getSkipReason(pkg, config)]),
+    );
+
     newChangeset = await createChangeset(
       changedPackagesNames,
       versionablePackages,
@@ -97,6 +115,7 @@ ${(error as Error).toString()}
         minor: options?.minor,
         patch: options?.patch,
       },
+      skippedPackages,
     );
     printConfirmationMessage(newChangeset, versionablePackages.length > 1);
   }
