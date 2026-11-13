@@ -919,7 +919,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
       describe.each(["existing", "new"] as const)(
         "%s package",
         (packageState) => {
-          it("stages and approves a package version", async ({ signal }) => {
+          it("stages a package version", async ({ signal }) => {
             await using stack = new AbortableAsyncDisposableStack(signal);
             const { pmBinPath } = stack.use(
               await getPmBinPath(signal, pm.bins),
@@ -939,7 +939,7 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
                         },
                       }
                     : {},
-                async middleware({ pnpr, request }) {
+                async middleware({ request }) {
                   const { pathname } = new URL(request.url);
                   if (
                     request.method === "POST" &&
@@ -951,24 +951,6 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
                     };
                     return Response.json({ stageId }, { status: 201 });
                   }
-                  if (
-                    request.method === "POST" &&
-                    pathname === `/-/stage/${stageId}/approve`
-                  ) {
-                    if (!stagedRequest) {
-                      return Response.json(
-                        { error: "Unknown staged package" },
-                        { status: 404 },
-                      );
-                    }
-                    return pnpr.fetch(
-                      new Request(new URL("/pkg-a", request.url), {
-                        method: "PUT",
-                        headers: stagedRequest.headers,
-                        body: stagedRequest.body,
-                      }),
-                    );
-                  }
                   return undefined;
                 },
               }),
@@ -977,52 +959,26 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
               createPmContext(registry, pmBinPath),
               createPkgAFixture(),
             );
-            const outputPath = path.join(cwd, "staged-output.ndjson");
 
             const stageResult = await runCliCommand({
               command: "publish",
               args: ["--stage"],
               cwd,
-              env: { CHANGESETS_OUTPUT: outputPath },
               pmBinPath,
               signal,
             });
             expect.soft(stageResult.exitCode).toBe(0);
-            const events = (await fs.readFile(outputPath, "utf8"))
-              .trim()
-              .split("\n")
-              .map((line) => JSON.parse(line));
-            expect.soft(events).toEqual([
-              expect.objectContaining({
-                type: "npm-stage",
-                packageName: "pkg-a",
-                version: "1.0.0",
-                tag: "latest",
-                gitTag: "pkg-a@1.0.0",
-                stageId,
-              }),
-            ]);
-            expect.soft(await tagExists("pkg-a@1.0.0", cwd)).toBe(false);
+            expect.soft(stagedRequest).toBeDefined();
+            expect.soft(await tagExists("pkg-a@1.0.0", cwd)).toBe(true);
 
-            const approveResult = await runCliCommand({
-              command: "stage",
-              args: ["approve", events[0].stageId, "--otp", "123456"],
-              cwd,
-              pmBinPath,
-              signal,
-            });
-            expect.soft(approveResult.exitCode).toBe(0);
-
-            const packument = await fetchPackument(registry, "pkg-a");
-            expect.soft(packument).toMatchObject({
-              "dist-tags": { latest: "1.0.0" },
-              versions: {
-                ...(packageState === "existing"
-                  ? { "0.0.1": { name: "pkg-a", version: "0.0.1" } }
-                  : {}),
-                "1.0.0": { name: "pkg-a", version: "1.0.0" },
-              },
-            });
+            const response = await fetch(new URL("pkg-a", registry.url));
+            expect
+              .soft(response.status)
+              .toBe(packageState === "existing" ? 200 : 404);
+            if (packageState === "existing") {
+              const packument = await response.json();
+              expect.soft(packument).not.toHaveProperty(["versions", "1.0.0"]);
+            }
           }, 30_000);
         },
       );

@@ -7,7 +7,6 @@ import { pack } from "./commands/pack/index.ts";
 import { pre } from "./commands/pre/index.ts";
 import { publishPlan } from "./commands/publish-plan/index.ts";
 import { publish } from "./commands/publish/index.ts";
-import { stage } from "./commands/stage/index.ts";
 import { status } from "./commands/status/index.ts";
 import { version } from "./commands/version/index.ts";
 
@@ -15,7 +14,6 @@ vi.mock("./commands/init/index.ts");
 vi.mock("./commands/add/index.ts");
 vi.mock("./commands/version/index.ts");
 vi.mock("./commands/publish/index.ts");
-vi.mock("./commands/stage/index.ts");
 vi.mock("./commands/publish-plan/index.ts");
 vi.mock("./commands/pack/index.ts");
 vi.mock("./commands/status/index.ts");
@@ -131,7 +129,7 @@ const tests: CommandTest[] = [
     cases: [
       {
         args: [],
-        options: {},
+        options: { gitTag: true },
       },
       {
         args: ["--no-git-tag"],
@@ -149,6 +147,7 @@ const tests: CommandTest[] = [
         args: ["--from-pack-dir", ".packed"],
         options: {
           fromPackDir: ".packed",
+          gitTag: true,
         },
       },
       {
@@ -157,42 +156,17 @@ const tests: CommandTest[] = [
           CHANGESETS_OUTPUT: "output.ndjson",
         },
         options: {
+          gitTag: true,
           output: "output.ndjson",
         },
       },
       {
         args: ["--stage"],
-        options: { stage: true },
+        options: { gitTag: true, stage: true },
       },
       {
         args: ["--no-stage"],
-        options: { stage: false },
-      },
-    ],
-  },
-  {
-    command: "stage",
-    fn: stage,
-    cases: [
-      {
-        args: [
-          "approve",
-          "1de6f3db-2ed9-4d72-b3dd-8f0e2b474a2f",
-          "2de6f3db-2ed9-4d72-b3dd-8f0e2b474a2f",
-          "--otp",
-          "123456",
-          "--registry",
-          "https://registry.example.com",
-        ],
-        options: {
-          operation: "approve",
-          ids: [
-            "1de6f3db-2ed9-4d72-b3dd-8f0e2b474a2f",
-            "2de6f3db-2ed9-4d72-b3dd-8f0e2b474a2f",
-          ],
-          otp: "123456",
-          registry: "https://registry.example.com",
-        },
+        options: { gitTag: true, stage: false },
       },
     ],
   },

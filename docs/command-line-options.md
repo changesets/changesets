@@ -6,7 +6,6 @@ The command line for changesets is the main way of interacting with it. There ar
 - add [--empty] [--open] [--since <ref>] [--message <text>]
 - version [--ignore, --snapshot]
 - publish [--otp=code, --tag, --stage, --no-stage]
-- stage [approve|reject] <id...> [--otp=code, --registry=url]
 - status [--since=master --verbose --output=JSON_FILE.json]
 - pre [exit|enter {tag}]
 - git-tag
@@ -120,24 +119,6 @@ Because this command assumes that the last commit is the release commit, you sho
 `--stage` stages packages for later approval instead of publishing
 them immediately. `--no-stage` disables a `stagedPublishing` config value for
 one invocation.
-
-Staged packages do not get Git tags by default. Explicit `--git-tag` still
-creates them immediately; `--no-git-tag` disables tags. Private packages
-configured for tag-only releases are tagged immediately because they do not
-participate in npm staged publishing.
-
-The staged package IDs are reported in dependency order. Approve or reject
-them with:
-
-```sh
-changeset stage approve <id...>
-changeset stage reject <id...>
-```
-
-IDs are processed sequentially and the command stops at the first failure.
-`--otp` is forwarded to the package manager. `--registry` selects the registry
-for that invocation; when a release spans multiple registries, split the IDs
-into correctly scoped commands.
 
 ### Git Tags
 

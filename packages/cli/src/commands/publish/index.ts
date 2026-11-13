@@ -12,7 +12,6 @@ import {
 } from "../../lib/common.ts";
 import type { PublishResult, PublishTool } from "../../lib/types.ts";
 import { importantWarning } from "../../utils/cli-utilities.ts";
-import { buildGitTag } from "../../utils/gitTags.ts";
 import { createOutputReport } from "../../utils/output.ts";
 import { readConfig } from "../../utils/read-config.ts";
 import { createGitTags, formatGitTagResults } from "../git-tag/utils.ts";
@@ -179,7 +178,7 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
   // in TTY mode the first publish "checks" if the publish process requires interactive auth or not
   // on CI everything has to be configured in a way that allows automation so we can go straight to bulk publishing
   // similarly, when OTP is provided we can go straight to bulk publishing as well
-  let sequential = stagedPublishing || (process.stdin.isTTY && otpCode == null);
+  let sequential = process.stdin.isTTY && otpCode == null;
 
   const p = progress({ max: totalPublishCount });
   const renderProgressMessage = () =>
@@ -289,21 +288,11 @@ for every package being published after this!
 
         if (isPublishSuccessful(result)) {
           successfulNpmPublishes.push(result);
-          if (result.result === "staged") {
-            reporter?.write({
-              type: "npm-stage",
-              packageName: result.name,
-              version: result.version,
-              tag: item.release.tag,
-              gitTag: buildGitTag(packages.tool, item.release),
-              stageId: result.stageId,
-            });
-          }
 
           // A successful non-interactive publish proves that bulk publishing is
           // currently possible. If 2FA becomes necessary again, bulk publishing
           // will hand the affected packages back to this sequential path.
-          if (!stagedPublishing && !interactive) {
+          if (!interactive) {
             sequential = false;
           } else if (finishedCount < totalPublishCount) {
             // The interactive child owned the terminal, so publishing progress
@@ -386,17 +375,13 @@ for every package being published after this!
     const message = `Successfully ${stagedPublishing ? "staged" : "published"}:
 ${formatPackageList(successfulNpmPublishes)}`;
 
-    if (sequential && !stagedPublishing) {
+    if (sequential) {
       log.success(message);
     } else {
       p.stop(message);
     }
 
-    // Staged publishing normally defers tags until approval. An explicit
-    // --git-tag is still respected as an intentional opt-out of that safety.
-    if (
-      stagedPublishing ? options?.gitTag === true : (options?.gitTag ?? true)
-    ) {
+    if (options?.gitTag ?? true) {
       gitTagReleases.push(
         ...successfulNpmPublishes.map((result) => ({
           kind: "tag-only" as const,
@@ -415,26 +400,6 @@ Some packages failed to publish:
 ${formatPackageList(unsuccessfulNpmPublishes, c.red)}
       `.trim(),
     );
-    if (stagedPublishing && successfulNpmPublishes.length > 0) {
-      const stageIds = successfulNpmPublishes
-        .filter(
-          (result): result is Extract<PublishResult, { result: "staged" }> =>
-            result.result === "staged",
-        )
-        .map((result) => result.stageId);
-      log.warn(
-        `Reject the successfully staged packages, then retry:\nchangeset stage reject ${stageIds.join(" ")}`,
-      );
-    }
-  } else if (stagedPublishing && successfulNpmPublishes.length > 0) {
-    const stageIds = successfulNpmPublishes
-      .filter(
-        (result): result is Extract<PublishResult, { result: "staged" }> =>
-          result.result === "staged",
-      )
-      .map((result) => result.stageId);
-    log.info(`Approve the staged packages in this order:
-changeset stage approve ${stageIds.join(" ")}`);
   }
 
   // finally, create git tags as plan instructs
