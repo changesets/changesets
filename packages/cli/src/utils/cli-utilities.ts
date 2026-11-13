@@ -1,6 +1,7 @@
 import c from "@changesets/color";
 import {
   cancel,
+  type CANCEL_SYMBOL,
   confirm,
   groupMultiselect,
   type GroupMultiSelectOptions,
@@ -11,7 +12,7 @@ import {
   text,
 } from "@clack/prompts";
 
-async function cancelable<T>(task: () => Promise<T | symbol>) {
+async function cancelable<T>(task: () => Promise<T | typeof CANCEL_SYMBOL>) {
   const result = await task();
   if (isCancel(result)) {
     cancel("Canceled... 👋 ");
