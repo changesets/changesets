@@ -1,7 +1,7 @@
 import { stripVTControlCharacters } from "node:util";
 import { exec } from "tinyexec";
 import { streamNdjson } from "../utils/streamNdjson.ts";
-import { isAlreadyPublishedError } from "./common.ts";
+import { isAlreadyPublishedError, isAlreadyStagedError } from "./common.ts";
 import type { PackageInfo, PublishResult, PublishTool } from "./types.ts";
 
 // -- PublishTool -- //
@@ -228,7 +228,10 @@ export const publish: PublishTool["publish"] = async ({
 
   if (
     reporterError.code === "YN0035" &&
-    isAlreadyPublishedError(reporterError.message)
+    (isAlreadyPublishedError(reporterError.message) ||
+      (stage &&
+        reporterError.message.includes("Response Code: 409 (Conflict)") &&
+        isAlreadyStagedError(reporterError.message, release.version)))
   ) {
     return {
       ...resultBase,

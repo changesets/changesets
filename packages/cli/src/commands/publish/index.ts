@@ -274,7 +274,7 @@ for every package being published after this!
 
         advanceProgress();
 
-        if (result.result === "failed:already-published" && !stagedPublishing) {
+        if (result.result === "failed:already-published") {
           // we don't trust this error to mean that the authentication works
           // this could be rejected by a preflight check (theoretically, we've not observed this in practice)
           // in general, we should *rarely* see this error as we only try to publish packages that have not been published yet

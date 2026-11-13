@@ -117,6 +117,23 @@ describe("publishing", () => {
     expect(result.result).toEqual("published");
   });
 
+  it("rejects a successful stage command without a stage ID", async () => {
+    mockedExec.mockResolvedValue({ exitCode: 0, stdout: "{}", stderr: "" });
+    await expect(
+      pnpm.publish({
+        pkg,
+        release,
+        tarballPath: null,
+        interactive: false,
+        otpCode: null,
+        stage: true,
+      }),
+    ).resolves.toMatchObject({
+      result: "failed",
+      message: expect.stringContaining("did not report a stage ID"),
+    });
+  });
+
   it("stages a publish and returns its stage id", async () => {
     mockedExec.mockResolvedValue({
       exitCode: 0,

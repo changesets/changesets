@@ -24,6 +24,15 @@ export function isAlreadyPublishedError(message: string) {
   return message.includes("cannot publish over the previously published");
 }
 
+// Pending stages are invisible to the publish-plan preflight, including with OIDC.
+export function isAlreadyStagedError(message: string, version: string) {
+  return message
+    .split("\n")
+    .some((line) =>
+      line.endsWith(`Cannot stage previously published version "${version}".`),
+    );
+}
+
 export const isPublishSuccessful = (
   result: PublishResult,
 ): result is PublishResultSuccess | PublishResultStaged =>
