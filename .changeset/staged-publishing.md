@@ -4,5 +4,6 @@
 "@changesets/types": minor
 ---
 
-Add staged npm publishing with the `stagedPublishing` configuration option,
-`publish --stage` and `--no-stage` overrides, and native npm, pnpm, and Yarn adapters.
+Add staged npm publishing, including config and CLI overrides, native npm,
+pnpm, and Yarn adapters, structured stage events, and
+bulk approve/reject commands.
