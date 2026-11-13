@@ -1,7 +1,7 @@
 import path from "node:path";
 import { exec } from "tinyexec";
 import { getLastJsonObjectFromString } from "../utils/getLastJsonObjectFromString.ts";
-import { isAlreadyPublishedError } from "./common.ts";
+import { isAlreadyPublishedError, isAlreadyStagedError } from "./common.ts";
 import * as npm from "./npm.ts";
 import type { PackageInfo, PublishResult, PublishTool } from "./types.ts";
 
@@ -13,7 +13,7 @@ export type PnpmPublish2faRequiredError = {
 };
 
 export type PnpmPublishGenericError = {
-  code: "E403" | "E404";
+  code: "E403" | "E404" | "E409";
   message: string;
 };
 
@@ -230,10 +230,15 @@ export const publish: PublishTool["publish"] = async ({
   // let the npm error handler take care of any other non-json error, as pnpm 10 delegates publishing to npm
   // TODO: after dropping pnpm 10 support stop delegating to npm and handle all errors here instead
   if (!isPnpmPublishError(json)) {
-    return npm.handlePublishError(resultBase, json, stderr || stdout);
+    return npm.handlePublishError(resultBase, json, stderr || stdout, stage);
   }
 
-  if (isAlreadyPublishedError(json.error.message)) {
+  if (
+    isAlreadyPublishedError(json.error.message) ||
+    (stage &&
+      json.error.code === "E409" &&
+      isAlreadyStagedError(json.error.message, release.version))
+  ) {
     // we don't need to log anything here, it just turned out the version was already published so we gracefully exit the publish process
     return {
       ...resultBase,

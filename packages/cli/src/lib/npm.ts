@@ -3,7 +3,7 @@ import path from "node:path";
 import type { PackageJSON } from "@changesets/types";
 import { exec } from "tinyexec";
 import { getLastJsonObjectFromString } from "../utils/getLastJsonObjectFromString.ts";
-import { isAlreadyPublishedError } from "./common.ts";
+import { isAlreadyPublishedError, isAlreadyStagedError } from "./common.ts";
 import type {
   PackageInfo,
   PublishResultFailedNeeds2fa,
@@ -274,6 +274,7 @@ export function handlePublishError(
   resultBase: Pick<PublishResult, "name" | "version">,
   json: unknown,
   processOutput: string,
+  stage?: boolean,
 ): PublishResult {
   // if we get back an unknown error
   if (!isNpmPublishError(json)) {
@@ -285,7 +286,12 @@ export function handlePublishError(
   }
 
   // npm v11 doesn't return a `code` on already-published errors
-  if (isAlreadyPublishedError(json.error.summary)) {
+  if (
+    isAlreadyPublishedError(json.error.summary) ||
+    (stage &&
+      json.error.code === "E409" &&
+      isAlreadyStagedError(json.error.summary, resultBase.version))
+  ) {
     // we don't need to log anything here, it just turned out the version was already published so we gracefully exit the publish process
     return {
       ...resultBase,
@@ -420,5 +426,5 @@ export const publish: PublishTool["publish"] = async ({
     };
   }
 
-  return handlePublishError(resultBase, json, stderr || stdout);
+  return handlePublishError(resultBase, json, stderr || stdout, stage);
 };

@@ -275,7 +275,7 @@ for every package being published after this!
 
         advanceProgress();
 
-        if (result.result === "failed:already-published" && !stagedPublishing) {
+        if (result.result === "failed:already-published") {
           // we don't trust this error to mean that the authentication works
           // this could be rejected by a preflight check (theoretically, we've not observed this in practice)
           // in general, we should *rarely* see this error as we only try to publish packages that have not been published yet
@@ -305,7 +305,7 @@ for every package being published after this!
           // will hand the affected packages back to this sequential path.
           if (!stagedPublishing && !interactive) {
             sequential = false;
-          } else if (finishedCount < totalPublishCount) {
+          } else if (interactive && finishedCount < totalPublishCount) {
             // The interactive child owned the terminal, so publishing progress
             // was stopped while it ran. Resume it before publishing the next
             // package sequentially.
