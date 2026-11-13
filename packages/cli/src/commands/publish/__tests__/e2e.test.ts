@@ -975,10 +975,9 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
             expect
               .soft(response.status)
               .toBe(packageState === "existing" ? 200 : 404);
-            if (packageState === "existing") {
-              const packument = await response.json();
-              expect.soft(packument).not.toHaveProperty(["versions", "1.0.0"]);
-            }
+            const packument =
+              packageState === "existing" ? await response.json() : {};
+            expect.soft(packument).not.toHaveProperty(["versions", "1.0.0"]);
           }, 30_000);
         },
       );
