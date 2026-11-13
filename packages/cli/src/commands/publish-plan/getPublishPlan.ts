@@ -46,7 +46,6 @@ export type PublishReleaseEntry = BaseReleaseEntry & {
   kind: "publish";
   access: AccessType;
   tag: string;
-  isNew?: boolean;
   tarball?: TarballMetadata;
 };
 
@@ -176,7 +175,6 @@ ${response.error.message || "Unknown error"}
         version: localVersion,
         access: pkg.packageJson.publishConfig?.access || access,
         tag: getReleaseTag(publishedState, preState, options.tag),
-        isNew: publishedState === "never",
       };
       packagesToPublish.push(release);
       previewLines.push(`${c.blue(release.name)}@${c.green(release.version)}`);

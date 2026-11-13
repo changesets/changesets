@@ -9,7 +9,6 @@ import {
   isPublishFailure,
   isPublishSuccessful,
   npmPublishQueue,
-  npmRequestQueue,
 } from "../../lib/common.ts";
 import type { PublishResult, PublishTool } from "../../lib/types.ts";
 import { importantWarning } from "../../utils/cli-utilities.ts";
@@ -162,53 +161,6 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
   if (plan.length === 0) {
     log.warn("No unpublished projects to publish.");
     return;
-  }
-
-  if (stagedPublishing) {
-    const publishReleases = plan
-      .flat()
-      .filter(
-        (release): release is PublishReleaseEntry => release.kind === "publish",
-      );
-    const unknownNewPackages = new Set(
-      (
-        await Promise.all(
-          publishReleases
-            .filter((release) => release.isNew == null)
-            .map(async (release) => {
-              const pkg = packagesByName.get(release.name);
-              if (!pkg) {
-                throw new Error(`Package not found: ${release.name}`);
-              }
-              const response = await npmRequestQueue.add(() =>
-                publishTool.info({ cwd: packages.rootDir, pkg }),
-              );
-              if ("error" in response) {
-                log.error(
-                  `Failed to verify whether ${c.cyan(release.name)} already exists in the registry: ${response.error.message || response.error.code || "Unknown error"}`,
-                );
-                throw new ExitError(1);
-              }
-              return response.published ? undefined : release.name;
-            }),
-        )
-      ).filter((name): name is string => name != null),
-    );
-    const newPackages = publishReleases.filter(
-      (release) =>
-        release.isNew === true || unknownNewPackages.has(release.name),
-    );
-    if (newPackages.length > 0) {
-      log.error(
-        `Staged publishing does not support packages that have never been published:\n${newPackages
-          .map(
-            (release) =>
-              `${c.blueBright(release.name)}@${c.red(release.version)}`,
-          )
-          .join("\n")}`,
-      );
-      throw new ExitError(1);
-    }
   }
 
   let finishedCount = 0;

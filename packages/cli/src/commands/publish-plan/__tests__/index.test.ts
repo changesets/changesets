@@ -69,7 +69,6 @@ describe("publish-plan", () => {
           version: "1.0.0",
           access: "restricted",
           tag: "latest",
-          isNew: true,
         },
         {
           kind: "tag-only",
@@ -139,7 +138,6 @@ describe("publish-plan", () => {
           version: "1.0.0",
           access: "restricted",
           tag: "latest",
-          isNew: true,
         },
       ],
     ]);

@@ -57,9 +57,6 @@ function mockExecImplementation(
   ) => Promise<ReturnType<typeof execResult>>,
 ) {
   mockedExec.mockImplementation(((cmd: string, args?: readonly string[]) => {
-    if (args?.[0] === "dist-tag") {
-      return Promise.resolve(execResult('{"error":{"code":"E404"}}', 1));
-    }
     return Promise.resolve(fn(cmd, args ?? []));
   }) as any);
 }
@@ -895,29 +892,84 @@ changeset stage reject ${stageId}`,
     );
   });
 
-  it("preflights new packages before staging anything", async () => {
-    const cwd = await testdir({
-      "package.json": JSON.stringify({
-        private: true,
-        workspaces: ["packages/*"],
-      }),
-      "package-lock.json": "",
-      "packages/pkg-a/package.json": JSON.stringify({
+  it.each([false, true])(
+    "stages a previously unpublished package (packed plan: %s)",
+    async (fromPackDir) => {
+      const release = {
+        kind: "publish",
         name: "pkg-a",
         version: "1.0.0",
-      }),
-      ".changeset/config.json": JSON.stringify(defaultConfig),
-    });
-    mockExecImplementation(async (_command, args) => {
-      if (args[0] === "info") return execResult("");
-      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
-    });
+        access: "restricted",
+        tag: "latest",
+        tarball: { path: "pkg-a-1.0.0.tgz", integrity: "sha512-test" },
+      };
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "package-lock.json": "",
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify(defaultConfig),
+        ".packed/publish-plan.json": JSON.stringify({
+          version: 1,
+          plan: [[release]],
+        }),
+      });
+      const stageId = "1de6f3db-2ed9-4d72-b3dd-8f0e2b474a2f";
+      const output = path.join(cwd, "stages.ndjson");
+      mockExecImplementation(async (_command, args) => {
+        if (!fromPackDir && args[0] === "info") {
+          return execResult(JSON.stringify({ error: { code: "E404" } }), 1);
+        }
+        if (args[0] === "stage" && args[1] === "publish") {
+          return execResult(JSON.stringify({ stageId }));
+        }
+        throw new Error(`Unexpected exec args: ${args.join(" ")}`);
+      });
 
-    await expect(publishCommand({ cwd, stage: true })).rejects.toThrow();
-    expect(mockedExec.mock.calls.some((call) => call[1]?.[0] === "stage")).toBe(
-      false,
-    );
-  });
+      await publishCommand({
+        cwd,
+        stage: true,
+        fromPackDir: fromPackDir ? ".packed" : undefined,
+        output,
+      });
+
+      const calls = mockedExec.mock.calls;
+      expect(calls.filter((call) => call[1]?.[0] === "info")).toHaveLength(
+        fromPackDir ? 0 : 1,
+      );
+      const stageCalls = calls.filter((call) => call[1]?.[0] === "stage");
+      expect(stageCalls).toHaveLength(1);
+      expect(stageCalls[0][1]).toEqual([
+        "stage",
+        "publish",
+        ...(fromPackDir
+          ? [path.join("..", "..", ".packed", "pkg-a-1.0.0.tgz")]
+          : []),
+        "--json",
+        "--access",
+        "restricted",
+        "--tag",
+        "latest",
+      ]);
+      expect(JSON.parse(await fs.readFile(output, "utf8"))).toEqual({
+        type: "npm-stage",
+        packageName: "pkg-a",
+        version: "1.0.0",
+        tag: "latest",
+        gitTag: "pkg-a@1.0.0",
+        stageId,
+      });
+      expect(mockedLogger.info).toHaveBeenCalledWith(
+        `Approve the staged packages in this order:\nchangeset stage approve ${stageId}`,
+      );
+      expect(git.tag).not.toHaveBeenCalled();
+    },
+  );
 
   it("rejects custom tags when publishing from a pack directory", async () => {
     const cwd = await testdir({

@@ -61,29 +61,6 @@ function getPnpmError(stderr: string, stdout: string): PnpmCommandError {
   return { message: stderr || stdout || undefined };
 }
 
-function parseDistTags(output: string): Record<string, string> {
-  if (!output) return {};
-
-  try {
-    const parsed: unknown = JSON.parse(output);
-    return parsed && typeof parsed === "object" && !Array.isArray(parsed)
-      ? Object.fromEntries(
-          Object.entries(parsed).filter(
-            (entry): entry is [string, string] => typeof entry[1] === "string",
-          ),
-        )
-      : {};
-  } catch {
-    return Object.fromEntries(
-      output
-        .split("\n")
-        .map((line) => line.match(/^(.+?):\s+(\S+)\s*$/))
-        .filter((match): match is RegExpMatchArray => match != null)
-        .map((match) => [match[1], match[2]]),
-    );
-  }
-}
-
 // -- PublishTool -- //
 
 export const name = "pnpm" satisfies PublishTool["name"];
@@ -133,33 +110,6 @@ export const info: PublishTool["info"] = async ({ cwd, pkg }) => {
     info = parseInfoResult(exactResult) ?? {
       error: { code: "E404" },
     };
-  }
-  if (
-    "error" in info &&
-    (info.error.code === "E404" ||
-      info.error.code === "ERR_PNPM_FETCH_404" ||
-      info.error.code === "ERR_PNPM_PACKAGE_NOT_FOUND")
-  ) {
-    const tagsResult = await exec(
-      "pnpm",
-      ["dist-tag", "ls", packageJson.name, "--json"],
-      {
-        nodePath: false,
-        nodeOptions: { cwd },
-      },
-    );
-    if (tagsResult.exitCode === 0) {
-      const tags = parseDistTags(tagsResult.stdout);
-      // The exact local-version query already proved that version is absent.
-      // Here we only need to distinguish a truly new package from an existing
-      // package without `latest`; querying another exact version is unnecessary.
-      info = {
-        info: {
-          "dist-tags": tags,
-          versions: [...new Set(Object.values(tags))],
-        },
-      };
-    }
   }
   if ("error" in info) {
     return info.error.code === "E404" ||

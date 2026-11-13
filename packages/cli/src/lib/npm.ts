@@ -169,29 +169,6 @@ function getRegistryOverrides(packageJson: PackageJSON) {
   return registryOverrides;
 }
 
-function parseDistTags(output: string): Record<string, string> {
-  if (!output) return {};
-
-  try {
-    const parsed: unknown = JSON.parse(output);
-    return isJsonObject(parsed)
-      ? Object.fromEntries(
-          Object.entries(parsed).filter(
-            (entry): entry is [string, string] => typeof entry[1] === "string",
-          ),
-        )
-      : {};
-  } catch {
-    return Object.fromEntries(
-      output
-        .split("\n")
-        .map((line) => line.match(/^(.+?):\s+(\S+)\s*$/))
-        .filter((match): match is RegExpMatchArray => match != null)
-        .map((match) => [match[1], match[2]]),
-    );
-  }
-}
-
 // `npm info <pkg> --json` (aka `npm view`) behavior:
 //
 // - Bare package name starts with version string `'latest'`. If
@@ -240,28 +217,6 @@ export const info: PublishTool["info"] = async ({ cwd, pkg }) => {
     info = parseInfoResult(exactResult) ?? {
       error: { code: "E404" },
     };
-  }
-  if ("error" in info && info.error.code === "E404") {
-    const tagsResult = await exec(
-      "npm",
-      ["dist-tag", "ls", packageJson.name, ...flags],
-      {
-        nodePath: false,
-        nodeOptions: { cwd },
-      },
-    );
-    if (tagsResult.exitCode === 0) {
-      const tags = parseDistTags(tagsResult.stdout);
-      // The exact local-version query already proved that version is absent.
-      // Here we only need to distinguish a truly new package from an existing
-      // package without `latest`; querying another exact version is unnecessary.
-      info = {
-        info: {
-          "dist-tags": tags,
-          versions: [...new Set(Object.values(tags))],
-        },
-      };
-    }
   }
   if ("error" in info) {
     return info.error.code === "E404"

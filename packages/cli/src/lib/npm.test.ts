@@ -58,36 +58,6 @@ describe("package info", () => {
       },
     );
   });
-
-  it("falls back to plain-text dist-tags when latest is missing", async () => {
-    const pkg = {
-      dir: "/workspace/packages/package",
-      packageJson: {
-        name: "@test/package",
-        version: "0.0.2-beta.0",
-      },
-    } satisfies Package;
-    mockedExec
-      .mockResolvedValueOnce({ exitCode: 0, stdout: "", stderr: "" })
-      .mockResolvedValueOnce({
-        exitCode: 1,
-        stdout: JSON.stringify({ error: { code: "E404" } }),
-        stderr: "",
-      })
-      .mockResolvedValueOnce({
-        exitCode: 0,
-        stdout: "beta: 0.0.1-beta.0\n",
-        stderr: "",
-      });
-
-    await expect(npm.info({ cwd: "/workspace", pkg })).resolves.toEqual({
-      published: true,
-      info: {
-        "dist-tags": { beta: "0.0.1-beta.0" },
-        versions: ["0.0.1-beta.0"],
-      },
-    });
-  });
 });
 
 describe("publishing", () => {

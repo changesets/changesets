@@ -117,10 +117,9 @@ Because this command assumes that the last commit is the release commit, you sho
 
 `--tag TAGNAME` - for packages that are published, the chosen tag will be used instead of `latest`, allowing you to publish changes intended for testing and validation, not main consumption. This will most likely be used with [snapshot releases](./snapshot-releases.md).
 
-`--stage` stages existing packages for later approval instead of publishing
+`--stage` stages packages for later approval instead of publishing
 them immediately. `--no-stage` disables a `stagedPublishing` config value for
-one invocation. New packages cannot be staged, so Changesets checks for them
-before staging any package.
+one invocation.
 
 Staged packages do not get Git tags by default. Explicit `--git-tag` still
 creates them immediately; `--no-git-tag` disables tags. Private packages

@@ -259,13 +259,11 @@ When `tag` is set to `true`, Changesets will create a tag for private packages. 
 
 Default value: `false`
 
-When enabled, `changeset publish` stages existing package versions for later
+When enabled, `changeset publish` stages package versions for later
 approval instead of publishing them immediately. It can be overridden per
 invocation with `--stage` or `--no-stage`.
 
-New packages are rejected during preflight because npm staged publishing does
-not support their first publication. Staged packages skip Git tags by default;
-an explicit `--git-tag` is respected.
+Staged packages skip Git tags by default; an explicit `--git-tag` is respected.
 
 ## `changedFilePatterns` (array of strings)
 
