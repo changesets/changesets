@@ -198,6 +198,11 @@ describe("validateConfig", () => {
         expected: { ...defaultConfig, commit: false },
       },
       {
+        name: "gitTagFormat: string",
+        config: { gitTagFormat: "{name}_{version}" },
+        expected: { ...defaultConfig, gitTagFormat: "{name}_{version}" },
+      },
+      {
         name: "commit: true",
         config: { commit: true },
         expected: {
@@ -573,6 +578,26 @@ describe("validateConfig", () => {
         config: { snapshot: { useCalculatedVersion: "not true" } },
         errors: ["Expected boolean"],
       },
+      // gitTagFormat
+      {
+        name: "gitTagFormat: non-string",
+        config: { gitTagFormat: true },
+        errors: ["Expected string"],
+      },
+      {
+        name: "gitTagFormat: missing {version}",
+        config: { gitTagFormat: "{name}" },
+        errors: [
+          'Invalid format: The git tag format must include the "{version}" variable pattern.',
+        ],
+      },
+      {
+        name: "gitTagFormat: missing {name} in a monorepo",
+        config: { gitTagFormat: "v{version}" },
+        errors: [
+          'gitTagFormat: Invalid format: The git tag format must include the "{name}" variable pattern in monorepos',
+        ],
+      },
       // changedFilePatterns
       {
         name: "changedFilePatterns: non-array",
@@ -659,6 +684,25 @@ describe("validateConfig", () => {
         expect(result.errors![0]).toContain(
           'linked: Invalid group: The package or glob "pkg-a" is defined in multiple groups',
         );
+      });
+    });
+
+    describe("gitTagFormatIncludesName", () => {
+      it("should not require {name} in a single-package repo", async () => {
+        const config = { gitTagFormat: "{version}" };
+
+        const cwd = await testdir({
+          ".changeset/config.json": JSON.stringify(config),
+          "package.json": JSON.stringify(rootManifest),
+        });
+
+        const result = validateConfig(config, {
+          ...getDefaultPackages(cwd),
+          tool: { type: "root" },
+        });
+
+        expect(result.errors).toBeUndefined();
+        expect(result.config?.gitTagFormat).toBe("{version}");
       });
     });
 
