@@ -263,6 +263,8 @@ When enabled, `changeset publish` stages package versions for later
 approval instead of publishing them immediately. It can be overridden per
 invocation with `--stage` or `--no-stage`.
 
+Staged packages skip Git tags by default; an explicit `--git-tag` is respected.
+
 ## `changedFilePatterns` (array of strings)
 
 Glob patterns for changed files that should mark a package as changed. Useful to fine-tune what counts as a change (e.g. only source files, ignoring test files, etc).
