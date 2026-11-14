@@ -8,18 +8,18 @@ import { shouldSkipPackage } from "@changesets/should-skip-package";
 import type {
   ChangelogFunctions,
   ComprehensiveRelease,
-  Packages,
   Config,
   ModCompWithPackage,
   NewChangeset,
+  Packages,
   ReleasePlan,
 } from "@changesets/types";
 import { resolve } from "import-meta-resolve";
 import { editJson, type EditJsonOperation } from "./edit-json.ts";
 import { getChangelogEntry } from "./get-changelog-entry.ts";
 import {
-  getDependencyVersionEdits,
   type DependencyUpdateOptions,
+  getDependencyVersionEdits,
 } from "./version-package.ts";
 
 function importResolveFromDir(specifier: string, dir: string) {
@@ -229,28 +229,31 @@ export async function applyReleasePlan(
   return touchedFiles;
 }
 
+type ReleaseWithChangelog = ModCompWithPackage & {
+  changelog: string | null;
+};
+
 async function getNewChangelogEntry(
   releasesWithPackage: ModCompWithPackage[],
   changesets: NewChangeset[],
   config: Config,
   cwd: string,
   contextDir: string,
-) {
+): Promise<ReleaseWithChangelog[]> {
   if (!config.changelog) {
-    return Promise.resolve(
-      releasesWithPackage.map((release) => ({
-        ...release,
-        changelog: null,
-      })),
-    );
+    for (const release of releasesWithPackage) {
+      (release as ReleaseWithChangelog).changelog = null;
+    }
+    return releasesWithPackage as ReleaseWithChangelog[];
   }
 
+  const defaultFn = () => "";
   let getChangelogFuncs: ChangelogFunctions = {
-    getReleaseLine: () => Promise.resolve(""),
-    getDependencyReleaseLine: () => Promise.resolve(""),
+    getReleaseLine: defaultFn,
+    getDependencyReleaseLine: defaultFn,
   };
 
-  const changelogOpts = config.changelog[1];
+  const changelogFormatterOptions = config.changelog[1];
   const changesetPath = path.join(cwd, ".changeset");
   let changelogPath;
 
@@ -295,7 +298,7 @@ async function getNewChangelogEntry(
         releasesWithPackage,
         moddedChangesets,
         getChangelogFuncs,
-        changelogOpts,
+        changelogFormatterOptions,
         {
           updateInternalDependencies: config.updateInternalDependencies,
           onlyUpdatePeerDependentsWhenOutOfRange:

@@ -21,9 +21,13 @@
     "@changesets/types": "workspace:^"
   },
   "devDependencies": {
-    "@changesets/parse": "workspace:*"
+    "@changesets/parse": "workspace:*",
+    "valibot": "^1.5.0"
   },
   "engines": {
     "node": "^22.11 || ^24 || >=26"
+  },
+  "inlinedDependencies": {
+    "valibot": "1.5.0"
   }
 }
