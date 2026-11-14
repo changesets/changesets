@@ -274,7 +274,7 @@ for every package being published after this!
 
         advanceProgress();
 
-        if (result.result === "failed:already-published") {
+        if (result.result === "failed:already-done") {
           // we don't trust this error to mean that the authentication works
           // this could be rejected by a preflight check (theoretically, we've not observed this in practice)
           // in general, we should *rarely* see this error as we only try to publish packages that have not been published yet
@@ -342,7 +342,7 @@ for every package being published after this!
       if (failures.length > 0 || !process.stdin.isTTY) {
         // We could still retry the recoverable failures, but mixing recovery
         // with hard failures complicates the flow. Only recover when every
-        // failure is recoverable; failed:already-published is acceptable here.
+        // failure is recoverable. Same-operation duplicates are acceptable here.
         unsuccessfulNpmPublishes.push(
           ...recoverableItems.map((item) => item.result!),
         );
