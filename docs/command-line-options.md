@@ -5,7 +5,7 @@ The command line for changesets is the main way of interacting with it. There ar
 - init
 - add [--empty] [--open] [--since <ref>] [--message <text>]
 - version [--ignore, --snapshot]
-- publish [--otp=code, --tag, --stage, --no-stage]
+- publish [--otp=code, --tag, --stage]
 - status [--since=master --verbose --output=JSON_FILE.json]
 - pre [exit|enter {tag}]
 - git-tag
