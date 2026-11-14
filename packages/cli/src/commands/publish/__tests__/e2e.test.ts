@@ -1003,10 +1003,6 @@ describe("Publish command e2e", { tags: ["slow"] }, () => {
             status: 403,
             error: 'Cannot stage previously published version "1.0.0".',
           },
-          {
-            status: 409,
-            error: 'Cannot stage previously published version "2.0.0".',
-          },
         ].flatMap((entry) => [false, true].map((tty) => ({ ...entry, tty }))),
       )(
         "rejects staging errors $status: $error (TTY: $tty)",

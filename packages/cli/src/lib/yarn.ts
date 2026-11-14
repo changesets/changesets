@@ -231,7 +231,7 @@ export const publish: PublishTool["publish"] = async ({
     (isAlreadyPublishedError(reporterError.message) ||
       (stage &&
         reporterError.message.includes("Response Code: 409 (Conflict)") &&
-        isAlreadyStagedError(reporterError.message, release.version)))
+        isAlreadyStagedError(reporterError.message)))
   ) {
     return {
       ...resultBase,
