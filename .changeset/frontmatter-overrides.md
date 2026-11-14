@@ -11,6 +11,7 @@ test: minor
 _:
   pr: 1337
   author: somone-else
+  commit: abcdefgh
 ---
 
 Changed some stuff, please update!
