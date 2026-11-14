@@ -69,12 +69,8 @@ type PublishResultBase = {
 };
 
 export type PublishResultSuccess = PublishResultBase & {
-  result: "published";
-};
-
-export type PublishResultStaged = PublishResultBase & {
-  result: "staged";
-  stageId: string;
+  result: "success";
+  stageId?: string;
 };
 
 export type PublishResultFailed = PublishResultBase & {
@@ -83,8 +79,8 @@ export type PublishResultFailed = PublishResultBase & {
   message?: string;
 };
 
-export type PublishResultAlreadyPublished = PublishResultBase & {
-  result: "failed:already-published";
+export type PublishResultAlreadyDone = PublishResultBase & {
+  result: "failed:already-done";
   code?: string;
 };
 
@@ -98,7 +94,6 @@ export type PublishResultFailedNeeds2fa = PublishResultBase & {
 
 export type PublishResult =
   | PublishResultSuccess
-  | PublishResultStaged
   | PublishResultFailed
-  | PublishResultAlreadyPublished
+  | PublishResultAlreadyDone
   | PublishResultFailedNeeds2fa;

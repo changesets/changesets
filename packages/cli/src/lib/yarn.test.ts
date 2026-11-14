@@ -91,7 +91,7 @@ describe("package info", () => {
 });
 
 describe("publishing", () => {
-  it("rejects a successful stage command without a stage ID", async () => {
+  it("accepts a successful stage command without a stage ID", async () => {
     mockedExec.mockResolvedValue({ exitCode: 0, stdout: "{}", stderr: "" });
     await expect(
       yarn.publish({
@@ -103,8 +103,8 @@ describe("publishing", () => {
         stage: true,
       }),
     ).resolves.toMatchObject({
-      result: "failed",
-      message: expect.stringContaining("did not report a stage ID"),
+      result: "success",
+      stageId: undefined,
     });
   });
 
@@ -127,7 +127,7 @@ describe("publishing", () => {
     ).resolves.toEqual({
       name: "@test/package",
       version: "0.0.1",
-      result: "staged",
+      result: "success",
       stageId: "stage-1",
     });
     expect(mockedExec.mock.calls[0][1]).toEqual([
@@ -193,5 +193,69 @@ describe("publishing", () => {
         },
       },
     );
+  });
+});
+
+describe("fresh published-version lookup", () => {
+  it.each([
+    { scopes: {}, expected: "https://publish.example.test/@test%2fpackage" },
+    {
+      scopes: { test: { npmPublishRegistry: "https://scoped.example.test" } },
+      expected: "https://scoped.example.test/@test%2fpackage",
+    },
+  ])("uses the publish registry: $expected", async ({ scopes, expected }) => {
+    mockedExec
+      .mockResolvedValueOnce({
+        exitCode: 0,
+        stderr: "",
+        stdout: JSON.stringify(scopes),
+      })
+      .mockResolvedValueOnce({
+        exitCode: 0,
+        stderr: "",
+        stdout: JSON.stringify("https://publish.example.test"),
+      })
+      .mockResolvedValueOnce({
+        exitCode: 0,
+        stderr: "",
+        stdout: JSON.stringify("https://fetch.example.test"),
+      });
+    const fetch = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(Response.json({ versions: { "0.0.1": {} } }));
+    await expect(
+      yarn.publishedVersion({ cwd: pkg.dir, pkg }),
+    ).resolves.toMatchObject({
+      published: true,
+      info: { versions: ["0.0.1"] },
+    });
+    expect(fetch).toHaveBeenCalledExactlyOnceWith(
+      new URL(expected),
+      expect.objectContaining({
+        headers: { "cache-control": "no-cache", pragma: "no-cache" },
+      }),
+    );
+  });
+
+  it("uses publishConfig.registry without reading Yarn config", async () => {
+    const fetch = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(
+        Response.json({ error: "Unauthorized" }, { status: 401 }),
+      );
+    await expect(
+      yarn.publishedVersion({
+        cwd: pkg.dir,
+        pkg: {
+          ...pkg,
+          packageJson: {
+            ...pkg.packageJson,
+            publishConfig: { registry: "https://override.example.test" },
+          },
+        },
+      }),
+    ).resolves.toMatchObject({ error: { code: "HTTP401" } });
+    expect(mockedExec).not.toHaveBeenCalled();
+    expect(fetch).toHaveBeenCalledOnce();
   });
 });

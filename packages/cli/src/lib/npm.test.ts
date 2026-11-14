@@ -78,7 +78,7 @@ describe("publishing", () => {
     },
   } satisfies Package;
 
-  it("should return `published` if npm cli succeeds", async () => {
+  it("should return `success` if the package manager succeeds", async () => {
     mockedExec.mockResolvedValue({ exitCode: 0, stdout: "", stderr: "" });
 
     const result = await npm.publish({
@@ -89,10 +89,10 @@ describe("publishing", () => {
       otpCode: null,
     });
 
-    expect(result.result).toEqual("published");
+    expect(result.result).toEqual("success");
   });
 
-  it("rejects a successful stage command without a stage ID", async () => {
+  it("accepts a successful stage command without a stage ID", async () => {
     mockedExec.mockResolvedValue({ exitCode: 0, stdout: "{}", stderr: "" });
     await expect(
       npm.publish({
@@ -104,8 +104,8 @@ describe("publishing", () => {
         stage: true,
       }),
     ).resolves.toMatchObject({
-      result: "failed",
-      message: expect.stringContaining("did not report a stage ID"),
+      result: "success",
+      stageId: undefined,
     });
   });
 
@@ -128,7 +128,7 @@ describe("publishing", () => {
     ).resolves.toEqual({
       name: "@test/package",
       version: "0.0.1",
-      result: "staged",
+      result: "success",
       stageId: "stage-1",
     });
     expect(mockedExec.mock.calls[0][1]).toEqual([
@@ -147,7 +147,7 @@ describe("publishing", () => {
   it.each([false, true])(
     "only skips a duplicate stage in staging mode (%s)",
     async (stage) => {
-      mockedExec.mockResolvedValue({
+      mockedExec.mockResolvedValueOnce({
         exitCode: 1,
         stderr: "",
         stdout: JSON.stringify({
@@ -159,6 +159,14 @@ describe("publishing", () => {
           },
         }),
       });
+      if (stage)
+        mockedExec.mockResolvedValueOnce({
+          exitCode: 1,
+          stdout: JSON.stringify({
+            error: { code: "E404", summary: "Not found" },
+          }),
+          stderr: "",
+        });
       const result = await npm.publish({
         pkg,
         release,
@@ -167,7 +175,7 @@ describe("publishing", () => {
         otpCode: null,
         stage,
       });
-      expect(result.result).toBe(stage ? "failed:already-published" : "failed");
+      expect(result.result).toBe(stage ? "failed:already-done" : "failed");
       expect(result).not.toHaveProperty("stageId");
     },
   );
@@ -189,7 +197,25 @@ describe("publishing", () => {
         otpCode: null,
       });
 
-      expect(result.result).toEqual("failed:already-published");
+      expect(result.result).toEqual("failed:already-done");
+    },
+  );
+
+  it.each(alreadyPublishedCases)(
+    "does not ignore duplicate-publish errors while staging (%s)",
+    async (_, snapshot) => {
+      mockedExec.mockResolvedValue(snapshot);
+      await expect(
+        npm.publish({
+          pkg,
+          release,
+          tarballPath: null,
+          interactive: false,
+          otpCode: null,
+          stage: true,
+        }),
+      ).resolves.toHaveProperty("result", "failed");
+      expect(mockedExec).toHaveBeenCalledOnce();
     },
   );
 
@@ -283,7 +309,7 @@ describe("publishing", () => {
       otpCode: null,
     });
 
-    expect(result.result).toEqual("published");
+    expect(result.result).toEqual("success");
     expect(mockedExec).toHaveBeenCalledWith(
       "npm",
       [
@@ -335,5 +361,52 @@ describe("publishing", () => {
       "--tag",
       "latest",
     ]);
+  });
+});
+
+describe("fresh published-version lookup", () => {
+  const pkg = {
+    dir: process.cwd(),
+    packageJson: { name: "@test/package", version: "0.0.1" },
+  } satisfies Package;
+  it("queries the exact version against the publishing registry", async () => {
+    mockedExec.mockResolvedValue({
+      exitCode: 0,
+      stderr: "",
+      stdout: JSON.stringify({ versions: ["0.0.1"], "dist-tags": {} }),
+    });
+    await expect(
+      npm.publishedVersion({
+        cwd: pkg.dir,
+        pkg: {
+          ...pkg,
+          packageJson: {
+            ...pkg.packageJson,
+            publishConfig: { registry: "https://publish.example.test" },
+          },
+        },
+      }),
+    ).resolves.toMatchObject({ published: true });
+    expect(mockedExec.mock.lastCall?.[1]).toEqual(
+      expect.arrayContaining([
+        "info",
+        "@test/package@0.0.1",
+        "--registry=https://publish.example.test",
+        "--@test:registry=https://publish.example.test",
+        "--prefer-online",
+        "--offline=false",
+      ]),
+    );
+  });
+
+  it("rejects malformed published versions", async () => {
+    mockedExec.mockResolvedValue({
+      exitCode: 0,
+      stderr: "",
+      stdout: JSON.stringify({ versions: "0.0.1" }),
+    });
+    await expect(
+      npm.publishedVersion({ cwd: pkg.dir, pkg }),
+    ).resolves.toHaveProperty("error");
   });
 });

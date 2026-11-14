@@ -1,7 +1,11 @@
 import { stripVTControlCharacters } from "node:util";
 import { exec } from "tinyexec";
 import { streamNdjson } from "../utils/streamNdjson.ts";
-import { isAlreadyPublishedError, isAlreadyStagedError } from "./common.ts";
+import {
+  isAlreadyPublishedError,
+  isStageConflictError,
+  resolveStageConflict,
+} from "./common.ts";
 import type { PackageInfo, PublishResult, PublishTool } from "./types.ts";
 
 // -- PublishTool -- //
@@ -112,6 +116,66 @@ export const info: PublishTool["info"] = async ({ cwd, pkg }) => {
   return info ? { published: true, info } : { error: {} };
 };
 
+// Yarn's info command always uses the fetch registry. Resolve the publish
+// registry explicitly for this public metadata query, including scoped settings.
+export const publishedVersion: PublishTool["info"] = async ({ cwd, pkg }) => {
+  async function config(key: string): Promise<unknown> {
+    const result = await exec("yarn", ["config", "get", key, "--json"], {
+      nodePath: false,
+      nodeOptions: { cwd },
+    });
+    if (result.exitCode !== 0) throw new Error(result.stderr || result.stdout);
+    return result.stdout.trim() === "undefined"
+      ? undefined
+      : JSON.parse(result.stdout);
+  }
+  let registry: unknown = pkg.packageJson.publishConfig?.registry;
+  if (!registry) {
+    const [scopes, publishRegistry, fetchRegistry] = await Promise.all([
+      config("npmScopes"),
+      config("npmPublishRegistry"),
+      config("npmRegistryServer"),
+    ]);
+    const scope = pkg.packageJson.name.startsWith("@")
+      ? pkg.packageJson.name.slice(1).split("/")[0]
+      : undefined;
+    const scoped =
+      scope && isJsonObject(scopes) && isJsonObject(scopes[scope])
+        ? scopes[scope]
+        : undefined;
+    registry = scoped?.npmPublishRegistry ?? publishRegistry ?? fetchRegistry;
+  }
+  if (typeof registry !== "string")
+    return { error: { message: "Unable to resolve the publishing registry." } };
+  // Pending stage metadata is not needed. Public packuments work with OIDC
+  // without obtaining a new token. Restricted registries fail closed.
+  const response = await fetch(
+    new URL(
+      pkg.packageJson.name.replace("/", "%2f"),
+      `${registry.replace(/\/$/, "")}/`,
+    ),
+    {
+      headers: { "cache-control": "no-cache", pragma: "no-cache" },
+      signal: AbortSignal.timeout(30_000),
+    },
+  );
+  if (response.status === 404) return { published: false };
+  if (!response.ok)
+    return {
+      error: {
+        code: `HTTP${response.status}`,
+        message: "Unable to query published versions.",
+      },
+    };
+  const packument: unknown = await response.json();
+  if (!isJsonObject(packument) || !isJsonObject(packument.versions))
+    return { error: { message: "Invalid published versions response." } };
+  return {
+    published: true,
+    info: { "dist-tags": {}, versions: Object.keys(packument.versions) },
+  };
+};
+
 export const pack: PublishTool["pack"] = async ({ packDir, tarballPath }) => {
   const { exitCode, stdout, stderr } = await exec(
     "yarn",
@@ -197,22 +261,15 @@ export const publish: PublishTool["publish"] = async ({
           stageId = entry.stageId;
         }
       }
-      if (!stageId) {
-        return {
-          ...resultBase,
-          result: "failed",
-          message: "The Yarn stage command did not report a stage ID.",
-        };
-      }
       return {
         ...resultBase,
-        result: "staged",
+        result: "success",
         stageId,
       };
     }
     return {
       ...resultBase,
-      result: "published",
+      result: "success",
     };
   }
 
@@ -228,16 +285,19 @@ export const publish: PublishTool["publish"] = async ({
 
   if (
     reporterError.code === "YN0035" &&
-    (isAlreadyPublishedError(reporterError.message) ||
+    ((!stage && isAlreadyPublishedError(reporterError.message)) ||
       (stage &&
         reporterError.message.includes("Response Code: 409 (Conflict)") &&
-        isAlreadyStagedError(reporterError.message)))
+        isStageConflictError(reporterError.message)))
   ) {
-    return {
+    const result = {
       ...resultBase,
-      result: "failed:already-published",
+      result: "failed:already-done" as const,
       code: reporterError.code,
     };
+    return stage
+      ? resolveStageConflict(result, { cwd: pkg.dir, pkg }, publishedVersion)
+      : result;
   }
 
   if (

@@ -103,7 +103,7 @@ describe("publishing", () => {
     tarball: undefined,
   } satisfies PublishReleaseEntry as PublishReleaseEntry;
 
-  it("should return `published` if npm cli succeeds", async () => {
+  it("should return `success` if the package manager succeeds", async () => {
     mockedExec.mockResolvedValue({ exitCode: 0, stdout: "", stderr: "" });
 
     const result = await pnpm.publish({
@@ -114,10 +114,10 @@ describe("publishing", () => {
       otpCode: null,
     });
 
-    expect(result.result).toEqual("published");
+    expect(result.result).toEqual("success");
   });
 
-  it("rejects a successful stage command without a stage ID", async () => {
+  it("accepts a successful stage command without a stage ID", async () => {
     mockedExec.mockResolvedValue({ exitCode: 0, stdout: "{}", stderr: "" });
     await expect(
       pnpm.publish({
@@ -129,8 +129,8 @@ describe("publishing", () => {
         stage: true,
       }),
     ).resolves.toMatchObject({
-      result: "failed",
-      message: expect.stringContaining("did not report a stage ID"),
+      result: "success",
+      stageId: undefined,
     });
   });
 
@@ -155,7 +155,7 @@ describe("publishing", () => {
     ).resolves.toEqual({
       name: "@test/package",
       version: "0.0.1",
-      result: "staged",
+      result: "success",
       stageId: "stage-1",
     });
     expect(mockedExec.mock.calls[0][1]).toEqual([
@@ -189,7 +189,25 @@ describe("publishing", () => {
         otpCode: null,
       });
 
-      expect(result.result).toEqual("failed:already-published");
+      expect(result.result).toEqual("failed:already-done");
+    },
+  );
+
+  it.each(alreadyPublishedCases)(
+    "does not ignore duplicate-publish errors while staging (%s)",
+    async (_, snapshot) => {
+      mockedExec.mockResolvedValue(snapshot);
+      await expect(
+        pnpm.publish({
+          pkg,
+          release,
+          tarballPath: null,
+          interactive: false,
+          otpCode: null,
+          stage: true,
+        }),
+      ).resolves.toHaveProperty("result", "failed");
+      expect(mockedExec).toHaveBeenCalledOnce();
     },
   );
 
@@ -304,5 +322,51 @@ describe("publishing", () => {
         }),
       },
     );
+  });
+});
+
+describe("fresh published-version lookup", () => {
+  const pkg = {
+    dir: process.cwd(),
+    packageJson: { name: "@test/package", version: "0.0.1" },
+  } satisfies Package;
+  it("queries the exact version against the publishing registry", async () => {
+    mockedExec.mockResolvedValue({
+      exitCode: 0,
+      stderr: "",
+      stdout: JSON.stringify({ versions: ["0.0.1"], "dist-tags": {} }),
+    });
+    await expect(
+      pnpm.publishedVersion({
+        cwd: pkg.dir,
+        pkg: {
+          ...pkg,
+          packageJson: {
+            ...pkg.packageJson,
+            publishConfig: { registry: "https://publish.example.test" },
+          },
+        },
+      }),
+    ).resolves.toMatchObject({ published: true });
+    expect(mockedExec.mock.lastCall?.[1]).toEqual(
+      expect.arrayContaining([
+        "info",
+        "@test/package@0.0.1",
+        "--registry=https://publish.example.test",
+        "--@test:registry=https://publish.example.test",
+        "--config.fetch-retries=0",
+      ]),
+    );
+  });
+
+  it("rejects malformed published versions", async () => {
+    mockedExec.mockResolvedValue({
+      exitCode: 0,
+      stderr: "",
+      stdout: JSON.stringify({ versions: "0.0.1" }),
+    });
+    await expect(
+      pnpm.publishedVersion({ cwd: pkg.dir, pkg }),
+    ).resolves.toHaveProperty("error");
   });
 });

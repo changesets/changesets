@@ -1,7 +1,11 @@
 import path from "node:path";
 import { exec } from "tinyexec";
 import { getLastJsonObjectFromString } from "../utils/getLastJsonObjectFromString.ts";
-import { isAlreadyPublishedError, isAlreadyStagedError } from "./common.ts";
+import {
+  isAlreadyPublishedError,
+  isStageConflictError,
+  resolveStageConflict,
+} from "./common.ts";
 import * as npm from "./npm.ts";
 import type { PackageInfo, PublishResult, PublishTool } from "./types.ts";
 
@@ -121,6 +125,46 @@ export const info: PublishTool["info"] = async ({ cwd, pkg }) => {
   return { published: true, info: info.info };
 };
 
+// pnpm 11 info fetches metadata directly and rejects unexpected 304 responses.
+// It does not read cached packuments or accept npm's cache-control flags.
+export const publishedVersion: PublishTool["info"] = async ({ cwd, pkg }) => {
+  const registry = pkg.packageJson.publishConfig?.registry;
+  const flags = registry ? [`--registry=${registry}`] : [];
+  if (registry && pkg.packageJson.name.startsWith("@")) {
+    flags.push(`--${pkg.packageJson.name.split("/")[0]}:registry=${registry}`);
+  }
+  const result = parseInfoResult(
+    await exec(
+      "pnpm",
+      [
+        "info",
+        `${pkg.packageJson.name}@${pkg.packageJson.version}`,
+        ...flags,
+        "--json",
+        "--config.fetch-retries=0",
+      ],
+      { nodePath: false, nodeOptions: { cwd } },
+    ),
+  );
+  if (!result) return { published: false };
+  if ("error" in result)
+    return [
+      "E404",
+      "ERR_PNPM_FETCH_404",
+      "ERR_PNPM_PACKAGE_NOT_FOUND",
+      "ERR_PNPM_NO_MATCHING_VERSION",
+    ].includes(result.error.code ?? "")
+      ? { published: false }
+      : result;
+  if (
+    !Array.isArray(result.info.versions) ||
+    !result.info.versions.every((version) => typeof version === "string")
+  ) {
+    return { error: { message: "Invalid published versions response." } };
+  }
+  return { published: true, info: result.info };
+};
+
 export const pack: PublishTool["pack"] = async ({ pkg, tarballPath }) => {
   // note: pnpm emits an object when packing a single package and an array when packing multiple packages
   // but with pnpm we don't even have to extract it from stdout as we are relying on explicitly configured --out
@@ -197,22 +241,15 @@ export const publish: PublishTool["publish"] = async ({
         typeof value.stageId === "string"
           ? value.stageId
           : undefined;
-      if (!stageId) {
-        return {
-          ...resultBase,
-          result: "failed",
-          message: "The pnpm stage command did not report a stage ID.",
-        };
-      }
       return {
         ...resultBase,
-        result: "staged",
+        result: "success",
         stageId,
       };
     }
     return {
       ...resultBase,
-      result: "published",
+      result: "success",
     };
   }
 
@@ -230,21 +267,32 @@ export const publish: PublishTool["publish"] = async ({
   // let the npm error handler take care of any other non-json error, as pnpm 10 delegates publishing to npm
   // TODO: after dropping pnpm 10 support stop delegating to npm and handle all errors here instead
   if (!isPnpmPublishError(json)) {
-    return npm.handlePublishError(resultBase, json, stderr || stdout, stage);
+    const result = npm.handlePublishError(
+      resultBase,
+      json,
+      stderr || stdout,
+      stage,
+    );
+    return stage && result.result === "failed:already-done"
+      ? resolveStageConflict(result, { cwd, pkg }, publishedVersion)
+      : result;
   }
 
   if (
-    isAlreadyPublishedError(json.error.message) ||
+    (!stage && isAlreadyPublishedError(json.error.message)) ||
     (stage &&
       json.error.code === "E409" &&
-      isAlreadyStagedError(json.error.message))
+      isStageConflictError(json.error.message))
   ) {
-    // we don't need to log anything here, it just turned out the version was already published so we gracefully exit the publish process
-    return {
+    // Verify ambiguous stage conflicts before tolerating a duplicate.
+    const result = {
       ...resultBase,
-      result: "failed:already-published",
+      result: "failed:already-done" as const,
       code: json.error.code,
     };
+    return stage
+      ? resolveStageConflict(result, { cwd, pkg }, publishedVersion)
+      : result;
   }
 
   const message = json.error.message.trim();

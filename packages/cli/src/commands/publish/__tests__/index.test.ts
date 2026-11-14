@@ -801,6 +801,39 @@ changeset stage approve ${stageIds.join(" ")}`,
     );
   });
 
+  it("accepts stage success without inventing a stage ID or approval command", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+    });
+    const output = path.join(cwd, "stages.ndjson");
+    mockExecImplementation(async (_command, args) => {
+      if (args[0] === "info")
+        return execResult(
+          JSON.stringify({
+            versions: ["0.9.0"],
+            "dist-tags": { latest: "0.9.0" },
+          }),
+        );
+      if (args[0] === "stage") return execResult("{}");
+      throw new Error(`Unexpected exec args: ${args.join(" ")}`);
+    });
+    await publishCommand({ cwd, stage: true, output });
+    expect(await fs.readFile(output, "utf8")).toBe("");
+    expect(mockedLogger.error).not.toHaveBeenCalled();
+    expect(mockedLogger.info).not.toHaveBeenCalledWith(
+      expect.stringContaining("changeset stage approve"),
+    );
+  });
+
   it("respects explicit git tagging in staged mode", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({

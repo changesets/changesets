@@ -3,7 +3,11 @@ import path from "node:path";
 import type { PackageJSON } from "@changesets/types";
 import { exec } from "tinyexec";
 import { getLastJsonObjectFromString } from "../utils/getLastJsonObjectFromString.ts";
-import { isAlreadyPublishedError, isAlreadyStagedError } from "./common.ts";
+import {
+  isAlreadyPublishedError,
+  isStageConflictError,
+  resolveStageConflict,
+} from "./common.ts";
 import type {
   PackageInfo,
   PublishResultFailedNeeds2fa,
@@ -226,6 +230,44 @@ export const info: PublishTool["info"] = async ({ cwd, pkg }) => {
   return { published: true, info: info.info };
 };
 
+// Exact queries work without a latest tag and npm view revalidates its cache.
+export const publishedVersion: PublishTool["info"] = async ({ cwd, pkg }) => {
+  const { packageJson } = pkg;
+  const flags = getRegistryOverrides(packageJson);
+  if (packageJson.name.startsWith("@") && packageJson.publishConfig?.registry) {
+    const scope = packageJson.name.split("/")[0];
+    flags.push(
+      `--${scope}:registry=${packageJson.publishConfig[`${scope}:registry`] ?? packageJson.publishConfig.registry}`,
+    );
+  }
+  const result = parseInfoResult(
+    await exec(
+      "npm",
+      [
+        "info",
+        `${packageJson.name}@${packageJson.version}`,
+        ...flags,
+        "--json",
+        "--prefer-online",
+        "--cache-min=0",
+        "--offline=false",
+        "--fetch-retries=0",
+      ],
+      { nodePath: false, nodeOptions: { cwd } },
+    ),
+  );
+  if (!result) return { published: false };
+  if ("error" in result)
+    return result.error.code === "E404" ? { published: false } : result;
+  if (
+    !Array.isArray(result.info.versions) ||
+    !result.info.versions.every((version) => typeof version === "string")
+  ) {
+    return { error: { message: "Invalid published versions response." } };
+  }
+  return { published: true, info: result.info };
+};
+
 export const pack: PublishTool["pack"] = async ({
   pkg,
   packDir,
@@ -287,15 +329,15 @@ export function handlePublishError(
 
   // npm v11 doesn't return a `code` on already-published errors
   if (
-    isAlreadyPublishedError(json.error.summary) ||
+    (!stage && isAlreadyPublishedError(json.error.summary)) ||
     (stage &&
       json.error.code === "E409" &&
-      isAlreadyStagedError(json.error.summary))
+      isStageConflictError(json.error.summary))
   ) {
-    // we don't need to log anything here, it just turned out the version was already published so we gracefully exit the publish process
+    // Stage conflicts are verified against fresh metadata before returning to the publish queue.
     return {
       ...resultBase,
-      result: "failed:already-published",
+      result: "failed:already-done",
       code: json.error.code!,
     };
   }
@@ -396,22 +438,15 @@ export const publish: PublishTool["publish"] = async ({
         typeof value.stageId === "string"
           ? value.stageId
           : undefined;
-      if (!stageId) {
-        return {
-          ...resultBase,
-          result: "failed",
-          message: "The npm stage command did not report a stage ID.",
-        };
-      }
       return {
         ...resultBase,
-        result: "staged",
+        result: "success",
         stageId,
       };
     }
     return {
       ...resultBase,
-      result: "published",
+      result: "success",
     };
   }
 
@@ -426,5 +461,8 @@ export const publish: PublishTool["publish"] = async ({
     };
   }
 
-  return handlePublishError(resultBase, json, stderr || stdout, stage);
+  const result = handlePublishError(resultBase, json, stderr || stdout, stage);
+  return stage && result.result === "failed:already-done"
+    ? resolveStageConflict(result, { cwd, pkg }, publishedVersion)
+    : result;
 };

@@ -275,7 +275,7 @@ for every package being published after this!
 
         advanceProgress();
 
-        if (result.result === "failed:already-published") {
+        if (result.result === "failed:already-done") {
           // we don't trust this error to mean that the authentication works
           // this could be rejected by a preflight check (theoretically, we've not observed this in practice)
           // in general, we should *rarely* see this error as we only try to publish packages that have not been published yet
@@ -289,7 +289,7 @@ for every package being published after this!
 
         if (isPublishSuccessful(result)) {
           successfulNpmPublishes.push(result);
-          if (result.result === "staged") {
+          if (stagedPublishing && result.stageId) {
             reporter?.write({
               type: "npm-stage",
               packageName: result.name,
@@ -353,7 +353,7 @@ for every package being published after this!
       if (failures.length > 0 || !process.stdin.isTTY) {
         // We could still retry the recoverable failures, but mixing recovery
         // with hard failures complicates the flow. Only recover when every
-        // failure is recoverable; failed:already-published is acceptable here.
+        // failure is recoverable. Same-operation duplicates are acceptable here.
         unsuccessfulNpmPublishes.push(
           ...recoverableItems.map((item) => item.result!),
         );
@@ -408,6 +408,12 @@ ${formatPackageList(successfulNpmPublishes)}`;
     p.clear();
   }
 
+  const stageIds = stagedPublishing
+    ? successfulNpmPublishes
+        .filter(isPublishSuccessful)
+        .flatMap((result) => (result.stageId ? [result.stageId] : []))
+    : [];
+
   if (unsuccessfulNpmPublishes.length !== 0) {
     log.error(
       `
@@ -415,24 +421,12 @@ Some packages failed to publish:
 ${formatPackageList(unsuccessfulNpmPublishes, c.red)}
       `.trim(),
     );
-    if (stagedPublishing && successfulNpmPublishes.length > 0) {
-      const stageIds = successfulNpmPublishes
-        .filter(
-          (result): result is Extract<PublishResult, { result: "staged" }> =>
-            result.result === "staged",
-        )
-        .map((result) => result.stageId);
+    if (stageIds.length > 0) {
       log.warn(
         `Reject the successfully staged packages, then retry:\nchangeset stage reject ${stageIds.join(" ")}`,
       );
     }
-  } else if (stagedPublishing && successfulNpmPublishes.length > 0) {
-    const stageIds = successfulNpmPublishes
-      .filter(
-        (result): result is Extract<PublishResult, { result: "staged" }> =>
-          result.result === "staged",
-      )
-      .map((result) => result.stageId);
+  } else if (stageIds.length > 0) {
     log.info(`Approve the staged packages in this order:
 changeset stage approve ${stageIds.join(" ")}`);
   }
