@@ -185,6 +185,9 @@ importers:
       '@changesets/parse':
         specifier: workspace:*
         version: link:../parse
+      valibot:
+        specifier: ^1.5.0
+        version: 1.5.0(typescript@6.0.3)
 
   packages/cli:
     dependencies:
@@ -398,6 +401,9 @@ importers:
       outdent:
         specifier: ^0.8.0
         version: 0.8.0
+      valibot:
+        specifier: ^1.5.0
+        version: 1.5.0(typescript@6.0.3)
 
   packages/pre:
     dependencies:

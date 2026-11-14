@@ -3,9 +3,30 @@ import path from "node:path";
 import util from "node:util";
 import { getCommitInfo, getPullRequestInfo } from "@changesets/get-github-info";
 import type { ChangelogFunctions } from "@changesets/types";
+import { type InferOutput, safeParse } from "valibot";
+import { MetadataSchema } from "./metadata.ts";
 import { buildReleaseLineTokens, renderTemplate } from "./render-template.ts";
+import { mdLink } from "./utils.ts";
+
+const arrayify = <T>(input: T | T[] | null | undefined): T[] | null =>
+  input != null ? (Array.isArray(input) ? input : [input]) : null;
 
 const ISSUE_REF_REGEX = /\[.*?\]\(.*?\)|\B#([1-9]\d*)\b/g;
+
+function verifyMetadata(input: unknown): InferOutput<typeof MetadataSchema> {
+  const result = safeParse(MetadataSchema, input);
+  if (!result.success) {
+    const issueLines = result.issues
+      .map(
+        (issue) =>
+          `${issue.path?.map((p) => p.key)?.join(".") || "."}: ${issue.message}`,
+      )
+      .join("\n");
+    throw new Error(`Received invalid metadata overrides:\n${issueLines}`);
+  }
+
+  return result.output;
+}
 
 // "match what you skip, capture what you want": the left alternative
 // consumes markdown links so the right alternative only matches bare refs
@@ -16,7 +37,7 @@ function linkifyIssueRefs(
   return line.replace(ISSUE_REF_REGEX, (match, issue) =>
     // PRs and issues are the same thing on GitHub (to some extent, of course)
     // this relies on GitHub redirecting from /issues/1234 to /pull/1234 when necessary
-    issue ? `[#${issue}](${serverUrl}/${repo}/issues/${issue})` : match,
+    issue ? mdLink(`#${issue}`, `${serverUrl}/${repo}/issues/${issue}`) : match,
   );
 }
 
@@ -79,6 +100,10 @@ const changelogFunctions: ChangelogFunctions = {
     const changesetLink = `- Updated dependencies [${(
       await Promise.all(
         changesets.map(async (cs) => {
+          if (cs.metadata != null) {
+            verifyMetadata(cs.metadata);
+          }
+
           if (cs.commit) {
             const info = await getCommitInfo({ commit: cs.commit, repo });
             return info?.commit.markdownLink ?? `\`${cs.commit.slice(0, 7)}\``;
@@ -95,32 +120,15 @@ const changelogFunctions: ChangelogFunctions = {
 
     return [changesetLink, ...updatedDepenenciesList].join("\n");
   },
-  getReleaseLine: async (changeset, type, options) => {
+  getReleaseLine: async (changeset, _, options) => {
+    const metadata =
+      changeset.metadata != null ? verifyMetadata(changeset.metadata) : null;
+
     const repo = await getRepo(options);
 
     const { GITHUB_SERVER_URL } = await readEnv();
 
-    let prFromSummary: number | undefined;
-    let commitFromSummary: string | undefined;
-    const usersFromSummary: string[] = [];
-
-    const replacedChangelog = changeset.summary
-      .replace(/^\s*(?:pr|pull|pull\s+request):\s*#?(\d+)/im, (_, pr) => {
-        const num = Number(pr);
-        if (!isNaN(num)) prFromSummary = num;
-        return "";
-      })
-      .replace(/^\s*commit:\s*([^\s]+)/im, (_, commit) => {
-        commitFromSummary = commit;
-        return "";
-      })
-      .replace(/^\s*(?:author|user):\s*@?([^\s]+)/gim, (_, user) => {
-        usersFromSummary.push(user);
-        return "";
-      })
-      .trim();
-
-    const [firstLine, ...futureLines] = replacedChangelog
+    const [firstLine, ...futureLines] = changeset.summary
       .split("\n")
       .map((l) => l.trimEnd());
 
@@ -130,34 +138,32 @@ const changelogFunctions: ChangelogFunctions = {
       user: undefined,
     };
 
-    if (prFromSummary != null) {
-      const info = await getPullRequestInfo({ pull: prFromSummary, repo });
+    if (metadata?.pr != null) {
+      const info = await getPullRequestInfo({ pull: metadata.pr, repo });
       links.commit = info?.commit?.markdownLink;
       links.pull = info?.pull.markdownLink;
       links.user = info?.author?.markdownLink;
 
-      if (commitFromSummary) {
-        const url = `${GITHUB_SERVER_URL}/${repo}/commit/${commitFromSummary}`;
-        links.commit = `[\`${commitFromSummary.slice(0, 7)}\`](${url})`;
+      if (metadata?.commit != null) {
+        const text = `\`${metadata.commit.slice(0, 7)}\``;
+        const url = `${GITHUB_SERVER_URL}/${repo}/commit/${metadata.commit}`;
+        links.commit = mdLink(text, url);
       }
-    } else if (commitFromSummary || changeset.commit) {
-      const commitToFetchFrom = commitFromSummary || changeset.commit!;
+    } else if (metadata?.commit || changeset.commit) {
+      const commitToFetchFrom = metadata?.commit || changeset.commit!;
       const info = await getCommitInfo({ commit: commitToFetchFrom, repo });
       links.commit = info?.commit.markdownLink;
       links.pull = info?.pull?.markdownLink;
       links.user = info?.author?.markdownLink;
     }
 
-    const users = options?.disableThanks
-      ? null
-      : usersFromSummary.length
-        ? usersFromSummary
-            .map(
-              (userFromSummary) =>
-                `[@${userFromSummary}](${GITHUB_SERVER_URL}/${userFromSummary})`,
-            )
-            .join(", ")
-        : links.user;
+    // ugly, but works...
+    const users = arrayify(metadata?.author);
+    const usersLinks = users
+      ?.map((user) => mdLink(`@${user}`, GITHUB_SERVER_URL, user))
+      ?.join(",");
+    const usersString =
+      options?.disableThanks !== true ? (usersLinks ?? links.user) : null;
 
     const linkOpts = { serverUrl: GITHUB_SERVER_URL, repo };
     const summaryLinked = linkifyIssueRefs(firstLine, linkOpts);
@@ -170,7 +176,7 @@ const changelogFunctions: ChangelogFunctions = {
       const tokens = buildReleaseLineTokens({
         summaryLinked,
         links,
-        users,
+        users: usersString,
       });
       // trimEnd so an empty trailing token (e.g. `{ref}` with no PR/commit)
       // leaves no dangling space - a trailing space in markdown is unsafe.
@@ -181,7 +187,7 @@ const changelogFunctions: ChangelogFunctions = {
     const prefix = [
       links.pull == null ? "" : ` ${links.pull}`,
       links.commit == null ? "" : ` ${links.commit}`,
-      users == null ? "" : ` Thanks ${users}!`,
+      usersString == null ? "" : ` Thanks ${usersString}!`,
     ].join("");
 
     return `\n\n-${prefix ? `${prefix} -` : ""} ${summaryLinked}\n${continuation}`;
