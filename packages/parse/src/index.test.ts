@@ -227,6 +227,23 @@ describe("parsing a changeset", () => {
     });
   });
 
+  it("should not treat the _ options key as a package", () => {
+    const changesetMd = outdent`---
+    _:
+      pr: 1337
+    "cool-package": minor
+    ---
+
+    Nice simple summary
+    `;
+
+    const changeset = parse(changesetMd);
+
+    expect(changeset.releases).toHaveLength(1);
+    expect(changeset.metadata).toBeDefined();
+    expect(changeset.metadata).toStrictEqual({ pr: 1337 });
+  });
+
   it("should throw if the frontmatter is followed by non-whitespace characters on the same line", () => {
     const changesetMd = outdent`---
     "cool-package": minor
@@ -236,7 +253,7 @@ describe("parsing a changeset", () => {
     `;
 
     expect(() => parse(changesetMd)).toThrowErrorMatchingInlineSnapshot(`
-      [Error: could not parse changeset - missing or invalid frontmatter.
+      [Error: Could not parse changeset: missing or invalid frontmatter.
       Changesets must start with frontmatter delimited by "---".
       Example:
       ---
@@ -262,9 +279,10 @@ describe("parsing a changeset", () => {
     `;
 
     expect(() => parse(changesetMd)).toThrowErrorMatchingInlineSnapshot(`
-      [Error: could not parse changeset - invalid package name in frontmatter.
-      Expected a non-empty string for package name, but got: ""
-      Changeset contents:
+      [Error: Could not parse changeset:
+      .: Package name can't be empty.
+
+      Received:
       ---
       : minor
       ---
@@ -275,7 +293,7 @@ describe("parsing a changeset", () => {
 
   it("should throw when file is completely empty", () => {
     expect(() => parse("")).toThrowErrorMatchingInlineSnapshot(`
-      [Error: could not parse changeset - file is empty.
+      [Error: Could not parse changeset: file is empty.
       Changesets must have frontmatter with package names and version types.
       Example:
       ---
@@ -285,7 +303,7 @@ describe("parsing a changeset", () => {
       Your changeset summary here.]
     `);
     expect(() => parse("   ")).toThrowErrorMatchingInlineSnapshot(`
-      [Error: could not parse changeset - file is empty.
+      [Error: Could not parse changeset: file is empty.
       Changesets must have frontmatter with package names and version types.
       Example:
       ---
@@ -295,7 +313,7 @@ describe("parsing a changeset", () => {
       Your changeset summary here.]
     `);
     expect(() => parse("\n\n")).toThrowErrorMatchingInlineSnapshot(`
-      [Error: could not parse changeset - file is empty.
+      [Error: Could not parse changeset: file is empty.
       Changesets must have frontmatter with package names and version types.
       Example:
       ---
@@ -309,7 +327,7 @@ describe("parsing a changeset", () => {
   it("should throw when frontmatter is missing", () => {
     const changesetMd = "Just some content without frontmatter";
     expect(() => parse(changesetMd)).toThrowErrorMatchingInlineSnapshot(`
-      [Error: could not parse changeset - missing or invalid frontmatter.
+      [Error: Could not parse changeset: missing or invalid frontmatter.
       Changesets must start with frontmatter delimited by "---".
       Example:
       ---
@@ -331,9 +349,10 @@ describe("parsing a changeset", () => {
     `;
 
     expect(() => parse(changesetMd)).toThrowErrorMatchingInlineSnapshot(`
-      [Error: could not parse changeset - invalid version type "invalid-type" for package "cool-package".
-      Valid version types are: major, minor, patch, none
-      Changeset contents:
+      [Error: Could not parse changeset:
+      cool-package: Invalid change type (valid ones are major, minor, patch, none)
+
+      Received:
       ---
       "cool-package": invalid-type
       ---
@@ -351,9 +370,10 @@ describe("parsing a changeset", () => {
     `;
 
     expect(() => parse(changesetMd)).toThrowErrorMatchingInlineSnapshot(`
-      [Error: could not parse changeset - invalid package name in frontmatter.
-      Expected a non-empty string for package name, but got: ""
-      Changeset contents:
+      [Error: Could not parse changeset:
+      .: Package name can't be empty.
+
+      Received:
       ---
       "": minor
       ---
