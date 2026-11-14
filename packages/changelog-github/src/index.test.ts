@@ -1,7 +1,7 @@
 import * as getGithubInfo from "@changesets/get-github-info";
 import { parseChangesetFile as parse } from "@changesets/parse";
 import type { ModCompWithPackage } from "@changesets/types";
-import { afterEach, beforeEach, describe, expect, it, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import changelogFunctions from "./index.ts";
 import { mdLink } from "./utils.ts";
 
