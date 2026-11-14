@@ -210,6 +210,7 @@ function getMainSidebar(): DefaultTheme.SidebarItem[] {
       text: "Guides",
       base: "/guide/",
       items: [
+        { text: "Writing Changesets", link: "writing-changesets" },
         {
           text: "Versioning and Publishing",
           link: "versioning-and-publishing",
@@ -222,10 +223,7 @@ function getMainSidebar(): DefaultTheme.SidebarItem[] {
           text: "Customize Changelog Format",
           link: "customize-changelog-format",
         },
-        {
-          text: "Customize Commit Format",
-          link: "customize-commit-format",
-        },
+        { text: "Customize Commit Format", link: "customize-commit-format" },
         { text: "Snapshot Releases", link: "snapshot-releases" },
         { text: "Prereleases", link: "prereleases" },
         { text: "Beyond npm", link: "beyond-npm" },
