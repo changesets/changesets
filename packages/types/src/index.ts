@@ -120,6 +120,8 @@ export type Config = {
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH: Required<ExperimentalOptions>;
   snapshot: {
     useCalculatedVersion: boolean;
+    /** The base version for snapshot versions when `useCalculatedVersion` is disabled. Defaults to `0.0.0`. */
+    baseVersion?: string;
     prereleaseTemplate: string | null;
   };
 };
@@ -149,6 +151,7 @@ export type WrittenConfig = {
   bumpVersionsWithWorkspaceProtocolOnly?: boolean;
   snapshot?: {
     useCalculatedVersion?: boolean;
+    baseVersion?: string;
     prereleaseTemplate?: string;
   };
   ___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH?: ExperimentalOptions;

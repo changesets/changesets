@@ -144,6 +144,11 @@
           "description": "Makes generated snapshot versions use the calculated version (based on the changeset files) as a base version, instead of 0.0.0",
           "default": false
         },
+        "baseVersion": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "The base version used for generated snapshot versions, in place of 0.0.0. It is ignored when `useCalculatedVersion` is enabled."
+        },
         "prereleaseTemplate": {
           "type": "string",
           "minLength": 1,
