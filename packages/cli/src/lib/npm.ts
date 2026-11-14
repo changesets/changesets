@@ -290,7 +290,7 @@ export function handlePublishError(
     isAlreadyPublishedError(json.error.summary) ||
     (stage &&
       json.error.code === "E409" &&
-      isAlreadyStagedError(json.error.summary, resultBase.version))
+      isAlreadyStagedError(json.error.summary))
   ) {
     // we don't need to log anything here, it just turned out the version was already published so we gracefully exit the publish process
     return {

@@ -237,7 +237,7 @@ export const publish: PublishTool["publish"] = async ({
     isAlreadyPublishedError(json.error.message) ||
     (stage &&
       json.error.code === "E409" &&
-      isAlreadyStagedError(json.error.message, release.version))
+      isAlreadyStagedError(json.error.message))
   ) {
     // we don't need to log anything here, it just turned out the version was already published so we gracefully exit the publish process
     return {
