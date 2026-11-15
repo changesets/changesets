@@ -30,8 +30,8 @@ Use the `@changesets/test-utils` package to silence the logs in test cases.
 For example:
 
 ```js
-import { temporarilySilenceLogs } from "@changesets/test-utils";
 import { log } from "@changesets/logger";
+import { temporarilySilenceLogs } from "@changesets/test-utils";
 
 temporarilySilenceLogs();
 

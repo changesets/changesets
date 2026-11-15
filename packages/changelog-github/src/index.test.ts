@@ -459,7 +459,7 @@ describe("{summary} token", () => {
   });
 });
 
-// Locks the template/output examples shown in docs/config-file-options.md so
+// Locks the template/output examples shown in packages/changelog-github/README.md so
 // they cannot drift. Mock data renders PR #1613, commit a085003, @Andarist.
 describe("documented template examples", () => {
   const pr = "[#1613](https://github.com/emotion-js/emotion/pull/1613)";

@@ -72,4 +72,6 @@ You can also delete them if you feel the changeset is not needed for a previous 
 
 ## Are changesets removed?
 
-When `changeset version` is run, all changeset files are removed. This is so we only ever use a changeset once. This makes the `.changeset` folder a very bad place to store any other information.
+When `changeset version` is run, changeset files are removed once they have been applied. This is so we only ever use a changeset once. This makes the `.changeset` folder a very bad place to store any other information.
+
+A changeset that names only packages that are skipped — private packages that are not versioned, or packages listed in `ignore` — stays in `.changeset`, because nothing was released for it.
