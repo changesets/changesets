@@ -208,7 +208,7 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
   // in TTY mode the first publish "checks" if the publish process requires interactive auth or not
   // on CI everything has to be configured in a way that allows automation so we can go straight to bulk publishing
   // similarly, when OTP is provided we can go straight to bulk publishing as well
-  let sequential = stagedPublishing || (process.stdin.isTTY && otpCode == null);
+  let sequential = stage || (process.stdin.isTTY && otpCode == null);
 
   const p = progress({ max: totalPublishCount });
   const renderProgressMessage = () =>
@@ -318,7 +318,7 @@ for every package being published after this!
 
         if (isPublishSuccessful(result)) {
           successfulNpmPublishes.push(result);
-          if (result.result === "staged") {
+          if (stage && result.stageId) {
             reporter?.write({
               type: "npm-stage",
               packageName: result.name,
@@ -332,7 +332,7 @@ for every package being published after this!
           // A successful non-interactive publish proves that bulk publishing is
           // currently possible. If 2FA becomes necessary again, bulk publishing
           // will hand the affected packages back to this sequential path.
-          if (!stagedPublishing && !interactive) {
+          if (!stage && !interactive) {
             sequential = false;
           } else if (finishedCount < totalPublishCount) {
             // The interactive child owned the terminal, so publishing progress
@@ -415,7 +415,7 @@ for every package being published after this!
     const message = `Successfully ${stage ? "staged" : "published"}:
 ${formatPackageList(successfulNpmPublishes)}`;
 
-    if (sequential && !stagedPublishing) {
+    if (sequential && !stage) {
       log.success(message);
     } else {
       p.stop(message);
@@ -423,9 +423,7 @@ ${formatPackageList(successfulNpmPublishes)}`;
 
     // Staged publishing normally defers tags until approval. An explicit
     // --git-tag is still respected as an intentional opt-out of that safety.
-    if (
-      stagedPublishing ? options?.gitTag === true : (options?.gitTag ?? true)
-    ) {
+    if (stage ? options?.gitTag === true : (options?.gitTag ?? true)) {
       gitTagReleases.push(
         ...successfulNpmPublishes.map((result) => ({
           kind: "tag-only" as const,
@@ -436,6 +434,12 @@ ${formatPackageList(successfulNpmPublishes)}`;
   } else {
     p.clear();
   }
+
+  const stageIds = stage
+    ? successfulNpmPublishes
+        .filter(isPublishSuccessful)
+        .flatMap((result) => (result.stageId ? [result.stageId] : []))
+    : [];
 
   if (unsuccessfulNpmPublishes.length !== 0) {
     log.error(
