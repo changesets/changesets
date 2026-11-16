@@ -845,6 +845,93 @@ describe("Publish command", () => {
     },
   );
 
+  it.each(["published", "staged", "lookup-error", "lookup-throws"])(
+    "checks the release version with ordinary info after a stage conflict (%s)",
+    async (state) => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "package-lock.json": "",
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify(defaultConfig),
+        ".packed/publish-plan.json": JSON.stringify({
+          version: 1,
+          plan: [
+            [
+              {
+                kind: "publish",
+                name: "pkg-a",
+                version: "2.0.0",
+                access: "public",
+                tag: "latest",
+                tarball: { path: "pkg-a-2.0.0.tgz", integrity: "sha512-test" },
+              },
+            ],
+          ],
+        }),
+      });
+      mockExecImplementation(async (_command, args) => {
+        if (args[0] === "stage") {
+          return execResult(
+            JSON.stringify({
+              error: {
+                code: "E409",
+                summary: 'Cannot stage previously published version "2.0.0".',
+              },
+            }),
+            1,
+          );
+        }
+        if (args[0] === "info") {
+          if (state === "lookup-throws")
+            throw new Error("Registry unavailable");
+          if (state === "lookup-error") {
+            return execResult(
+              JSON.stringify({
+                error: { code: "E401", summary: "Unauthorized" },
+              }),
+              1,
+            );
+          }
+          return execResult(
+            JSON.stringify({
+              versions: [state === "published" ? "2.0.0" : "1.0.0"],
+              "dist-tags": { latest: "1.0.0" },
+            }),
+          );
+        }
+        throw new Error(`Unexpected exec args: ${args.join(" ")}`);
+      });
+      const result = publishCommand({
+        cwd,
+        stage: true,
+        fromPackDir: ".packed",
+      });
+      const error = await result.then(
+        () => undefined,
+        (error: unknown) => error,
+      );
+      expect(error instanceof Error).toBe(state !== "staged");
+      expect(mockedExec.mock.calls.map((call) => call[1]?.[0])).toEqual([
+        "stage",
+        "info",
+      ]);
+      expect(mockedExec.mock.calls[1][1]).toEqual(["info", "pkg-a", "--json"]);
+      expect(git.tag).not.toHaveBeenCalled();
+      expect(
+        mockedLogger.error.mock.calls
+          .flat()
+          .join("\n")
+          .includes("Cannot stage already published version pkg-a@2.0.0."),
+      ).toBe(state === "published");
+    },
+  );
+
   it("rejects custom tags when publishing from a pack directory", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({

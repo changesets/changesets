@@ -24,7 +24,7 @@ export function isAlreadyPublishedError(message: string) {
 }
 
 // Pending stages are invisible to the publish-plan preflight.
-// This wording also covers published versions, so both are treated as already done.
+// This wording also covers published versions. The caller checks info to distinguish them.
 export function isStageConflictError(message: string) {
   return message.includes("Cannot stage previously published version");
 }

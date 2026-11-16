@@ -59,6 +59,49 @@ ${c.red("except")} for packages that have not had normal releases, which will be
   }
 }
 
+async function publishPackage(
+  publishTool: PublishTool,
+  options: Parameters<PublishTool["publish"]>[0],
+): Promise<PublishResult> {
+  const result = await publishTool.publish(options);
+  if (!options.stage || result.result !== "failed:already-done") {
+    return result;
+  }
+
+  const { pkg, release } = options;
+  try {
+    const response = await publishTool.info({ cwd: pkg.dir, pkg });
+    if ("error" in response) {
+      return {
+        name: release.name,
+        version: release.version,
+        result: "failed",
+        code: response.error.code,
+        message: response.error.message,
+      };
+    }
+    if (
+      response.published &&
+      response.info.versions.includes(release.version)
+    ) {
+      return {
+        name: release.name,
+        version: release.version,
+        result: "failed",
+        message: `Cannot stage already published version ${release.name}@${release.version}.`,
+      };
+    }
+  } catch (error) {
+    return {
+      name: release.name,
+      version: release.version,
+      result: "failed",
+      message: error instanceof Error ? error.message : String(error),
+    };
+  }
+  return result;
+}
+
 async function bulkPublishPackages({
   publishTool,
   publishQueue,
@@ -81,7 +124,7 @@ async function bulkPublishPackages({
   const publishPromises = publishQueue.map(async (item) => {
     const pkg = packagesByName.get(item.release.name)!;
     const result = await npmPublishQueue.add(() =>
-      publishTool.publish({
+      publishPackage(publishTool, {
         pkg,
         release: item.release,
         tarballPath: artifactDir
@@ -216,7 +259,7 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
         let result =
           item.result ??
           (await npmPublishQueue.add(() =>
-            publishTool.publish({
+            publishPackage(publishTool, {
               pkg: packagesByName.get(item.release.name)!,
               release: item.release,
               tarballPath: artifactDir
@@ -258,7 +301,7 @@ for every package being published after this!
             // run publish again in TTY mode, the user handle 2fa for us
             interactive = true;
             result = await npmPublishQueue.add(() =>
-              publishTool.publish({
+              publishPackage(publishTool, {
                 pkg: packagesByName.get(item.release.name)!,
                 release: item.release,
                 tarballPath: artifactDir
