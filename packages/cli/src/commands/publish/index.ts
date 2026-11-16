@@ -151,7 +151,7 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
   }
 
   const config = await readConfig(packages);
-  const stagedPublishing = options?.stage ?? config.stagedPublishing ?? false;
+  const stage = options?.stage ?? config.stagedPublishing ?? false;
   const plan = artifactDir
     ? await readPlanFile(path.join(artifactDir, "publish-plan.json"))
     : await getPublishPlan(packages.rootDir, config, {
@@ -183,8 +183,8 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
   const p = progress({ max: totalPublishCount });
   const renderProgressMessage = () =>
     finishedCount === 0
-      ? `${stagedPublishing ? "Staging" : "Publishing"} packages`
-      : `${stagedPublishing ? "Staging" : "Publishing"} packages (${finishedCount}/${totalPublishCount})`;
+      ? `${stage ? "Staging" : "Publishing"} packages`
+      : `${stage ? "Staging" : "Publishing"} packages (${finishedCount}/${totalPublishCount})`;
   const advanceProgress = () => {
     finishedCount++;
     p.advance(1, renderProgressMessage());
@@ -224,7 +224,7 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
                 : null,
               interactive,
               otpCode,
-              stage: stagedPublishing,
+              stage,
             }),
           ));
 
@@ -266,7 +266,7 @@ for every package being published after this!
                   : null,
                 interactive,
                 otpCode: null,
-                stage: stagedPublishing,
+                stage,
               }),
             );
           }
@@ -317,7 +317,7 @@ for every package being published after this!
         publishQueue,
         packagesByName,
         otpCode,
-        stage: stagedPublishing,
+        stage,
         artifactDir,
         onResult: (result) => {
           // those can be recovered in tty mode, so we don't want to advance the progress bar for them
@@ -372,7 +372,7 @@ for every package being published after this!
   }
 
   if (successfulNpmPublishes.length !== 0) {
-    const message = `Successfully ${stagedPublishing ? "staged" : "published"}:
+    const message = `Successfully ${stage ? "staged" : "published"}:
 ${formatPackageList(successfulNpmPublishes)}`;
 
     if (sequential) {
