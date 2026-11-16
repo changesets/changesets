@@ -107,7 +107,13 @@ export default async function publish(
     success("found untagged projects:");
     logReleases(untaggedPrivatePackageReleases);
 
-    await tagPublish(tool, untaggedPrivatePackageReleases, cwd);
+    if (gitTag) {
+      await tagPublish(tool, untaggedPrivatePackageReleases, cwd);
+    } else {
+      log(
+        "Skipping git tag creation for untagged projects because `gitTag` is false"
+      );
+    }
   }
 
   if (unsuccessfulNpmPublishes.length > 0) {
