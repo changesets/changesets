@@ -159,14 +159,6 @@ describe("publishing", () => {
           },
         }),
       });
-      if (stage)
-        mockedExec.mockResolvedValueOnce({
-          exitCode: 1,
-          stdout: JSON.stringify({
-            error: { code: "E404", summary: "Not found" },
-          }),
-          stderr: "",
-        });
       const result = await npm.publish({
         pkg,
         release,
@@ -177,6 +169,7 @@ describe("publishing", () => {
       });
       expect(result.result).toBe(stage ? "failed:already-done" : "failed");
       expect(result).not.toHaveProperty("stageId");
+      expect(mockedExec).toHaveBeenCalledOnce();
     },
   );
 
@@ -361,52 +354,5 @@ describe("publishing", () => {
       "--tag",
       "latest",
     ]);
-  });
-});
-
-describe("fresh published-version lookup", () => {
-  const pkg = {
-    dir: process.cwd(),
-    packageJson: { name: "@test/package", version: "0.0.1" },
-  } satisfies Package;
-  it("queries the exact version against the publishing registry", async () => {
-    mockedExec.mockResolvedValue({
-      exitCode: 0,
-      stderr: "",
-      stdout: JSON.stringify({ versions: ["0.0.1"], "dist-tags": {} }),
-    });
-    await expect(
-      npm.publishedVersion({
-        cwd: pkg.dir,
-        pkg: {
-          ...pkg,
-          packageJson: {
-            ...pkg.packageJson,
-            publishConfig: { registry: "https://publish.example.test" },
-          },
-        },
-      }),
-    ).resolves.toMatchObject({ published: true });
-    expect(mockedExec.mock.lastCall?.[1]).toEqual(
-      expect.arrayContaining([
-        "info",
-        "@test/package@0.0.1",
-        "--registry=https://publish.example.test",
-        "--@test:registry=https://publish.example.test",
-        "--prefer-online",
-        "--offline=false",
-      ]),
-    );
-  });
-
-  it("rejects malformed published versions", async () => {
-    mockedExec.mockResolvedValue({
-      exitCode: 0,
-      stderr: "",
-      stdout: JSON.stringify({ versions: "0.0.1" }),
-    });
-    await expect(
-      npm.publishedVersion({ cwd: pkg.dir, pkg }),
-    ).resolves.toHaveProperty("error");
   });
 });

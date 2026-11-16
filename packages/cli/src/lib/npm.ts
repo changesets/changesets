@@ -3,11 +3,7 @@ import path from "node:path";
 import type { PackageJSON } from "@changesets/types";
 import { exec } from "tinyexec";
 import { getLastJsonObjectFromString } from "../utils/getLastJsonObjectFromString.ts";
-import {
-  isAlreadyPublishedError,
-  isStageConflictError,
-  resolveStageConflict,
-} from "./common.ts";
+import { isAlreadyPublishedError, isStageConflictError } from "./common.ts";
 import type {
   PackageInfo,
   PublishResultFailedNeeds2fa,
@@ -230,44 +226,6 @@ export const info: PublishTool["info"] = async ({ cwd, pkg }) => {
   return { published: true, info: info.info };
 };
 
-// Exact queries work without a latest tag and npm view revalidates its cache.
-export const publishedVersion: PublishTool["info"] = async ({ cwd, pkg }) => {
-  const { packageJson } = pkg;
-  const flags = getRegistryOverrides(packageJson);
-  if (packageJson.name.startsWith("@") && packageJson.publishConfig?.registry) {
-    const scope = packageJson.name.split("/")[0];
-    flags.push(
-      `--${scope}:registry=${packageJson.publishConfig[`${scope}:registry`] ?? packageJson.publishConfig.registry}`,
-    );
-  }
-  const result = parseInfoResult(
-    await exec(
-      "npm",
-      [
-        "info",
-        `${packageJson.name}@${packageJson.version}`,
-        ...flags,
-        "--json",
-        "--prefer-online",
-        "--cache-min=0",
-        "--offline=false",
-        "--fetch-retries=0",
-      ],
-      { nodePath: false, nodeOptions: { cwd } },
-    ),
-  );
-  if (!result) return { published: false };
-  if ("error" in result)
-    return result.error.code === "E404" ? { published: false } : result;
-  if (
-    !Array.isArray(result.info.versions) ||
-    !result.info.versions.every((version) => typeof version === "string")
-  ) {
-    return { error: { message: "Invalid published versions response." } };
-  }
-  return { published: true, info: result.info };
-};
-
 export const pack: PublishTool["pack"] = async ({
   pkg,
   packDir,
@@ -334,7 +292,6 @@ export function handlePublishError(
       json.error.code === "E409" &&
       isStageConflictError(json.error.summary))
   ) {
-    // Stage conflicts are verified against fresh metadata before returning to the publish queue.
     return {
       ...resultBase,
       result: "failed:already-done",
@@ -461,8 +418,5 @@ export const publish: PublishTool["publish"] = async ({
     };
   }
 
-  const result = handlePublishError(resultBase, json, stderr || stdout, stage);
-  return stage && result.result === "failed:already-done"
-    ? resolveStageConflict(result, { cwd, pkg }, publishedVersion)
-    : result;
+  return handlePublishError(resultBase, json, stderr || stdout, stage);
 };

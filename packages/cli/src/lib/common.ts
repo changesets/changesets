@@ -3,8 +3,6 @@ import type {
   PublishResult,
   PublishResultFailed,
   PublishResultSuccess,
-  InfoOptions,
-  PackageInfoResult,
 } from "./types.ts";
 
 export const NPM_REQUEST_CONCURRENCY_LIMIT = 40;
@@ -25,7 +23,8 @@ export function isAlreadyPublishedError(message: string) {
   return message.includes("cannot publish over the previously published");
 }
 
-// Pending stages are invisible to the publish-plan preflight, including with OIDC.
+// Pending stages are invisible to the publish-plan preflight.
+// This wording also covers published versions, so both are treated as already done.
 export function isStageConflictError(message: string) {
   return message.includes("Cannot stage previously published version");
 }
@@ -37,42 +36,3 @@ export const isPublishSuccessful = (
 export const isPublishFailure = (
   result: PublishResult,
 ): result is PublishResultFailed => result.result.startsWith("failed");
-
-// The stage E409 wording is shared by published versions and pending stages.
-// Only a fresh lookup against the publishing registry can distinguish them.
-export async function resolveStageConflict(
-  result: PublishResult,
-  options: InfoOptions,
-  lookup: (options: InfoOptions) => Promise<PackageInfoResult>,
-): Promise<PublishResult> {
-  let response: PackageInfoResult;
-  try {
-    response = await lookup(options);
-  } catch (error) {
-    response = {
-      error: {
-        message: error instanceof Error ? error.message : String(error),
-      },
-    };
-  }
-  if ("error" in response) {
-    return {
-      name: result.name,
-      version: result.version,
-      result: "failed",
-      code: response.error.code,
-      message:
-        response.error.message ||
-        "Unable to check whether the conflicting version is published.",
-    };
-  }
-  if (response.published && response.info.versions.includes(result.version)) {
-    return {
-      name: result.name,
-      version: result.version,
-      result: "failed",
-      message: `Cannot stage already published version ${result.name}@${result.version}.`,
-    };
-  }
-  return result;
-}

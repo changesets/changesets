@@ -120,6 +120,10 @@ Because this command assumes that the last commit is the release commit, you sho
 them immediately. `--no-stage` disables a `stagedPublishing` config value for
 one invocation.
 
+Duplicate stages are treated as already done. The registry uses the same conflict
+message when the version is already published, so that case is also treated as
+already done if it reaches staging. Publishing over a staged version still fails.
+
 ### Git Tags
 
 It is useful to have git tags of a publish, to allow people looking for the code at that time to find them. We generate tags in git during publish, but you will need to push them back up if you want to make them available. We recommend after publish you run:
