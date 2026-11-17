@@ -211,6 +211,8 @@ export async function publish(
   const resultBase = { name: release.name, version: release.version };
   if (exitCode === 0) {
     if (stage) {
+      // pnpm 10 has no stage command, so its npm-dependent output formats don't apply.
+      // Native pnpm staging returns an object keyed by package name, not an array.
       const json = getLastJsonObjectFromString(stdout);
       const value =
         json && typeof json === "object" && !Array.isArray(json)
