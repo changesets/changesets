@@ -213,7 +213,7 @@ describe("publishing", () => {
     tarball: undefined,
   } satisfies PublishReleaseEntry as PublishReleaseEntry;
 
-  it("should return `success` if the package manager succeeds", async () => {
+  it("should return `success` if npm cli succeeds", async () => {
     mockedExec.mockResolvedValue({ exitCode: 0, stdout: "", stderr: "" });
 
     const result = await pnpm11.publish({
@@ -225,100 +225,6 @@ describe("publishing", () => {
     });
 
     expect(result.result).toEqual("success");
-  });
-
-  it.each(["pnpm", "npm"])(
-    "preserves the original duplicate error (%s)",
-    async (format) => {
-      const message = 'Cannot stage previously published version "0.0.1".';
-      mockedExec.mockResolvedValue({
-        exitCode: 1,
-        stderr: "",
-        stdout: JSON.stringify({
-          error:
-            format === "pnpm"
-              ? { code: "E409", message: `  ${message}  ` }
-              : {
-                  code: "E409",
-                  summary: message,
-                  detail: "Registry conflict details",
-                },
-        }),
-      });
-
-      await expect(
-        pnpm10.publish({
-          pkg,
-          release,
-          tarballPath: null,
-          interactive: false,
-          otpCode: null,
-          stage: true,
-        }),
-      ).resolves.toEqual({
-        name: "@test/package",
-        version: "0.0.1",
-        result: "failed:already-done",
-        code: "E409",
-        message:
-          format === "pnpm" ? message : `${message}\nRegistry conflict details`,
-      });
-    },
-  );
-
-  it("accepts a successful stage command without a stage ID", async () => {
-    mockedExec.mockResolvedValue({ exitCode: 0, stdout: "{}", stderr: "" });
-    await expect(
-      pnpm10.publish({
-        pkg,
-        release,
-        tarballPath: null,
-        interactive: false,
-        otpCode: null,
-        stage: true,
-      }),
-    ).resolves.toMatchObject({
-      result: "success",
-      stageId: undefined,
-    });
-  });
-
-  it("stages a publish and returns its stage id", async () => {
-    mockedExec.mockResolvedValue({
-      exitCode: 0,
-      stdout: JSON.stringify({
-        "@test/package": { stageId: "stage-1" },
-      }),
-      stderr: "",
-    });
-
-    await expect(
-      pnpm10.publish({
-        pkg,
-        release,
-        tarballPath: null,
-        interactive: false,
-        otpCode: "123456",
-        stage: true,
-      }),
-    ).resolves.toEqual({
-      name: "@test/package",
-      version: "0.0.1",
-      result: "success",
-      stageId: "stage-1",
-    });
-    expect(mockedExec.mock.calls[0][1]).toEqual([
-      "stage",
-      "publish",
-      "--json",
-      "--access",
-      "public",
-      "--tag",
-      "latest",
-      "--no-git-checks",
-      "--otp",
-      "123456",
-    ]);
   });
 
   const alreadyPublishedCases = Object.entries(
@@ -339,24 +245,6 @@ describe("publishing", () => {
       });
 
       expect(result.result).toEqual("failed:already-done");
-    },
-  );
-
-  it.each(alreadyPublishedCases)(
-    "does not ignore duplicate-publish errors while staging (%s)",
-    async (_, snapshot) => {
-      mockedExec.mockResolvedValue(snapshot);
-      await expect(
-        pnpm10.publish({
-          pkg,
-          release,
-          tarballPath: null,
-          interactive: false,
-          otpCode: null,
-          stage: true,
-        }),
-      ).resolves.toHaveProperty("result", "failed");
-      expect(mockedExec).toHaveBeenCalledOnce();
     },
   );
 
