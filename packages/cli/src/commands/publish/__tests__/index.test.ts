@@ -923,12 +923,16 @@ describe("Publish command", () => {
       ]);
       expect(mockedExec.mock.calls[1][1]).toEqual(["info", "pkg-a", "--json"]);
       expect(git.tag).not.toHaveBeenCalled();
+      const loggedErrors = mockedLogger.error.mock.calls.flat().join("\n");
+      expect(loggedErrors.includes("E409")).toBe(state !== "staged");
       expect(
-        mockedLogger.error.mock.calls
-          .flat()
-          .join("\n")
-          .includes("Cannot stage already published version pkg-a@2.0.0."),
-      ).toBe(state === "published");
+        loggedErrors.includes(
+          'Cannot stage previously published version "2.0.0".',
+        ),
+      ).toBe(state !== "staged");
+      expect(loggedErrors).not.toContain("E401");
+      expect(loggedErrors).not.toContain("Unauthorized");
+      expect(loggedErrors).not.toContain("Registry unavailable");
     },
   );
 

@@ -76,33 +76,14 @@ async function publishPackage(
   const { pkg, release } = options;
   try {
     const response = await publishTool.info({ cwd: pkg.dir, pkg });
-    if ("error" in response) {
-      return {
-        name: release.name,
-        version: release.version,
-        result: "failed",
-        code: response.error.code,
-        message: response.error.message,
-      };
-    }
     if (
-      response.published &&
-      response.info.versions.includes(release.version)
+      "error" in response ||
+      (response.published && response.info.versions.includes(release.version))
     ) {
-      return {
-        name: release.name,
-        version: release.version,
-        result: "failed",
-        message: `Cannot stage already published version ${release.name}@${release.version}.`,
-      };
+      return { ...result, result: "failed" };
     }
-  } catch (error) {
-    return {
-      name: release.name,
-      version: release.version,
-      result: "failed",
-      message: error instanceof Error ? error.message : String(error),
-    };
+  } catch {
+    return { ...result, result: "failed" };
   }
   return result;
 }

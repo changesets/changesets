@@ -91,6 +91,41 @@ describe("package info", () => {
 });
 
 describe("publishing", () => {
+  it.each([false, true])(
+    "preserves the original duplicate error (%s)",
+    async (stage) => {
+      const message = stage
+        ? 'Cannot stage previously published version "0.0.1".\nResponse Code: 409 (Conflict)'
+        : 'You cannot publish over the previously published versions: "0.0.1".';
+      mockedExec.mockResolvedValue({
+        exitCode: 1,
+        stderr: "",
+        stdout: JSON.stringify({
+          type: "error",
+          name: 35,
+          data: message,
+        }),
+      });
+
+      await expect(
+        yarn.publish({
+          pkg,
+          release,
+          tarballPath: null,
+          interactive: false,
+          otpCode: null,
+          stage,
+        }),
+      ).resolves.toEqual({
+        name: "@test/package",
+        version: "0.0.1",
+        result: "failed:already-done",
+        code: "YN0035",
+        message,
+      });
+    },
+  );
+
   it("accepts a successful stage command without a stage ID", async () => {
     mockedExec.mockResolvedValue({ exitCode: 0, stdout: "{}", stderr: "" });
     await expect(

@@ -82,6 +82,7 @@ export type PublishResultFailed = PublishResultBase & {
 export type PublishResultAlreadyDone = PublishResultBase & {
   result: "failed:already-done";
   code?: string;
+  message?: string;
 };
 
 export type PublishResultFailedNeeds2fa = PublishResultBase & {

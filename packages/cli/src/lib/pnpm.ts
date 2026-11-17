@@ -226,6 +226,8 @@ export const publish: PublishTool["publish"] = async ({
     return npm.handlePublishError(resultBase, json, stderr || stdout, stage);
   }
 
+  const message = json.error.message.trim();
+
   if (
     (!stage && isAlreadyPublishedError(json.error.message)) ||
     (stage &&
@@ -236,10 +238,9 @@ export const publish: PublishTool["publish"] = async ({
       ...resultBase,
       result: "failed:already-done",
       code: json.error.code,
+      message: message || undefined,
     };
   }
-
-  const message = json.error.message.trim();
 
   if (json.error.code === "ERR_PNPM_OTP_NON_INTERACTIVE") {
     return {

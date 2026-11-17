@@ -117,6 +117,45 @@ describe("publishing", () => {
     expect(result.result).toEqual("success");
   });
 
+  it.each(["pnpm", "npm"])(
+    "preserves the original duplicate error (%s)",
+    async (format) => {
+      const message = 'Cannot stage previously published version "0.0.1".';
+      mockedExec.mockResolvedValue({
+        exitCode: 1,
+        stderr: "",
+        stdout: JSON.stringify({
+          error:
+            format === "pnpm"
+              ? { code: "E409", message: `  ${message}  ` }
+              : {
+                  code: "E409",
+                  summary: message,
+                  detail: "Registry conflict details",
+                },
+        }),
+      });
+
+      await expect(
+        pnpm.publish({
+          pkg,
+          release,
+          tarballPath: null,
+          interactive: false,
+          otpCode: null,
+          stage: true,
+        }),
+      ).resolves.toEqual({
+        name: "@test/package",
+        version: "0.0.1",
+        result: "failed:already-done",
+        code: "E409",
+        message:
+          format === "pnpm" ? message : `${message}\nRegistry conflict details`,
+      });
+    },
+  );
+
   it("accepts a successful stage command without a stage ID", async () => {
     mockedExec.mockResolvedValue({ exitCode: 0, stdout: "{}", stderr: "" });
     await expect(

@@ -285,6 +285,11 @@ export function handlePublishError(
     };
   }
 
+  const message = `
+${json.error.summary ?? ""}
+${json.error.detail ?? ""}
+  `.trim();
+
   // npm v11 doesn't return a `code` on already-published errors
   if (
     (!stage && isAlreadyPublishedError(json.error.summary)) ||
@@ -295,14 +300,10 @@ export function handlePublishError(
     return {
       ...resultBase,
       result: "failed:already-done",
-      code: json.error.code!,
+      code: json.error.code,
+      message: message || undefined,
     };
   }
-
-  const message = `
-${json.error.summary ?? ""}
-${json.error.detail ?? ""}
-  `.trim();
 
   if (json.error.code === "EOTP") {
     const result: PublishResultFailedNeeds2fa = {

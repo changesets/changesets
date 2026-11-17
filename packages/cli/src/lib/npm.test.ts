@@ -168,6 +168,11 @@ describe("publishing", () => {
         stage,
       });
       expect(result.result).toBe(stage ? "failed:already-done" : "failed");
+      expect(result).toMatchObject({
+        code: "E409",
+        message:
+          '409 Conflict - POST https://registry.npmjs.org/-/stage/package/@test%2fpackage - Cannot stage previously published version "0.0.1".',
+      });
       expect(result).not.toHaveProperty("stageId");
       expect(mockedExec).toHaveBeenCalledOnce();
     },

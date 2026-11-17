@@ -230,6 +230,7 @@ export const publish: PublishTool["publish"] = async ({
       ...resultBase,
       result: "failed:already-done",
       code: reporterError.code,
+      message: reporterError.message,
     };
   }
 
