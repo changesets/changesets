@@ -1232,7 +1232,7 @@ describe("Publish command e2e", () => {
           );
           const result = await runCliCommand({
             command: "publish",
-            args: ["--stage"],
+            args: ["--stage", "--git-tag"],
             cwd,
             pmBinPath,
             signal,

@@ -139,13 +139,6 @@ IDs are processed sequentially and the command stops at the first failure.
 for that invocation; when a release spans multiple registries, split the IDs
 into correctly scoped commands.
 
-## stage
-
-```sh
-changeset stage approve <id...>
-changeset stage reject <id...>
-```
-
 ## publish-plan
 
 <div v-html="data.publishPlanHelpMessage" />
