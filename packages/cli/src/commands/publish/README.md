@@ -21,10 +21,12 @@
 
 Repeating a publish or stage is OK. Switching between them is an error.
 
-When npm's stage conflict is ambiguous, we check the publishing registry again.
-If the version is published, we fail. If it is absent, we assume it is already
-staged. A failed lookup stops the command.
+npm uses the same stage-conflict message for already-staged and already-published
+versions. We check again using the package manager's `info()`:
 
-This also treats an unpublished version as already staged. Yarn checks public
-metadata without requesting credentials, so it cannot resolve this conflict for
-packages whose metadata requires authentication.
+- Version is published -> fail.
+- Version is absent -> assume it is already staged and continue.
+- Lookup fails -> fail.
+
+A version removed with `npm unpublish` also appears absent, so it can be mistaken
+for an already-staged version.
