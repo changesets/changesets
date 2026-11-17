@@ -23,18 +23,13 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repo
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-        with:
-          persist-credentials: false
-
-      - uses: ./.github/actions/ci-setup
+      - uses: $/.github/actions/ci-setup
 
       - name: Build artifacts
         run: pnpm build
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           # the size of the dist artifacts is not very large, so we can use better compression without a slowdown
           compression-level: 8
@@ -53,12 +48,12 @@ jobs:
       security-events: write # allow writing security events
     steps:
       - name: Checkout repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
       - name: Run zizmor
-        uses: zizmorcore/zizmor-action@6599ee8b7a49aef6a770f63d261d214911a7ce02 # v0.6.0
+        uses: zizmorcore/zizmor-action@45d7276c9ca790aabd705e31ca99c6185c3e76dd # v0.8.1
         with:
           persona: pedantic
           annotations: true
@@ -72,15 +67,16 @@ jobs:
     strategy:
       matrix:
         node_version: [22, 24, 26]
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest]
+        include:
+          # Active LTS + other OS
+          - node_version: 24
+            os: macos-latest
+          - node_version: 24
+            os: windows-latest
       fail-fast: false
     steps:
-      - name: Check out repo
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-        with:
-          persist-credentials: false
-
-      - uses: ./.github/actions/ci-setup
+      - uses: $/.github/actions/ci-setup
         with:
           node-version: ${{ matrix.node_version }}
           download-dist: true
@@ -92,19 +88,46 @@ jobs:
         run: git config --global user.email "you@example.com" && git config --global user.name "Your Name"
 
       - name: Vitest tests
-        if: matrix.node_version != 24 || matrix.os != 'ubuntu-latest'
+        if: matrix.os != 'windows-latest' && !(matrix.node_version == 24 && matrix.os == 'ubuntu-latest')
         run: pnpm test
 
-      # Run coverage only once on node 24 to avoid duplicate codecov uploads
+      # For Windows, run fixtures in the runner tempdir instead of os tempdir. The default tempdir
+      # is in the D drive which is known to be slow: https://github.com/actions/runner-images/issues/8755
+      - name: Vitest tests on Windows
+        if: matrix.os == 'windows-latest'
+        run: pnpm test
+        env:
+          TEMP: ${{ runner.temp }}
+          TMP: ${{ runner.temp }}
+
+      # Run coverage only once on Ubuntu & node 24 to avoid duplicate codecov uploads
       - name: Vitest tests with coverage
         if: matrix.node_version == 24 && matrix.os == 'ubuntu-latest'
         run: pnpm test --coverage
 
       - name: Upload coverage
-        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         if: matrix.node_version == 24 && matrix.os == 'ubuntu-latest'
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+
+  e2e:
+    name: E2E tests
+    needs: [build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: $/.github/actions/ci-setup
+        with:
+          node-version: 24
+          download-dist: true
+          install-e2e: true
+
+      - name: Typecheck E2E tests
+        run: pnpm --filter=@changesets/e2e types:check
+
+      - name: Run E2E tests
+        run: pnpm test:e2e
 
   typecheck:
     name: Typecheck
@@ -112,12 +135,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Check out repo
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-        with:
-          persist-credentials: false
-
-      - uses: ./.github/actions/ci-setup
+      - uses: $/.github/actions/ci-setup
         with:
           download-dist: true
 
@@ -130,12 +148,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Check out repo
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-        with:
-          persist-credentials: false
-
-      - uses: ./.github/actions/ci-setup
+      - uses: $/.github/actions/ci-setup
         with:
           download-dist: true
 
@@ -149,7 +162,7 @@ jobs:
     name: CI OK
     runs-on: ubuntu-latest
     if: always()
-    needs: [lint-workflows, build, test, typecheck, lint]
+    needs: [lint-workflows, build, test, e2e, typecheck, lint]
     steps:
       - name: Exit with error if some jobs are not successful
         run: exit 1

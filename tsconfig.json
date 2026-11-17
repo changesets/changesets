@@ -15,5 +15,7 @@
     ],
     "types": ["node"]
   },
-  "include": ["./"]
+  "include": ["**/*"],
+  // E2e tests are typechecked separately after their on-demand dependencies are installed.
+  "exclude": ["scripts/e2e/**/*"]
 }

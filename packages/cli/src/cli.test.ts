@@ -87,6 +87,28 @@ const tests: CommandTest[] = [
           patch: ["pkg-c", "pkg-d"],
         },
       },
+      {
+        args: [
+          "--minor",
+          "pkg-a, pkg-b",
+          "--patch",
+          "pkg-c,pkg-d",
+          "--patch",
+          "pkg-e",
+        ],
+        options: {
+          minor: ["pkg-a", "pkg-b"],
+          patch: ["pkg-c", "pkg-d", "pkg-e"],
+        },
+      },
+      {
+        // Surrounding whitespace is trimmed and empty entries (from repeated
+        // or trailing commas) are dropped via `.filter(Boolean)`.
+        args: ["--patch", " pkg-a , , pkg-b , "],
+        options: {
+          patch: ["pkg-a", "pkg-b"],
+        },
+      },
     ],
   },
   {
@@ -99,6 +121,20 @@ const tests: CommandTest[] = [
       },
       {
         args: ["--ignore", "pkg-a", "--ignore", "pkg-b"],
+        options: {
+          ignore: ["pkg-a", "pkg-b"],
+        },
+      },
+      {
+        // The same comma-separated expansion applies to `--ignore`.
+        args: ["--ignore", "pkg-a,pkg-b"],
+        options: {
+          ignore: ["pkg-a", "pkg-b"],
+        },
+      },
+      {
+        // ...including trimming and dropping empty entries.
+        args: ["--ignore", " pkg-a , , pkg-b , "],
         options: {
           ignore: ["pkg-a", "pkg-b"],
         },

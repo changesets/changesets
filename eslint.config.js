@@ -10,10 +10,12 @@ import tseslint from "typescript-eslint";
 export default defineConfig(
   {
     ignores: [
-      "**/node_modules/**",
+      "**/*.{json,md}",
       "**/dist/**",
-      "site/.vitepress",
+      "**/coverage/**",
+      "**/node_modules/**",
       "packages/cli/bin.js",
+      "docs/.vitepress/cache/**",
       "**/*.snap",
     ],
   },
@@ -55,6 +57,7 @@ export default defineConfig(
       ],
 
       "e18e/prefer-static-regex": "off",
+      "e18e/ban-dependencies": ["error", { allowed: ["semver"] }],
 
       "@typescript-eslint/consistent-type-exports": [
         "error",
@@ -100,7 +103,9 @@ export default defineConfig(
   {
     files: [
       "**/index.ts", // to be removed in next release (v4) when we are dropping default export
-      "**/*.config.*", // config files often return default exports
+      "**/*config.*", // config files often return default exports
+      "docs/**/*.data.ts",
+      "docs/**/*.paths.ts",
     ],
     rules: {
       "import-lite/no-default-export": "off",

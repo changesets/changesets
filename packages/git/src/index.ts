@@ -84,7 +84,13 @@ export async function getCommitsThatAddFiles(
             "git",
             [
               "log",
-              "--diff-filter=A",
+              // We want to stop following commits when the file is flagged with either
+              // A = added (new file) or C = copied (new file with similar content).
+              // https://git-scm.com/docs/git-log#Documentation/git-log.txt---diff-filterACDMRTUXB
+              "--diff-filter=AC",
+              // We want to allow file renames and small word tweaks.
+              // https://git-scm.com/docs/git-log#Documentation/git-log.txt---follow
+              "--follow",
               "--max-count=1",
               short ? "--pretty=format:%h:%p" : "--pretty=format:%H:%p",
               gitPath,
@@ -251,13 +257,17 @@ export async function getChangedChangesetFilesSinceRef({
       },
     );
 
-    const tester = /.changeset\/[^/]+\.md$/;
+    const rootChangesetsRegex = /\.changeset\/[^/]+\.md$/;
+    const preChangesetsRegex = /\.changeset\/pre\/[^/]+\.md$/;
 
     const files = cmd.stdout
       .toString()
       .trim()
       .split("\n")
-      .filter((file) => tester.test(file));
+      .filter(
+        (file) =>
+          rootChangesetsRegex.test(file) || preChangesetsRegex.test(file),
+      );
     return files;
   } catch (err) {
     if (err instanceof GitError) return [];

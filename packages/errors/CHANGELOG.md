@@ -1,5 +1,23 @@
 # @changesets/errors
 
+## 1.0.0
+
+### Major Changes
+
+- [#1482](https://github.com/changesets/changesets/pull/1482) [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7) Thanks [@Andarist](https://github.com/Andarist)! - Bumped supported Node versions to `^22.11 || ^24 || >=26`
+
+- [#1482](https://github.com/changesets/changesets/pull/1482) [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7) Thanks [@Andarist](https://github.com/Andarist)! - From now on this package is going to be published as ES module.
+
+- [#2015](https://github.com/changesets/changesets/pull/2015) [`6a05002`](https://github.com/changesets/changesets/commit/6a05002228a06807b1a95da841d1809ae07441bf) Thanks [@beeequeue](https://github.com/beeequeue)! - Removed `ValidationError`.
+
+### Minor Changes
+
+- [#2015](https://github.com/changesets/changesets/pull/2015) [`6a05002`](https://github.com/changesets/changesets/commit/6a05002228a06807b1a95da841d1809ae07441bf) Thanks [@beeequeue](https://github.com/beeequeue)! - Added `cause` option to `ExitError` to help surface the cause behind exiting.
+
+### Patch Changes
+
+- [#2160](https://github.com/changesets/changesets/pull/2160) [`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640) Thanks [@beeequeue](https://github.com/beeequeue)! - Added or modified the `files` property in the manifest. This should not change any behavior.
+
 ## 1.0.0-next.4
 
 ### Patch Changes

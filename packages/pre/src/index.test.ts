@@ -37,7 +37,6 @@ describe("enterPre", () => {
       ),
     ).toMatchInlineSnapshot(`
       {
-        "changesets": [],
         "mode": "pre",
         "tag": "next",
       }
@@ -63,7 +62,6 @@ describe("enterPre", () => {
         version: "1.0.0",
       }),
       ".changeset/pre.json": JSON.stringify({
-        changesets: [],
         mode: "pre",
         tag: "next",
       }),
@@ -92,7 +90,6 @@ describe("enterPre", () => {
         version: "1.0.0",
       }),
       ".changeset/pre.json": JSON.stringify({
-        changesets: ["slimy-dingos-whisper"],
         mode: "exit",
         tag: "beta",
       }),
@@ -104,9 +101,6 @@ describe("enterPre", () => {
       ),
     ).toMatchInlineSnapshot(`
       {
-        "changesets": [
-          "slimy-dingos-whisper",
-        ],
         "mode": "pre",
         "tag": "next",
       }
@@ -135,7 +129,6 @@ describe("exitPre", () => {
         version: "1.0.0",
       }),
       ".changeset/pre.json": JSON.stringify({
-        changesets: [],
         mode: "pre",
         tag: "next",
       }),
@@ -148,7 +141,6 @@ describe("exitPre", () => {
       ),
     ).toMatchInlineSnapshot(`
       {
-        "changesets": [],
         "mode": "exit",
         "tag": "next",
       }
@@ -199,14 +191,12 @@ test("readPreState reads the pre state", async () => {
       version: "1.0.0",
     }),
     ".changeset/pre.json": JSON.stringify({
-      changesets: [],
       mode: "pre",
       tag: "next",
     }),
   });
   expect(await readPreState(cwd)).toMatchInlineSnapshot(`
     {
-      "changesets": [],
       "mode": "pre",
       "tag": "next",
     }

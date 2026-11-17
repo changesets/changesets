@@ -9,7 +9,7 @@ Get GitHub author and associated PR information for a commit or pull request. In
 
 > Note: This assumes you already have changesets setup.
 
-You can use `@changesets/get-github-info` like this if you have a [custom changelog formatter](https://github.com/changesets/changesets/blob/main/docs/modifying-changelog-format.md).
+You can use `@changesets/get-github-info` like this if you have a [custom changelog formatter](https://changesets.dev/guide/customize-changelog-format).
 
 ```js
 import { getCommitInfo } from "@changesets/get-github-info";

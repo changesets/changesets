@@ -1,7 +1,9 @@
-import { defineConfig } from "vitest/config";
+import { configDefaults, defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
+    // E2e tests have their own workspace and dependencies that are installed on demand.
+    exclude: [...configDefaults.exclude, "scripts/e2e/**"],
     // the default is !process.env.CI which makes it hard to debug CI issues at times
     // given we already use vitest/no-focused-tests ESLint rule, it's pretty OK to just allow those at all times to allow CI to run focused tests when debugging issues
     allowOnly: true,

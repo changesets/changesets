@@ -109,7 +109,7 @@ export type Config = {
    * The formatter to use to format changesets and changelogs. Set `false` to disable formatting.
    * The default value of `"auto"` will auto-detect the formatter based on the project's configuration files.
    */
-  format: "auto" | "prettier" | "oxfmt" | "deno" | "dprint" | false;
+  format: "auto" | "prettier" | "oxfmt" | "deno" | "biome" | "dprint" | false;
   /** Features enabled for Private packages */
   privatePackages: PrivatePackages;
   /** Stage packages for approval instead of publishing them immediately. */
@@ -137,10 +137,10 @@ export type WrittenConfig = {
   access?: AccessType;
   baseBranch?: string;
   changedFilePatterns?: readonly string[];
-  format?: "auto" | "prettier" | "oxfmt" | "deno" | "dprint" | false;
+  format?: "auto" | "prettier" | "oxfmt" | "deno" | "biome" | "dprint" | false;
   /** Opt in to tracking non-npm / private packages */
   privatePackages?:
-    | false
+    | boolean
     | {
         version?: boolean;
         tag?: boolean;
@@ -205,7 +205,6 @@ export type CommitFunctions = {
 export type PreState = {
   mode: "pre" | "exit";
   tag: string;
-  changesets: string[];
 };
 
 export interface Package {

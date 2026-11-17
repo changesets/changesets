@@ -17,6 +17,16 @@ async function getYarnVersion(packages: Packages) {
   return Number.isNaN(major) || major >= 2 ? "berry" : "classic";
 }
 
+async function getPnpmMajor(packages: Packages) {
+  const { stdout } = await exec("pnpm", ["--version"], {
+    nodePath: false,
+    nodeOptions: {
+      cwd: packages.rootDir,
+    },
+  });
+  return Number(stdout.toString().trim().split(".")[0]);
+}
+
 export async function getPublishTool(packages: Packages): Promise<PublishTool> {
   let packageManager = packages.tool.type;
 
@@ -25,7 +35,14 @@ export async function getPublishTool(packages: Packages): Promise<PublishTool> {
   }
 
   if (packageManager === "pnpm") {
-    return pnpm;
+    const major = await getPnpmMajor(packages);
+    return {
+      name: pnpm.name,
+      getOtpCode: pnpm.getOtpCode,
+      info: (args) => pnpm.info(args, { major }),
+      pack: (args) => pnpm.pack(args, { major }),
+      publish: (args) => pnpm.publish(args, { major }),
+    };
   }
   if (packageManager === "yarn") {
     if ((await getYarnVersion(packages)) === "classic") {

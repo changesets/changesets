@@ -22,7 +22,7 @@ If you are unsure if this is correct, contact the package's maintainers ${c.red(
     );
 
     return cli.askConfirm(
-      `Are you sure you want to release the ${c.red("first major version")} of ${name}?`,
+      `Are you sure you want to release the ${c.red("first major version")} of ${c.blue(name)}?`,
     );
   }
   return true;

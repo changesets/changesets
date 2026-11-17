@@ -797,7 +797,6 @@ describe("assembleReleasePlan", () => {
           ...defaultConfig,
         },
         {
-          changesets: [],
           tag: "next",
           mode: "exit",
         },
@@ -813,6 +812,12 @@ describe("assembleReleasePlan", () => {
       setup.updatePackage("pkg-b", "1.0.1-next.0");
       setup.updateDevDependency("pkg-b", "pkg-a", "1.0.1-next.0");
 
+      setup.changesets = [];
+      setup.addChangeset({
+        id: "pre/strange-words-combine",
+        releases: [{ name: "pkg-a", type: "patch" }],
+      });
+
       const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
@@ -820,7 +825,6 @@ describe("assembleReleasePlan", () => {
           ...defaultConfig,
         },
         {
-          changesets: ["strange-words-combine"],
           tag: "next",
           mode: "exit",
         },
@@ -838,6 +842,12 @@ describe("assembleReleasePlan", () => {
       setup.updatePackage("pkg-b", "1.0.1-next.0");
       setup.updateDevDependency("pkg-b", "pkg-a", "1.0.1-next.0");
 
+      setup.changesets = [];
+      setup.addChangeset({
+        id: "pre/strange-words-combine",
+        releases: [{ name: "pkg-a", type: "patch" }],
+      });
+
       const { releases } = assembleReleasePlan(
         setup.changesets,
         setup.packages,
@@ -846,7 +856,6 @@ describe("assembleReleasePlan", () => {
           ignore: ["pkg-b"],
         },
         {
-          changesets: ["strange-words-combine"],
           tag: "next",
           mode: "exit",
         },
@@ -859,10 +868,70 @@ describe("assembleReleasePlan", () => {
       expect(releases[1].newVersion).toEqual("1.0.1-next.0");
     });
 
+    it("should not bump ignored independent packages that had a prerelease when exiting pre-release mode", () => {
+      setup.updatePackage("pkg-a", "1.0.1-next.0");
+      setup.updatePackage("pkg-b", "1.0.1-next.0");
+
+      setup.changesets = [];
+      setup.addChangeset({
+        id: "pre/strange-words-combine",
+        releases: [{ name: "pkg-a", type: "patch" }],
+      });
+
+      const { releases } = assembleReleasePlan(
+        setup.changesets,
+        setup.packages,
+        {
+          ...defaultConfig,
+          ignore: ["pkg-b"],
+        },
+        {
+          tag: "next",
+          mode: "exit",
+        },
+      );
+
+      expect(releases.length).toEqual(1);
+      expect(releases[0].name).toEqual("pkg-a");
+      expect(releases[0].newVersion).toEqual("1.0.1");
+    });
+
+    it.each(["fixed", "linked"] as const)(
+      "should not bump ignored packages in %s groups when exiting pre-release mode",
+      (group) => {
+        setup.updatePackage("pkg-a", "1.0.1-next.0");
+        setup.updatePackage("pkg-b", "1.0.1-next.0");
+
+        setup.changesets = [];
+        setup.addChangeset({
+          id: "pre/strange-words-combine",
+          releases: [{ name: "pkg-a", type: "patch" }],
+        });
+
+        const { releases } = assembleReleasePlan(
+          setup.changesets,
+          setup.packages,
+          {
+            ...defaultConfig,
+            ignore: ["pkg-b"],
+            [group]: [["pkg-a", "pkg-b"]],
+          },
+          {
+            tag: "next",
+            mode: "exit",
+          },
+        );
+
+        expect(releases).not.toContainEqual(
+          expect.objectContaining({ name: "pkg-b" }),
+        );
+      },
+    );
+
     it("should return a release with the highest bump type within the current release despite of having a higher release among previous prereleases", () => {
       // previous release
       setup.addChangeset({
-        id: "major-bumping-one",
+        id: "pre/major-bumping-one",
         releases: [
           {
             name: "pkg-a",
@@ -889,7 +958,6 @@ describe("assembleReleasePlan", () => {
           ...defaultConfig,
         },
         {
-          changesets: ["major-bumping-one"],
           tag: "next",
           mode: "pre",
         },

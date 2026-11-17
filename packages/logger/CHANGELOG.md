@@ -1,5 +1,19 @@
 # @changesets/logger
 
+## 1.0.0
+
+### Major Changes
+
+- [#1482](https://github.com/changesets/changesets/pull/1482) [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7) Thanks [@Andarist](https://github.com/Andarist)! - Bumped supported Node versions to `^22.11 || ^24 || >=26`
+
+- [#1482](https://github.com/changesets/changesets/pull/1482) [`df424a4`](https://github.com/changesets/changesets/commit/df424a4a09eea15b0fa9159ee0b98af0d95f58a7) Thanks [@Andarist](https://github.com/Andarist)! - From now on this package is going to be published as ES module.
+
+### Patch Changes
+
+- [#2160](https://github.com/changesets/changesets/pull/2160) [`162419d`](https://github.com/changesets/changesets/commit/162419dc99278cbdd52db6eabfecd7b8b4eac640) Thanks [@beeequeue](https://github.com/beeequeue)! - Added or modified the `files` property in the manifest. This should not change any behavior.
+
+- [#2004](https://github.com/changesets/changesets/pull/2004) [`169b128`](https://github.com/changesets/changesets/commit/169b128522f0e53ef228f3acd8118709b0f72156) Thanks [@ghostdevv](https://github.com/ghostdevv)! - Replace `picocolors` with `node:util`'s `styleText`
+
 ## 1.0.0-next.4
 
 ### Patch Changes

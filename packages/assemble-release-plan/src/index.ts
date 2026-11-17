@@ -142,7 +142,7 @@ export function assembleReleasePlan(
     preState,
   );
 
-  const preInfo = getPreInfo(changesets, packagesByName, config, preState);
+  const preInfo = getPreInfo(packagesByName, config, preState);
 
   // releases is, at this point a list of all packages we are going to releases,
   // flattened down to one release per package, having a reference back to their
@@ -184,10 +184,19 @@ export function assembleReleasePlan(
 
   if (preInfo?.state.mode === "exit") {
     for (const pkg of packages.packages) {
+      if (
+        shouldSkipPackage(pkg, {
+          ignore: config.ignore,
+          allowPrivatePackages: config.privatePackages.version,
+        })
+      ) {
+        continue;
+      }
+      const preVersion = preInfo.preVersions.get(pkg.packageJson.name);
       // If a package had a prerelease, but didn't trigger a version bump in the regular release,
       // we want to give it a patch release.
       // Detailed explanation at https://github.com/changesets/changesets/pull/382#discussion_r434434182
-      if (preInfo.preVersions.get(pkg.packageJson.name) !== 0) {
+      if (preVersion != null && preVersion !== 0) {
         const existingRelease = releases.get(pkg.packageJson.name);
         if (!existingRelease) {
           releases.set(pkg.packageJson.name, {
@@ -196,13 +205,7 @@ export function assembleReleasePlan(
             oldVersion: pkg.packageJson.version,
             changesets: [],
           });
-        } else if (
-          existingRelease.type === "none" &&
-          !shouldSkipPackage(pkg, {
-            ignore: config.ignore,
-            allowPrivatePackages: config.privatePackages.version,
-          })
-        ) {
+        } else if (existingRelease.type === "none") {
           existingRelease.type = "patch";
         }
       }
@@ -274,10 +277,7 @@ function getRelevantChangesets(
   }
 
   if (preState && preState.mode !== "exit") {
-    const usedChangesetIds = new Set(preState.changesets);
-    return changesets.filter(
-      (changeset) => !usedChangesetIds.has(changeset.id),
-    );
+    return changesets.filter((changeset) => !changeset.id.startsWith("pre/"));
   }
 
   return changesets;
@@ -306,7 +306,6 @@ function getHighestPreVersion(
 }
 
 function getPreInfo(
-  changesets: NewChangeset[],
   packagesByName: Map<string, Package>,
   config: Config,
   preState: PreState | undefined,
@@ -314,11 +313,6 @@ function getPreInfo(
   if (preState == null) {
     return;
   }
-
-  const updatedPreState = {
-    ...preState,
-    changesets: changesets.map((changeset) => changeset.id),
-  };
 
   // Populate preVersion
   // preVersion is the map between package name and its next pre version number.
@@ -359,7 +353,7 @@ function getPreInfo(
   }
 
   return {
-    state: updatedPreState,
+    state: preState,
     preVersions,
   };
 }

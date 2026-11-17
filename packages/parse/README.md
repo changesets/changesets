@@ -3,44 +3,28 @@
 [![Open on npmx.dev](https://npmx.dev/api/registry/badge/version/@changesets/parse?name=true)](https://npmx.dev/package/@changesets/parse)
 [![View changelog](https://npmx.dev/api/registry/badge/version/@changesets/cli?color=229fe4&value=View+changelog&label=+)](./CHANGELOG.md)
 
-Parses a changeset from its written format to a data object.
+Parse a changeset from its written format to a data object.
 
-```js
+## Usage
+
+```ts
 import { parseChangesetFile } from "@changesets/parse";
 
 const changeset = `---
-"@changesets/something": minor
-"@changesets/something-else": patch
+"pkg-a": minor
+"pkg-b": patch
 ---
 
-A description of a minor change`;
+A summary of the change`;
 
 const parsedChangeset = parseChangesetFile(changeset);
+// {
+//   "summary": "A summary of the change",
+//   "releases": [
+//     { "name": "pkg-a", "type": "minor" },
+//     { "name": "pkg-b", "type": "patch" }
+//   ]
+// }
 ```
 
-For example, it can convert:
-
-```md
----
-"@changesets/something": minor
-"@changesets/something-else": patch
----
-
-A description of a minor change
-```
-
-to
-
-```json
-{
-  "summary": "A description of a minor change",
-  "releases": [
-    { "name": "@changesets/something", "type": "minor" },
-    { "name": "@changesets/something-else", "type": "patch" }
-  ]
-}
-```
-
-Note that this is not quite a complete Changeset for most tools as it lacks an `id`.
-
-For written changesets, the id is normally given as the file name, which parse is not aware of.
+Note that this does not include the changeset id, but it is normally given as the file name, which parse is not aware of.

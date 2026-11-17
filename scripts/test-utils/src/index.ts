@@ -99,7 +99,20 @@ export function stubIsTTY(value: boolean) {
 }
 
 export async function testdir(dir?: Fixture) {
-  const fixture = await createFixture(dir);
+  const fixture = await createFixture(dir, {
+    fs: {
+      ...fsp,
+      rm: (path, options) => {
+        return fsp.rm(path, {
+          // make it more forgiving to fs contention
+          // especially on Windows, given CI flakes we experienced caused by "EBUSY: resource busy or locked"
+          maxRetries: 3,
+          retryDelay: 100,
+          ...options,
+        });
+      },
+    },
+  });
   onTestFinished(() => fixture.rm());
   return fixture.path;
 }

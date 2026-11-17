@@ -49,7 +49,7 @@ describe("readConfig", () => {
         "linked": [],
         "privatePackages": {
           "tag": false,
-          "version": true,
+          "version": false,
         },
         "snapshot": {
           "useCalculatedVersion": false,
@@ -131,7 +131,7 @@ describe("defaultConfig", () => {
         "linked": [],
         "privatePackages": {
           "tag": false,
-          "version": true,
+          "version": false,
         },
         "snapshot": {
           "useCalculatedVersion": false,
@@ -248,7 +248,7 @@ describe("validateConfig", () => {
         config: { fixed: [["pkg-*", "@pkg/*"], ["@pkg-other/a"]] },
         expected: {
           ...defaultConfig,
-          fixed: [["pkg-*", "@pkg/*"], ["@pkg-other/a"]],
+          fixed: [["pkg-a", "pkg-b", "@pkg/a", "@pkg/b"], ["@pkg-other/a"]],
         },
       },
       {
@@ -264,7 +264,7 @@ describe("validateConfig", () => {
         config: { fixed: [["pkg-*", "!pkg-b", "@pkg/*"], ["@pkg-other/a"]] },
         expected: {
           ...defaultConfig,
-          fixed: [["pkg-*", "!pkg-b", "@pkg/*"], ["@pkg-other/a"]],
+          fixed: [["pkg-a", "@pkg/a", "@pkg/b"], ["@pkg-other/a"]],
         },
       },
       {
@@ -285,7 +285,7 @@ describe("validateConfig", () => {
         config: { linked: [["pkg-*", "@pkg/*"], ["@pkg-other/a"]] },
         expected: {
           ...defaultConfig,
-          linked: [["pkg-*", "@pkg/*"], ["@pkg-other/a"]],
+          linked: [["pkg-a", "pkg-b", "@pkg/a", "@pkg/b"], ["@pkg-other/a"]],
         },
       },
       {
@@ -301,7 +301,7 @@ describe("validateConfig", () => {
         config: { linked: [["pkg-*", "!pkg-b", "@pkg/*"], ["@pkg-other/a"]] },
         expected: {
           ...defaultConfig,
-          linked: [["pkg-*", "!pkg-b", "@pkg/*"], ["@pkg-other/a"]],
+          linked: [["pkg-a", "@pkg/a", "@pkg/b"], ["@pkg-other/a"]],
         },
       },
       {
@@ -336,6 +336,27 @@ describe("validateConfig", () => {
         expected: {
           ...defaultConfig,
           privatePackages: { version: false, tag: false },
+        },
+      },
+      {
+        name: "privatePackages: true",
+        config: { privatePackages: true },
+        expected: {
+          ...defaultConfig,
+          privatePackages: { version: true, tag: true },
+        },
+      },
+      {
+        name: "privatePackages: empty object",
+        config: { privatePackages: {} },
+        expected: defaultConfig,
+      },
+      {
+        name: "privatePackages: version",
+        config: { privatePackages: { version: true } },
+        expected: {
+          ...defaultConfig,
+          privatePackages: { version: true, tag: false },
         },
       },
       {
@@ -460,11 +481,11 @@ describe("validateConfig", () => {
         ],
       },
       {
-        name: "rule: noDuplicateFixedPackages: globs",
+        name: "rule: noDuplicateFixedPackages: overlapping glob",
         pkgs: ["pkg-a", "pkg-b"],
-        config: { fixed: [["pkg-*"], ["pkg-*"]] },
+        config: { fixed: [["pkg-*"], ["pkg-a"]] },
         errors: [
-          'Invalid group: The package or glob "pkg-*" is defined in multiple groups',
+          'Invalid group: The package or glob "pkg-a" is defined in multiple groups',
         ],
       },
       // linked
@@ -505,11 +526,11 @@ describe("validateConfig", () => {
         ],
       },
       {
-        name: "rule: noDuplicateLinkedPackages: globs",
+        name: "rule: noDuplicateLinkedPackages: overlapping glob",
         pkgs: ["pkg-a", "pkg-b"],
-        config: { linked: [["pkg-*"], ["pkg-*"]] },
+        config: { linked: [["pkg-*"], ["pkg-a"]] },
         errors: [
-          'Invalid group: The package or glob "pkg-*" is defined in multiple groups',
+          'Invalid group: The package or glob "pkg-a" is defined in multiple groups',
         ],
       },
       // updateInternalDependencies
@@ -533,6 +554,11 @@ describe("validateConfig", () => {
       {
         name: "privatePackages: should error when a public package depends on a private package skipped via privatePackages.version: false",
         config: { privatePackages: { version: false, tag: false } },
+      },
+      {
+        name: "privatePackages: tag requires version",
+        config: { privatePackages: { tag: true } },
+        errors: ['"tag" is set to "true" but "version" is set to "false"'],
       },
       {
         name: "experimental: onlyUpdatePeerDependentsWhenOutOfRange: non-boolean",
@@ -600,6 +626,44 @@ describe("validateConfig", () => {
 
   // any tests that don't fit nicely into the cases above
   describe("rules", () => {
+    describe("noDuplicateFixedPackages", () => {
+      it("should report a duplicated package once when more groups follow it", async () => {
+        const config = { fixed: [["pkg-a"], ["pkg-a"], ["pkg-b"]] };
+
+        const cwd = await testdir({
+          ".changeset/config.json": JSON.stringify(config),
+          "package.json": JSON.stringify(rootManifest),
+        });
+        const packages = withPackages(cwd, ["pkg-a", "pkg-b"]);
+
+        const result = validateConfig(config, packages);
+
+        expect(result.errors).toHaveLength(1);
+        expect(result.errors![0]).toContain(
+          'fixed: Invalid group: The package or glob "pkg-a" is defined in multiple groups',
+        );
+      });
+    });
+
+    describe("noDuplicateLinkedPackages", () => {
+      it("should report a duplicated package once when more groups follow it", async () => {
+        const config = { linked: [["pkg-a"], ["pkg-a"], ["pkg-b"]] };
+
+        const cwd = await testdir({
+          ".changeset/config.json": JSON.stringify(config),
+          "package.json": JSON.stringify(rootManifest),
+        });
+        const packages = withPackages(cwd, ["pkg-a", "pkg-b"]);
+
+        const result = validateConfig(config, packages);
+
+        expect(result.errors).toHaveLength(1);
+        expect(result.errors![0]).toContain(
+          'linked: Invalid group: The package or glob "pkg-a" is defined in multiple groups',
+        );
+      });
+    });
+
     describe("alsoSkipDependentsOfSkipped", () => {
       it("should error when a not-skipped package depends on a skipped package", async () => {
         const pkgA = {

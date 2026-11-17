@@ -1,6 +1,3 @@
-// Lint has invalid data, styleText is supported experimentally since node 22.0.
-// https://github.com/nodejs/node/blob/v22.0.0/lib/util.js#L214
-// eslint-disable-next-line n/no-unsupported-features/node-builtins
 import { styleText } from "node:util";
 
 type Color = Extract<Parameters<typeof styleText>[0], string>;

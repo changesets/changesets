@@ -1,21 +1,27 @@
 packages:
   - packages/*
   - scripts/*
+  - docs
 
 allowBuilds:
   "@pnpm/pnpr": true
+  pnpm: true
+
 blockExoticSubdeps: true
 dedupePeers: true
 dedupePeerDependents: true
+
 minimumReleaseAge: 10080
-minimumReleaseAgeExclude:
-  - "@changesets/format@0.1.1"
-  - pnpm@11.13.1
-  - npm@12.0.1
-  - pnpm@10.34.5
+
 overrides:
-  rolldown: 1.0.3
+  "vitepress>@docsearch/js": "-"
+  "vitepress>@docsearch/sidepanel-js": "-"
+
 shellEmulator: true
+
+# Bootstrap scripts intentionally run before the workspace is fully installed.
+verifyDepsBeforeRun: warn
+
 trustPolicy: no-downgrade
 trustPolicyExclude:
   - pnpm@10.34.5
