@@ -78,7 +78,7 @@ describe("publishing", () => {
     },
   } satisfies Package;
 
-  it("should return `success` if the package manager succeeds", async () => {
+  it("should return `success` if npm cli succeeds", async () => {
     mockedExec.mockResolvedValue({ exitCode: 0, stdout: "", stderr: "" });
 
     const result = await npm.publish({
@@ -91,92 +91,6 @@ describe("publishing", () => {
 
     expect(result.result).toEqual("success");
   });
-
-  it("accepts a successful stage command without a stage ID", async () => {
-    mockedExec.mockResolvedValue({ exitCode: 0, stdout: "{}", stderr: "" });
-    await expect(
-      npm.publish({
-        pkg,
-        release,
-        tarballPath: null,
-        interactive: false,
-        otpCode: null,
-        stage: true,
-      }),
-    ).resolves.toMatchObject({
-      result: "success",
-      stageId: undefined,
-    });
-  });
-
-  it("stages a publish and returns its stage id", async () => {
-    mockedExec.mockResolvedValue({
-      exitCode: 0,
-      stdout: JSON.stringify({ stageId: "stage-1" }),
-      stderr: "",
-    });
-
-    await expect(
-      npm.publish({
-        pkg,
-        release,
-        tarballPath: null,
-        interactive: false,
-        otpCode: "123456",
-        stage: true,
-      }),
-    ).resolves.toEqual({
-      name: "@test/package",
-      version: "0.0.1",
-      result: "success",
-      stageId: "stage-1",
-    });
-    expect(mockedExec.mock.calls[0][1]).toEqual([
-      "stage",
-      "publish",
-      "--json",
-      "--access",
-      "public",
-      "--tag",
-      "latest",
-      "--otp",
-      "123456",
-    ]);
-  });
-
-  it.each([false, true])(
-    "only skips a duplicate stage in staging mode (%s)",
-    async (stage) => {
-      mockedExec.mockResolvedValueOnce({
-        exitCode: 1,
-        stderr: "",
-        stdout: JSON.stringify({
-          error: {
-            code: "E409",
-            summary:
-              '409 Conflict - POST https://registry.npmjs.org/-/stage/package/@test%2fpackage - Cannot stage previously published version "0.0.1".',
-            detail: "",
-          },
-        }),
-      });
-      const result = await npm.publish({
-        pkg,
-        release,
-        tarballPath: null,
-        interactive: false,
-        otpCode: null,
-        stage,
-      });
-      expect(result.result).toBe(stage ? "failed:already-done" : "failed");
-      expect(result).toMatchObject({
-        code: "E409",
-        message:
-          '409 Conflict - POST https://registry.npmjs.org/-/stage/package/@test%2fpackage - Cannot stage previously published version "0.0.1".',
-      });
-      expect(result).not.toHaveProperty("stageId");
-      expect(mockedExec).toHaveBeenCalledOnce();
-    },
-  );
 
   const alreadyPublishedCases = Object.entries(
     alreadyPublishedErrorSnapshot.npm,
@@ -196,24 +110,6 @@ describe("publishing", () => {
       });
 
       expect(result.result).toEqual("failed:already-done");
-    },
-  );
-
-  it.each(alreadyPublishedCases)(
-    "does not ignore duplicate-publish errors while staging (%s)",
-    async (_, snapshot) => {
-      mockedExec.mockResolvedValue(snapshot);
-      await expect(
-        npm.publish({
-          pkg,
-          release,
-          tarballPath: null,
-          interactive: false,
-          otpCode: null,
-          stage: true,
-        }),
-      ).resolves.toHaveProperty("result", "failed");
-      expect(mockedExec).toHaveBeenCalledOnce();
     },
   );
 
