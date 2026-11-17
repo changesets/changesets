@@ -23,8 +23,13 @@ export function isAlreadyPublishedError(message: string) {
   return message.includes("cannot publish over the previously published");
 }
 
-// Pending stages are invisible to the publish-plan preflight.
-// This wording also covers published versions. The caller checks info to distinguish them.
+// Pending stages are invisible to the current preflight. npm's
+// GET /-/package/{package-name}/version/{version}/status could detect them, but
+// OIDC access appears unsupported and we have no separate read-token support.
+// Split publishing could separate those credentials, but direct status queries
+// would add npm-specific behavior and duplicate registry resolution delegated to
+// each package manager. This wording also covers published versions, so the
+// caller uses info to distinguish them.
 export function isStageConflictError(message: string) {
   return message.includes("Cannot stage previously published version");
 }
