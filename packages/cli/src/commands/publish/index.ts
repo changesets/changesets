@@ -334,7 +334,7 @@ for every package being published after this!
           // will hand the affected packages back to this sequential path.
           if (!stage && !interactive) {
             sequential = false;
-          } else if (finishedCount < totalPublishCount) {
+          } else if (interactive && finishedCount < totalPublishCount) {
             // The interactive child owned the terminal, so publishing progress
             // was stopped while it ran. Resume it before publishing the next
             // package sequentially.
@@ -448,24 +448,12 @@ Some packages failed to publish:
 ${formatPackageList(unsuccessfulNpmPublishes, c.red)}
       `.trim(),
     );
-    if (stagedPublishing && successfulNpmPublishes.length > 0) {
-      const stageIds = successfulNpmPublishes
-        .filter(
-          (result): result is Extract<PublishResult, { result: "staged" }> =>
-            result.result === "staged",
-        )
-        .map((result) => result.stageId);
+    if (stageIds.length > 0) {
       log.warn(
         `Reject the successfully staged packages, then retry:\nchangeset stage reject ${stageIds.join(" ")}`,
       );
     }
-  } else if (stagedPublishing && successfulNpmPublishes.length > 0) {
-    const stageIds = successfulNpmPublishes
-      .filter(
-        (result): result is Extract<PublishResult, { result: "staged" }> =>
-          result.result === "staged",
-      )
-      .map((result) => result.stageId);
+  } else if (stageIds.length > 0) {
     log.info(`Approve the staged packages in this order:
 changeset stage approve ${stageIds.join(" ")}`);
   }
