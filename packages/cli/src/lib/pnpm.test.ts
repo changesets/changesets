@@ -247,7 +247,7 @@ describe("publishing", () => {
       });
 
       await expect(
-        pnpm.publish({
+        pnpm10.publish({
           pkg,
           release,
           tarballPath: null,
@@ -269,7 +269,7 @@ describe("publishing", () => {
   it("accepts a successful stage command without a stage ID", async () => {
     mockedExec.mockResolvedValue({ exitCode: 0, stdout: "{}", stderr: "" });
     await expect(
-      pnpm.publish({
+      pnpm10.publish({
         pkg,
         release,
         tarballPath: null,
@@ -293,7 +293,7 @@ describe("publishing", () => {
     });
 
     await expect(
-      pnpm.publish({
+      pnpm10.publish({
         pkg,
         release,
         tarballPath: null,
@@ -347,7 +347,7 @@ describe("publishing", () => {
     async (_, snapshot) => {
       mockedExec.mockResolvedValue(snapshot);
       await expect(
-        pnpm.publish({
+        pnpm10.publish({
           pkg,
           release,
           tarballPath: null,
