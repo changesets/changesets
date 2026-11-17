@@ -120,12 +120,6 @@ Because this command assumes that the last commit is the release commit, you sho
 them immediately. `--no-stage` disables a `stagedPublishing` config value for
 one invocation.
 
-Duplicate stages are treated as already done. After a staging conflict, Changesets
-uses the package manager’s existing info query to check whether the version is
-already published. Staging fails when that query lists the release version or
-returns an error. This query uses the same registry and cache behavior as the
-normal publishing preflight. Publishing over a staged version still fails.
-
 ### Git Tags
 
 It is useful to have git tags of a publish, to allow people looking for the code at that time to find them. We generate tags in git during publish, but you will need to push them back up if you want to make them available. We recommend after publish you run:
