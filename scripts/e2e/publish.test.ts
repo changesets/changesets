@@ -1101,9 +1101,7 @@ describe("Publish command e2e", () => {
             tty,
           });
           expect.soft(conflictName).toBeDefined();
-          expect
-            .soft(result.exitCode === 0, result.stdout)
-            .toBe(state === "staged");
+          expect.soft(result.exitCode === 0).toBe(state === "staged");
           expect
             .soft(await tagExists(`${conflictName}@1.0.0`, cwd))
             .toBe(false);
@@ -1119,7 +1117,6 @@ describe("Publish command e2e", () => {
                     request.method === "GET" &&
                     decodeURIComponent(request.pathname) === `/${conflictName}`,
                 ),
-              result.stdout,
             )
             .toBe(true);
           expect.soft(state !== "staged" || writes === 4).toBe(true);
