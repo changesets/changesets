@@ -4,8 +4,4 @@
 "@changesets/types": minor
 ---
 
-Add staged npm publishing, including config and CLI overrides, native npm,
-pnpm, and Yarn adapters, structured stage events, and
-bulk approve/reject commands.
-
-Treat duplicate publishes and duplicate stages as already done. After an ambiguous staging conflict, reuse the package manager’s existing info query to reject staging an already published version. Lookup errors, publishing over a staged version, and unrelated conflicts still fail. The info query retains its normal registry and cache behavior.
+Add support for staging packages for approval before they go live on npm. You can enable it with `"stagedPublishing": true` in your Changesets config or by running `changeset publish --stage`. If staging is enabled in your config, you can use `--no-stage` to publish directly.
