@@ -1,7 +1,7 @@
 import * as v from "valibot";
 
 const OptionsSchema = v.object({
-  _: v.optional(v.record(v.string(), v.any())),
+  _: v.optional(v.record(v.string(), v.unknown())),
 });
 
 const VersionTypeSchema = v.picklist(
@@ -14,6 +14,8 @@ const PackageNameSchema = v.pipe(
   v.nonEmpty("Package name can't be empty."),
   v.maxLength(214, "Package name can't exceed 214 characters."),
 );
+// this schema does an odd dance with transform to exclude `_` from being validated
+// as we want that key to be validated as frontmatter metadata instead of a package
 const PackagesSchema = v.pipe(
   v.record(v.string(), v.any()),
   // exclude `_` from being validated as a package

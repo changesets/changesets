@@ -1,6 +1,5 @@
 ---
 "@changesets/changelog-github": minor
-"@changesets/parse": minor
 ---
 
 Added support for info overrides via changesets' frontmatter:

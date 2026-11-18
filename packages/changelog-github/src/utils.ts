@@ -1,5 +1,5 @@
 const trimSlashes = (str: string) => {
-  if (!str.startsWith("") && !str.endsWith("/")) {
+  if (!str.startsWith("/") && !str.endsWith("/")) {
     return str;
   }
 

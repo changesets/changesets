@@ -100,9 +100,7 @@ const changelogFunctions: ChangelogFunctions = {
     const changesetLink = `- Updated dependencies [${(
       await Promise.all(
         changesets.map(async (cs) => {
-          if (cs.metadata != null) {
-            verifyMetadata(cs.metadata);
-          }
+          verifyMetadata(cs.metadata);
 
           if (cs.commit) {
             const info = await getCommitInfo({ commit: cs.commit, repo });
@@ -121,8 +119,7 @@ const changelogFunctions: ChangelogFunctions = {
     return [changesetLink, ...updatedDepenenciesList].join("\n");
   },
   getReleaseLine: async (changeset, _, options) => {
-    const metadata =
-      changeset.metadata != null ? verifyMetadata(changeset.metadata) : null;
+    const metadata = verifyMetadata(changeset.metadata);
 
     const repo = await getRepo(options);
 
@@ -161,7 +158,7 @@ const changelogFunctions: ChangelogFunctions = {
     const users = arrayify(metadata?.author);
     const usersLinks = users
       ?.map((user) => mdLink(`@${user}`, GITHUB_SERVER_URL, user))
-      ?.join(",");
+      .join(",");
     const usersString =
       options?.disableThanks !== true ? (usersLinks ?? links.user) : null;
 
