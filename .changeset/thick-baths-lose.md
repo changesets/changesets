@@ -2,9 +2,10 @@
 "@changesets/parse": minor
 "@changesets/read": minor
 "@changesets/types": minor
+"@changesets/write": minor
 ---
 
-Now reads frontmatter metadata inside `_` into the optional `metadata` key on `Changeset`:
+Now supports arbitrary frontmatter metadata inside `_`:
 
 ```markdown
 ---

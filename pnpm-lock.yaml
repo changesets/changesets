@@ -487,6 +487,9 @@ importers:
       human-id:
         specifier: ^4.2.2
         version: 4.2.2
+      yaml:
+        specifier: ^2.9.0
+        version: 2.9.1
     devDependencies:
       '@changesets/parse':
         specifier: workspace:*
