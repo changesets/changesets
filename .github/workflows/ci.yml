@@ -29,7 +29,7 @@ jobs:
         run: pnpm build
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        uses: actions/upload-artifact@v7.0.2
         with:
           # the size of the dist artifacts is not very large, so we can use better compression without a slowdown
           compression-level: 8
@@ -44,20 +44,28 @@ jobs:
     name: Lint workflows
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       actions: read # only required in private repos
       security-events: write # allow writing security events
     steps:
       - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
 
       - name: Run zizmor
-        uses: zizmorcore/zizmor-action@45d7276c9ca790aabd705e31ca99c6185c3e76dd # v0.8.1
+        uses: zizmorcore/zizmor-action@v0.8.1
         with:
           persona: pedantic
           annotations: true
           advanced-security: false
+
+      - name: Verify workflow lockfile
+        run: |
+          gh extension install github/gh-actions-lock --pin v0.5.0
+          gh actions-lock --verify
+        env:
+          GH_TOKEN: ${{ github.token }}
 
   test:
     name: "Test using Node ${{ matrix.node_version }} on ${{ matrix.os }}"
@@ -106,7 +114,7 @@ jobs:
         run: pnpm test --coverage
 
       - name: Upload coverage
-        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        uses: codecov/codecov-action@v7.1.1
         if: matrix.node_version == 24 && matrix.os == 'ubuntu-latest'
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
