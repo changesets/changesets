@@ -1,12 +1,14 @@
-const trimSlashes = (str: string) => {
-  if (!str.startsWith("/") && !str.endsWith("/")) {
-    return str;
-  }
+export function trimSlashes(str: string): string {
+  let start = 0;
+  let end = str.length;
 
-  return str.replace(/^\/+|\/+$/g, "");
-};
+  while (start < end && str.charCodeAt(start) === 47 /*/*/) start++;
+  while (end > start && str.charCodeAt(end - 1) === 47 /*/*/) end--;
 
-export function mdLink(text: string, ...urlParts: string[]) {
+  return str.slice(start, end);
+}
+
+export function mdLink(text: string, ...urlParts: string[]): string {
   const url = urlParts.map(trimSlashes).join("/");
 
   return `[${text}](${url})`;

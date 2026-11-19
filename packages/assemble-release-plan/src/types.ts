@@ -1,10 +1,10 @@
-import type { ComprehensiveRelease, PreState } from "@changesets/types";
+import type { PreState, VersionType } from "@changesets/types";
 
-export type InternalRelease = Omit<
-  ComprehensiveRelease,
-  "oldVersion" | "newVersion"
-> & {
+export type InternalRelease = {
+  name: string;
+  type: VersionType;
   oldVersion: string;
+  changesets: string[];
 };
 
 export type PreInfo = {

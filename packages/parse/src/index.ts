@@ -70,10 +70,10 @@ export function parseChangesetFile(contents: string): Changeset {
     type: value,
   }));
 
-  const changeset = {
+  const changeset: Changeset = {
     releases,
     summary,
-  } satisfies Changeset as Changeset;
+  };
   if (metadata != null) {
     changeset.metadata = metadata;
   }

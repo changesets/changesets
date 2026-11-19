@@ -241,10 +241,12 @@ async function getNewChangelogEntry(
   contextDir: string,
 ): Promise<ReleaseWithChangelog[]> {
   if (!config.changelog) {
-    for (const release of releasesWithPackage) {
-      (release as ReleaseWithChangelog).changelog = null;
-    }
-    return releasesWithPackage as ReleaseWithChangelog[];
+    return Promise.resolve(
+      releasesWithPackage.map((release) => ({
+        ...release,
+        changelog: null,
+      })),
+    );
   }
 
   const defaultFn = () => "";
