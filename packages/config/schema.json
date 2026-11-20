@@ -136,6 +136,11 @@
       "description": "Determines whether Changesets should only bump dependency ranges that use workspace protocol of packages that are part of the workspace.",
       "default": false
     },
+    "runVersionScripts": {
+      "type": "boolean",
+      "description": "Determines whether `changeset version` runs the `preversion` and `postversion` scripts of the packages it versions.",
+      "default": true
+    },
     "snapshot": {
       "type": "object",
       "properties": {
