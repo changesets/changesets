@@ -14,6 +14,7 @@ import {
   getCommitsThatAddFiles,
   getCurrentCommitId,
   getDivergedCommit,
+  remoteTagExists,
   tag,
   tagExists,
 } from "./index.ts";
@@ -250,6 +251,26 @@ describe("git", { tags: ["slow"] }, () => {
       await tag("tag_message", cwd);
 
       expect(await tagExists("tag_message", cwd)).toBe(true);
+    });
+  });
+
+  describe("remoteTagExists", () => {
+    it("does not match the tag of a scoped package with the same suffix", async () => {
+      const cwd = await gitdir({
+        "a.js": 'export default "a"',
+      });
+
+      await exec("git", ["remote", "add", "origin", cwd], {
+        nodeOptions: { cwd },
+      });
+      await exec("git", ["tag", "@scope/pkg@1.0.0"], { nodeOptions: { cwd } });
+
+      expect(await remoteTagExists("pkg@1.0.0", cwd)).toBe(false);
+      expect(await remoteTagExists("@scope/pkg@1.0.0", cwd)).toBe(true);
+
+      await exec("git", ["tag", "pkg@1.0.0"], { nodeOptions: { cwd } });
+
+      expect(await remoteTagExists("pkg@1.0.0", cwd)).toBe(true);
     });
   });
 
