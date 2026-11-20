@@ -56,10 +56,10 @@
     "eslint-plugin-import-lite": "~0.6.0",
     "eslint-plugin-n": "^18.5.0",
     "lint-staged": "^17.6.0",
-    "oxfmt": "^0.76.0",
+    "oxfmt": "^0.77.0",
     "pkg-pr-new": "^0.0.93",
     "publint": "^0.3.25",
-    "tsdown": "^0.23.5",
+    "tsdown": "^0.23.7",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.72.1",
     "vitest": "^5.0.5"
