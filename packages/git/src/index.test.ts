@@ -608,6 +608,35 @@ describe("git", { tags: ["slow"] }, () => {
   });
 
   describe("getChangedPackagesSinceRef", () => {
+    it("detects changed files starting with two dots inside a package", async () => {
+      const cwd = await gitdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "package-lock.json": "",
+        "packages/pkg-a/package.json": JSON.stringify({ name: "pkg-a" }),
+        "packages/pkg-b/package.json": JSON.stringify({ name: "pkg-b" }),
+      });
+
+      await exec("git", ["checkout", "-b", "new-branch"], {
+        nodeOptions: { cwd },
+      });
+      const file = "packages/pkg-a/..metadata";
+      await outputFile(path.join(cwd, file), "new metadata");
+      await add(file, cwd);
+      await commit("add metadata", cwd);
+
+      const changedPackages = await getChangedPackagesSinceRef({
+        cwd,
+        ref: "main",
+        changedFilePatterns: ["..metadata"],
+      });
+      expect(changedPackages.map((pkg) => pkg.packageJson.name)).toEqual([
+        "pkg-a",
+      ]);
+    });
+
     it("should return an empty list if no packages have changed", async () => {
       const cwd = await gitdir({
         "package.json": JSON.stringify({
