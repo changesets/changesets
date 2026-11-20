@@ -1,5 +1,39 @@
 # @changesets/assemble-release-plan
 
+## 7.1.0
+
+### Minor Changes
+
+- [#2365](https://github.com/changesets/changesets/pull/2365) [`1ed9edd`](https://github.com/changesets/changesets/commit/1ed9edda6ed9e7576afea79503b593bba8cd2d9b) Thanks [@beeequeue](https://github.com/beeequeue)! - Now reads frontmatter metadata and passes it to changelog formatter functions:
+
+  ```markdown
+  ---
+  foo: minor
+  _:
+    your: "metadata here"
+    any: yaml
+    number: 123
+  ---
+
+  Something changed!
+  ```
+
+  ```ts
+  export default {
+    getReleaseLine: (changeset, changeType, options) => {
+      // { your: "metadata here", any: "yaml", number: 123 }
+      console.log(changeset.metadata);
+    },
+  };
+  ```
+
+### Patch Changes
+
+- Updated dependencies [[`b09779a`](https://github.com/changesets/changesets/commit/b09779a3d503a581df98a81384d5849db969eb03), [`1ed9edd`](https://github.com/changesets/changesets/commit/1ed9edda6ed9e7576afea79503b593bba8cd2d9b)]:
+  - @changesets/types@7.1.0
+  - @changesets/get-dependents-graph@3.0.1
+  - @changesets/should-skip-package@1.0.1
+
 ## 7.0.0
 
 ### Major Changes
