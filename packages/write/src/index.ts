@@ -3,6 +3,7 @@ import path from "node:path";
 import { detect as detectFormatter, format } from "@changesets/format";
 import type { Changeset, Config } from "@changesets/types";
 import { humanId } from "human-id";
+import * as yaml from "yaml";
 
 async function getFormatter(
   config: Config["format"],
@@ -24,7 +25,7 @@ async function getFormatter(
 }
 
 export async function writeChangeset(
-  { summary, releases }: Changeset,
+  { summary, releases, metadata }: Changeset,
   rootDir: string,
   options?: { format?: Config["format"] },
 ): Promise<string> {
@@ -40,15 +41,25 @@ export async function writeChangeset(
   const formatter = await getFormatter(options?.format ?? "auto", rootDir);
   const newChangesetPath = path.resolve(changesetBase, `${changesetID}.md`);
 
-  // NOTE: The quotation marks in here are really important even though they are
-  // not spec for yaml. This is because package names can contain special
-  // characters that will otherwise break the parsing step
-  const changesetContents = `---
-${releases.map((release) => `"${release.name}": ${release.type}`).join("\n")}
+  const packagesFrontmatter = Object.fromEntries(
+    releases.map((release) => [release.name, release.type]),
+  );
+  const frontmatter = {
+    ...packagesFrontmatter,
+    _: metadata,
+  };
+  const frontmatterString = yaml.stringify(frontmatter, {
+    singleQuote: false,
+    aliasDuplicateObjects: false,
+  });
+
+  const changesetContents = `
+---
+${frontmatterString}
 ---
 
 ${summary}
-`;
+`.trimStart();
 
   await fs.mkdir(path.dirname(newChangesetPath), { recursive: true });
   await fs.writeFile(newChangesetPath, changesetContents);

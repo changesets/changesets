@@ -19,7 +19,7 @@ export async function getChangelogEntry(
   releases: ModCompWithPackage[],
   changesets: NewChangesetWithCommit[],
   changelogFuncs: ChangelogFunctions,
-  changelogOpts: null | Record<string, unknown>,
+  changelogFormatterOptions: null | Record<string, unknown>,
   {
     updateInternalDependencies,
     onlyUpdatePeerDependentsWhenOutOfRange,
@@ -45,7 +45,11 @@ export async function getChangelogEntry(
     if (rls && rls.type !== "none") {
       changelogLines[rls.type].push(
         Promise.resolve(
-          changelogFuncs.getReleaseLine(cs, rls.type, changelogOpts),
+          changelogFuncs.getReleaseLine(
+            cs,
+            rls.type,
+            changelogFormatterOptions,
+          ),
         ),
       );
     }
@@ -92,7 +96,7 @@ export async function getChangelogEntry(
       changelogFuncs.getDependencyReleaseLine(
         relevantChangesets,
         dependentReleases,
-        changelogOpts,
+        changelogFormatterOptions,
       ),
     ),
   );
