@@ -233,6 +233,26 @@ These restrictions exist to ensure your repository or published code do not end 
 
 Whether to only bump dependency ranges that use the `workspace:` protocol of packages that are part of the workspace.
 
+## gitTagFormat
+
+- **Type:** `string`
+- **Default:** `"{name}@{version}"` in monorepos, `"v{version}"` in single-package repositories
+
+A template for the names of the git tags created by `changeset publish` and `changeset git-tag`. Changesets also uses it to check which packages have already been tagged, so changing it makes packages without a tag in the new format count as untagged.
+
+The template can use the following variable patterns:
+
+- `{name}` - the package name. Required in monorepos, so that packages released at the same version don't get the same tag.
+- `{version}` - the package version. Always required.
+
+For example, to create tags that are also valid Docker image tags (which can't contain `@` or `/`), you can use a format without those characters for packages with unscoped names:
+
+```json [.changeset/config.json]
+{
+  "gitTagFormat": "{name}_{version}"
+}
+```
+
 ## snapshot
 
 - **Type:** `{ useCalculatedVersion?: boolean; prereleaseTemplate?: string }`

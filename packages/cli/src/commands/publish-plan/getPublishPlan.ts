@@ -205,7 +205,11 @@ export async function getUntaggedPrivatePackages(
   cwd: string,
   packages: Array<Package>,
   tool: Packages["tool"],
-  options: { ignore: PackageGroup; allowPrivatePackages: boolean },
+  options: {
+    ignore: PackageGroup;
+    allowPrivatePackages: boolean;
+    gitTagFormat: string | undefined;
+  },
 ): Promise<Array<TagReleaseEntry>> {
   const taggableReleases = packages
     .filter(
@@ -217,7 +221,9 @@ export async function getUntaggedPrivatePackages(
       version: pkg.packageJson.version,
     }));
 
-  return (await splitByTagStatus(cwd, tool, taggableReleases)).untagged;
+  return (
+    await splitByTagStatus(cwd, tool, taggableReleases, options.gitTagFormat)
+  ).untagged;
 }
 
 function sortReleases(
@@ -296,6 +302,7 @@ export async function getPublishPlan(
         {
           ignore: config.ignore,
           allowPrivatePackages: config.privatePackages.tag,
+          gitTagFormat: config.gitTagFormat,
         },
       )
     : [];

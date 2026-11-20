@@ -7,6 +7,7 @@ import type { TagReleaseEntry } from "../publish-plan/getPublishPlan.ts";
 
 type CreateGitTagsOptions = {
   packages: Packages;
+  gitTagFormat: string | undefined;
   releases: TagReleaseEntry[];
   reporter?: OutputReporter;
 };
@@ -23,11 +24,12 @@ export async function createGitTags(
     opts.packages.rootDir,
     opts.packages.tool,
     opts.releases,
+    opts.gitTagFormat,
   );
 
   const newTags: TagReleaseEntry[] = [];
   for (const entry of untagged) {
-    const tagName = buildGitTag(opts.packages.tool, entry);
+    const tagName = buildGitTag(opts.packages.tool, entry, opts.gitTagFormat);
     await git.tag(tagName, opts.packages.rootDir);
     opts.reporter?.write({
       type: "git-tag",
@@ -40,7 +42,14 @@ export async function createGitTags(
   return { tagged: newTags, existing };
 }
 
-function buildTagMessage(tool: Packages["tool"], pkg: TagReleaseEntry) {
+function buildTagMessage(
+  tool: Packages["tool"],
+  pkg: TagReleaseEntry,
+  gitTagFormat: string | undefined,
+) {
+  if (gitTagFormat != null) {
+    return c.cyan(buildGitTag(tool, pkg, gitTagFormat));
+  }
   return tool.type !== "root"
     ? `${c.blue(pkg.name)}@${c.green(pkg.version)}`
     : c.cyan(`v${pkg.version}`);
@@ -49,6 +58,7 @@ function buildTagMessage(tool: Packages["tool"], pkg: TagReleaseEntry) {
 export function formatGitTagResults(
   tool: Packages["tool"],
   results: CreateGitTagsResult,
+  gitTagFormat: string | undefined,
 ): string {
   if (results.tagged.length === 0 && results.existing.length === 0) {
     return "Created git tags.";
@@ -58,13 +68,17 @@ export function formatGitTagResults(
   if (results.tagged.length !== 0) {
     lines.push(
       "Created git tags:",
-      ...results.tagged.map((entry) => `- ${buildTagMessage(tool, entry)}`),
+      ...results.tagged.map(
+        (entry) => `- ${buildTagMessage(tool, entry, gitTagFormat)}`,
+      ),
     );
   }
   if (results.existing.length !== 0) {
     lines.push(
       "Skipped tags (already exist):",
-      ...results.existing.map((entry) => `- ${buildTagMessage(tool, entry)}`),
+      ...results.existing.map(
+        (entry) => `- ${buildTagMessage(tool, entry, gitTagFormat)}`,
+      ),
     );
   }
 

@@ -81,6 +81,44 @@ describe("getPublishPlan", () => {
     `);
   });
 
+  it("checks existing tags of private packages using gitTagFormat", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        name: "repo",
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      ".changeset/config.json": JSON.stringify({
+        privatePackages: { version: true, tag: true },
+        gitTagFormat: "{name}_{version}",
+      }),
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+        private: true,
+      }),
+      "packages/pkg-b/package.json": JSON.stringify({
+        name: "pkg-b",
+        version: "1.0.0",
+        private: true,
+      }),
+    });
+
+    mockedGit.getAllTags.mockResolvedValue(new Set(["pkg-a_1.0.0"]));
+    mockedGit.remoteTagExists.mockResolvedValue(false);
+
+    const config = await readConfig(cwd);
+    const result = await getPublishPlan(cwd, config.config!);
+
+    expect(result).toStrictEqual([
+      [{ kind: "tag-only", name: "pkg-b", version: "1.0.0" }],
+    ]);
+    expect(mockedGit.remoteTagExists).toHaveBeenCalledExactlyOnceWith(
+      "pkg-b_1.0.0",
+    );
+  });
+
   it("skips ignored public packages", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
