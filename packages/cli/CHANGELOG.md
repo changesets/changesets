@@ -1,5 +1,53 @@
 # @changesets/cli
 
+## 3.1.0
+
+### Minor Changes
+
+- [#2346](https://github.com/changesets/changesets/pull/2346) [`b09779a`](https://github.com/changesets/changesets/commit/b09779a3d503a581df98a81384d5849db969eb03) Thanks [@Netail](https://github.com/Netail)! - Added support for formatting with [Biome](https://biomejs.dev/) (version 2.6+).
+
+- [#2365](https://github.com/changesets/changesets/pull/2365) [`1ed9edd`](https://github.com/changesets/changesets/commit/1ed9edda6ed9e7576afea79503b593bba8cd2d9b) Thanks [@beeequeue](https://github.com/beeequeue)! - Now reads frontmatter metadata and passes it to changelog formatter functions:
+
+  ```markdown
+  ---
+  foo: minor
+  _:
+    your: "metadata here"
+    any: yaml
+    number: 123
+  ---
+
+  Something changed!
+  ```
+
+  ```ts
+  export default {
+    getReleaseLine: (changeset, changeType, options) => {
+      // { your: "metadata here", any: "yaml", number: 123 }
+      console.log(changeset.metadata);
+    },
+  };
+  ```
+
+### Patch Changes
+
+- [#2387](https://github.com/changesets/changesets/pull/2387) [`06548ad`](https://github.com/changesets/changesets/commit/06548adc8461e3e3754def2efcafa556f091af71) Thanks [@mixelburg](https://github.com/mixelburg)! - Fixed `remoteTagExists` matching the end instead of full names.
+
+  e.g. `shacl-playground` would also match `@zazuko/shacl-playground`, which it shouldn't.
+
+- Updated dependencies [[`b09779a`](https://github.com/changesets/changesets/commit/b09779a3d503a581df98a81384d5849db969eb03), [`06548ad`](https://github.com/changesets/changesets/commit/06548adc8461e3e3754def2efcafa556f091af71), [`1ed9edd`](https://github.com/changesets/changesets/commit/1ed9edda6ed9e7576afea79503b593bba8cd2d9b), [`1ed9edd`](https://github.com/changesets/changesets/commit/1ed9edda6ed9e7576afea79503b593bba8cd2d9b)]:
+  - @changesets/config@4.1.0
+  - @changesets/types@7.1.0
+  - @changesets/write@1.1.0
+  - @changesets/git@4.0.2
+  - @changesets/apply-release-plan@8.2.0
+  - @changesets/assemble-release-plan@7.1.0
+  - @changesets/read@1.1.0
+  - @changesets/changelog-git@1.0.1
+  - @changesets/get-dependents-graph@3.0.1
+  - @changesets/pre@3.0.1
+  - @changesets/should-skip-package@1.0.1
+
 ## 3.0.3
 
 ### Patch Changes

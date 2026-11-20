@@ -1,5 +1,12 @@
 # @changesets/should-skip-package
 
+## 1.0.1
+
+### Patch Changes
+
+- Updated dependencies [[`b09779a`](https://github.com/changesets/changesets/commit/b09779a3d503a581df98a81384d5849db969eb03), [`1ed9edd`](https://github.com/changesets/changesets/commit/1ed9edda6ed9e7576afea79503b593bba8cd2d9b)]:
+  - @changesets/types@7.1.0
+
 ## 1.0.0
 
 ### Major Changes
