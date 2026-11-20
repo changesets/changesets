@@ -59,6 +59,82 @@ export async function getDivergedCommit(cwd: string, ref: string) {
   return cmd.stdout.toString().trim();
 }
 
+// Find the commit that added `gitPath`. We avoid `git log --follow` because it
+// turns on rename detection against every file in the parent tree, which became
+// very slow on git 2.56 in blobless clones (it lazily fetches most of the tree
+// for each lookup, see #2364). Instead we find the add with renames turned off
+// and then check for a rename only on that single commit, following the chain
+// back if one is found. This returns the same commit as `--follow` did.
+async function getCommitThatAddsFile(
+  gitPath: string,
+  {
+    cwd,
+    short,
+    from = "HEAD",
+    seen = new Set<string>(),
+  }: { cwd: string; short?: boolean; from?: string; seen?: Set<string> },
+): Promise<{ path: string; commitSha?: string; parentSha?: string }> {
+  const [commitSha, parentSha] = (
+    await exec(
+      "git",
+      [
+        "log",
+        from,
+        // A = added (new file). Renames are handled separately below.
+        // https://git-scm.com/docs/git-log#Documentation/git-log.txt---diff-filterACDMRTUXB
+        "--diff-filter=A",
+        "--no-renames",
+        "--max-count=1",
+        short ? "--pretty=format:%h:%p" : "--pretty=format:%H:%p",
+        "--",
+        gitPath,
+      ],
+      { nodeOptions: { cwd } },
+    )
+  ).stdout
+    .toString()
+    .split(":");
+
+  const info = { path: gitPath, commitSha, parentSha };
+
+  // No commit (file never added on this history) or no parent (we hit the
+  // boundary of a shallow clone, so we cannot look for a rename yet). In the
+  // shallow case the caller deepens the clone and retries.
+  if (!commitSha || !parentSha || seen.has(gitPath)) {
+    return info;
+  }
+  seen.add(gitPath);
+
+  // Only the first parent matters for the add; a merge cannot add a file on
+  // its own.
+  const parent = parentSha.split(" ")[0];
+  const renameSource = (
+    await exec(
+      "git",
+      ["diff", "--name-status", "-M", "--diff-filter=R", parent, commitSha],
+      { nodeOptions: { cwd } },
+    )
+  ).stdout
+    .toString()
+    .split("\n")
+    .map((line) => line.split("\t"))
+    .find(([, , to]) => to === gitPath)?.[1];
+
+  if (!renameSource) {
+    return info;
+  }
+
+  // The file was renamed into place here, so keep walking back to the commit
+  // that first added it under its old name.
+  const earlier = await getCommitThatAddsFile(renameSource, {
+    cwd,
+    short,
+    from: parent,
+    seen,
+  });
+  return earlier.commitSha ? { ...earlier, path: gitPath } : info;
+}
+
 /**
  * Get the SHAs for the commits that added files, including automatically
  * extending a shallow clone if necessary to determine any commits.
@@ -78,35 +154,14 @@ export async function getCommitsThatAddFiles(
   do {
     // Fetch commit information for all paths we don't have yet
     const commitInfos = await Promise.all(
-      remaining.map(async (gitPath: string) => {
-        const [commitSha, parentSha] = (
-          await exec(
-            "git",
-            [
-              "log",
-              // We want to stop following commits when the file is flagged with either
-              // A = added (new file) or C = copied (new file with similar content).
-              // https://git-scm.com/docs/git-log#Documentation/git-log.txt---diff-filterACDMRTUXB
-              "--diff-filter=AC",
-              // We want to allow file renames and small word tweaks.
-              // https://git-scm.com/docs/git-log#Documentation/git-log.txt---follow
-              "--follow",
-              "--max-count=1",
-              short ? "--pretty=format:%h:%p" : "--pretty=format:%H:%p",
-              gitPath,
-            ],
-            { nodeOptions: { cwd } },
-          )
-        ).stdout
-          .toString()
-          .split(":");
-        return { path: gitPath, commitSha, parentSha };
-      }),
+      remaining.map((gitPath: string) =>
+        getCommitThatAddsFile(gitPath, { cwd, short }),
+      ),
     );
 
     // To collect commits without parents (usually because they're absent from
     // a shallow clone).
-    const commitsWithMissingParents = [];
+    const commitsWithMissingParents: { path: string; commitSha: string }[] = [];
 
     for (const info of commitInfos) {
       if (info.commitSha) {
@@ -115,7 +170,10 @@ export async function getCommitsThatAddFiles(
           // Therefore we know that the commit is legitimate and isn't simply the boundary of a shallow clone.
           map.set(info.path, info.commitSha);
         } else {
-          commitsWithMissingParents.push(info);
+          commitsWithMissingParents.push({
+            path: info.path,
+            commitSha: info.commitSha,
+          });
         }
       } else {
         // No commit for this file, which indicates it doesn't exist.

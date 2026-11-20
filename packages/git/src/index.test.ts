@@ -498,6 +498,19 @@ describe("git", { tags: ["slow"] }, () => {
         const commits = await getCommitsThatAddFiles(["b.md"], { cwd: clone });
         expect(commits).toEqual([secondCommit]);
       });
+
+      it("reads the SHA of a file-add across a chain of renames", async () => {
+        const cwd = await gitdir({});
+        await outputFile(path.join(cwd, "a.js"), 'export default "a"');
+        const originalCommit = await addFileAndCommit("a.js", cwd);
+
+        await renameFileAndCommit("a.js", "b.js", cwd);
+        await renameFileAndCommit("b.js", "c.js", cwd);
+
+        const clone = await shallowClone(cwd, 1);
+        const commits = await getCommitsThatAddFiles(["c.js"], { cwd: clone });
+        expect(commits).toEqual([originalCommit]);
+      });
     });
   });
 
