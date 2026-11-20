@@ -303,6 +303,9 @@ async function getNewChangelogEntry(
         changelogFormatterOptions,
         {
           updateInternalDependencies: config.updateInternalDependencies,
+          updateInternalDependents:
+            config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
+              .updateInternalDependents,
           onlyUpdatePeerDependentsWhenOutOfRange:
             config.___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH
               .onlyUpdatePeerDependentsWhenOutOfRange,
