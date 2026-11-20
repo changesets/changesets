@@ -573,6 +573,17 @@ describe("validateConfig", () => {
         config: { snapshot: { useCalculatedVersion: "not true" } },
         errors: ["Expected boolean"],
       },
+      // snapshot.baseVersion
+      {
+        name: "snapshot.baseVersion: non-string",
+        config: { snapshot: { baseVersion: 1 } },
+        errors: ["Expected string"],
+      },
+      {
+        name: "snapshot.baseVersion: not MAJOR.MINOR.PATCH",
+        config: { snapshot: { baseVersion: "1.0.0-beta.1" } },
+        errors: ["Expected a plain MAJOR.MINOR.PATCH version"],
+      },
       // changedFilePatterns
       {
         name: "changedFilePatterns: non-array",

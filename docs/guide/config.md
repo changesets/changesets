@@ -235,7 +235,7 @@ Whether to only bump dependency ranges that use the `workspace:` protocol of pac
 
 ## snapshot
 
-- **Type:** `{ useCalculatedVersion?: boolean; prereleaseTemplate?: string }`
+- **Type:** `{ useCalculatedVersion?: boolean; baseVersion?: string; prereleaseTemplate?: string }`
 
 Configure snapshot releases when using `changesets version --snapshot`.
 
@@ -247,6 +247,15 @@ Configure snapshot releases when using `changesets version --snapshot`.
 Snapshot version uses `0.0.0` as the base version, e.g. `0.0.0-tag-20211213000730`, so it does not hinder with other version releases. For example, if you have a prerelease at `1.0.0-beta.0`, and then you had a snapshot prerelease at `1.0.0-tag-20211213000730`, and a consumer is using the range `^1.0.0-beta.0` would resolve to the snapshot version which is likely not expected. Using `0.0.0` solves this problem.
 
 If this problem doesn't affect you, set this to `true` to use the calculated version based on the changeset files.
+
+### snapshot.baseVersion
+
+- **Type:** `string`
+- **Default:** `"0.0.0"`
+
+The fixed base version used for snapshot releases instead of `0.0.0`. It must be a plain `MAJOR.MINOR.PATCH` version such as `0.0.1`. This is useful when another tool in your pipeline doesn't accept `0.0.0` as a version.
+
+It has no effect when `snapshot.useCalculatedVersion` is `true`.
 
 ### snapshot.prereleaseTemplate
 

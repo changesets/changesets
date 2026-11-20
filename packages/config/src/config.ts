@@ -120,6 +120,18 @@ export const WrittenConfigSchema = v.object({
         ),
         false,
       ),
+      baseVersion: v.optional(
+        v.pipe(
+          v.string(),
+          v.regex(
+            /^\d+\.\d+\.\d+$/,
+            "Expected a plain MAJOR.MINOR.PATCH version, e.g. 0.0.1",
+          ),
+          v.description(
+            "The base version used for generated snapshot versions, in place of 0.0.0. It is ignored when `useCalculatedVersion` is enabled.",
+          ),
+        ),
+      ),
       prereleaseTemplate: v.optional(
         v.pipe(
           v.string(),

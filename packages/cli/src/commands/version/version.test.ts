@@ -1998,6 +1998,45 @@ describe("snapshot release", () => {
     );
   });
 
+  describe("snapshot.baseVersion", () => {
+    it("should use the configured base version instead of 0.0.0", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "package-lock.json": "",
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify({
+          ...modifiedDefaultConfig,
+          commit: false,
+          snapshot: {
+            baseVersion: "0.0.1",
+          },
+        }),
+      });
+      await writeChangesets(
+        [
+          {
+            summary: "This is a summary",
+            releases: [{ name: "pkg-a", type: "minor" }],
+          },
+        ],
+        cwd,
+      );
+      await version({ cwd, snapshot: "experimental" });
+      expect(await getPkgJSON("pkg-a", cwd)).toEqual(
+        expect.objectContaining({
+          name: "pkg-a",
+          version: expect.stringMatching(/^0\.0\.1-experimental-\d{14}$/),
+        }),
+      );
+    });
+  });
+
   describe("snapshot.useCalculatedVersion: true", () => {
     it("should update packages using calculated version", async () => {
       const cwd = await testdir({
