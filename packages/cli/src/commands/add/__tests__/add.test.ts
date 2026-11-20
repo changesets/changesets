@@ -716,6 +716,59 @@ describe("Add command", () => {
     );
   });
 
+  it("should explain why a package passed in from release type flags is skipped", async () => {
+    const loggerErrorSpy = vi.spyOn(clack.log, "error");
+
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      "packages/pkg-private/package.json": JSON.stringify({
+        name: "pkg-private",
+        version: "1.0.0",
+        private: true,
+      }),
+      "packages/pkg-ignored/package.json": JSON.stringify({
+        name: "pkg-ignored",
+        version: "1.0.0",
+      }),
+      "packages/pkg-unversioned/package.json": JSON.stringify({
+        name: "pkg-unversioned",
+      }),
+      ".changeset/config.json": JSON.stringify({
+        ...defaultConfig,
+        ignore: ["pkg-ignored"],
+      }),
+    });
+
+    await expect(() =>
+      addChangeset({
+        cwd,
+        message: "test",
+        major: ["pkg-private"],
+        minor: ["pkg-ignored"],
+        patch: ["pkg-unversioned", "pkg-missing"],
+      }),
+    ).rejects.toThrow("The process exited with code: 1");
+
+    expect(loggerErrorSpy).toHaveBeenCalledOnce();
+    const output = stripVTControlCharacters(loggerErrorSpy.mock.calls[0][0]);
+    expect(output).toEqual(
+      [
+        "The package pkg-private is passed to the `--major` option but it is skipped because it is private and `privatePackages.version` is not enabled in the config.",
+        "The package pkg-ignored is passed to the `--minor` option but it is skipped because it is listed in the `ignore` option of the config.",
+        "The package pkg-unversioned is passed to the `--patch` option but it is skipped because its package.json doesn't have a `version` field.",
+        "The package pkg-missing is passed to the `--patch` option but it is not found in the project. You may have misspelled the package name.",
+      ].join("\n"),
+    );
+  });
+
   it("should generate a changeset for a single package", async () => {
     const cwd = await createBasicFixture();
     await addChangeset({

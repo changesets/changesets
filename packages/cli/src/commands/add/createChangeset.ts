@@ -90,6 +90,7 @@ type OptionsFromCli = {
 
 function validateSelectedPackageNames(
   pkgNames: Set<string>,
+  skippedPackages: ReadonlyMap<string, string>,
   optionsFromCli: OptionsFromCli | undefined,
   messages: string[],
 ) {
@@ -100,6 +101,14 @@ function validateSelectedPackageNames(
   ] as const) {
     for (const pkgName of packageNamesFromCli ?? []) {
       if (pkgNames.has(pkgName)) {
+        continue;
+      }
+
+      const skipReason = skippedPackages.get(pkgName);
+      if (skipReason) {
+        messages.push(
+          `The package ${c.blue(pkgName)} is passed to the \`${flag}\` option but it is skipped because ${skipReason}.`,
+        );
         continue;
       }
 
@@ -142,6 +151,7 @@ export async function createChangeset(
   changedPackages: Array<string>,
   allPackages: Array<Package>,
   optionsFromCli?: OptionsFromCli,
+  skippedPackages: ReadonlyMap<string, string> = new Map(),
 ): Promise<{ summary: string; releases: Array<Release> }> {
   const releases: Array<Release> = [];
 
@@ -151,7 +161,12 @@ export async function createChangeset(
     );
 
     const messages: string[] = [];
-    validateSelectedPackageNames(pkgNames, optionsFromCli, messages);
+    validateSelectedPackageNames(
+      pkgNames,
+      skippedPackages,
+      optionsFromCli,
+      messages,
+    );
     validateDuplicatePackageNames(pkgNames, optionsFromCli, messages);
 
     if (messages.length > 0) {
