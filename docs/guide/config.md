@@ -12,6 +12,7 @@ Changesets keeps its configuration in `.changeset/config.json`. The default conf
   "baseBranch": "main",
   "changedFilePatterns": ["**"],
   "format": "auto",
+  "stagedPublishing": false,
   "privatePackages": { "version": false, "tag": false },
   "updateInternalDependencies": "patch",
   "ignore": [],
@@ -282,3 +283,12 @@ Add dependent packages to the release (if they are not already a part of it) wit
 - **Default:** `false`
 
 When set to `true`, Changesets will only bump peer dependents when `peerDependencies` are leaving the range.
+
+## `stagedPublishing`
+
+- **Type:** `boolean`
+- **Default:** `false`
+
+When enabled, `changeset publish` stages package versions for later
+approval instead of publishing them immediately. It can be overridden per
+invocation with `--stage` or `--no-stage`.

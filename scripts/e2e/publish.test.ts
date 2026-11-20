@@ -16,6 +16,7 @@ import { describe, expect, it } from "vitest";
 import {
   AbortableAsyncDisposableStack,
   createPkgAFixture,
+  createPmBinEnv,
   createTempDir,
   getFreePort,
   getPmBinPath,
@@ -958,6 +959,507 @@ function createPmContext(
 
 describe("Publish command e2e", () => {
   describe.each(pmCases)("$name", (pm) => {
+    it.for([false, true])(
+      "tolerates duplicate publishes sequentially and in bulk (TTY: %s)",
+      async (tty, { signal }) => {
+        await using stack = new AbortableAsyncDisposableStack(signal);
+        const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+        let writes = 0;
+        const duplicates = new Set<string>();
+        const registry = stack.use(
+          await createTestRegistry({
+            async middleware({ request, pnpr, record }) {
+              if (request.method !== "PUT") return;
+              if (++writes === 1 || writes === 3) {
+                duplicates.add(record.packageName!);
+                return Response.json(
+                  {
+                    error:
+                      "You cannot publish over the previously published versions: 1.0.0.",
+                  },
+                  { status: 403 },
+                );
+              }
+              return pnpr.fetch(request);
+            },
+          }),
+        );
+        const fixture = createPkgAFixture();
+        for (const name of ["pkg-b", "pkg-c", "pkg-d"])
+          fixture[`packages/${name}/package.json`] = JSON.stringify({
+            name,
+            version: "1.0.0",
+          });
+        const cwd = await pm.gitdir(
+          createPmContext(registry, pmBinPath),
+          fixture,
+        );
+        const result = await runCliCommand({
+          command: "publish",
+          cwd,
+          pmBinPath,
+          signal,
+          tty,
+        });
+        expect.soft(result.exitCode).toBe(0);
+        expect.soft(writes).toBe(4);
+        expect.soft(duplicates.size).toBe(2);
+        for (const name of ["pkg-a", "pkg-b", "pkg-c", "pkg-d"])
+          expect
+            .soft(await tagExists(`${name}@1.0.0`, cwd))
+            .toBe(!duplicates.has(name));
+      },
+    );
+
+    if (pm.name === "npm 12" || pm.name === "pnpm 11" || pm.name === "yarn 4") {
+      it.for([
+        ...["published", "staged", "lookup-auth"].flatMap((state) =>
+          [false, true].flatMap((tty) =>
+            [1, 2].map((failureAt) => ({ state, tty, failureAt })),
+          ),
+        ),
+      ])(
+        "checks stage conflict with ordinary package info ($state, TTY: $tty, request: $failureAt)",
+        { timeout: 30_000 },
+        async ({ state, tty, failureAt }, { signal }) => {
+          await using stack = new AbortableAsyncDisposableStack(signal);
+          const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+          let writes = 0;
+          let conflictName: string | undefined;
+          const registry = stack.use(
+            await createTestRegistry({
+              packages:
+                state === "staged"
+                  ? Object.fromEntries(
+                      ["pkg-a", "pkg-b", "pkg-c", "pkg-d"].map((name) => [
+                        name,
+                        { versions: ["0.9.0"], tags: { latest: "0.9.0" } },
+                      ]),
+                    )
+                  : undefined,
+              async middleware({ request, pnpr }) {
+                const pathname = new URL(request.url).pathname;
+                if (
+                  request.method === "POST" &&
+                  pathname.startsWith("/-/stage/package/")
+                ) {
+                  const name = decodeURIComponent(pathname.split("/").at(-1)!);
+                  if (++writes === failureAt) {
+                    conflictName = name;
+                    if (state === "published") {
+                      await pnpr.seedPackage(name, {
+                        versions: ["1.0.0"],
+                        tags: { latest: "1.0.0" },
+                      });
+                    }
+                    // Inferred HTTP body reconstructed from the supplied npm JSON.
+                    // Both duplicate stages and published versions return this wording.
+                    return Response.json(
+                      {
+                        error:
+                          'Cannot stage previously published version "1.0.0".',
+                      },
+                      { status: 409 },
+                    );
+                  }
+                  return Response.json(
+                    { stageId: randomUUID() },
+                    { status: 201 },
+                  );
+                }
+                if (
+                  request.method === "GET" &&
+                  conflictName &&
+                  decodeURIComponent(pathname) === `/${conflictName}`
+                ) {
+                  if (state === "lookup-auth")
+                    return Response.json(
+                      { error: "Unauthorized" },
+                      { status: 401 },
+                    );
+                }
+              },
+            }),
+          );
+          const fixture = createPkgAFixture();
+          for (const name of ["pkg-b", "pkg-c", "pkg-d"]) {
+            fixture[`packages/${name}/package.json`] = JSON.stringify({
+              name,
+              version: "1.0.0",
+            });
+          }
+          const cwd = await pm.gitdir(
+            createPmContext(registry, pmBinPath),
+            fixture,
+          );
+          const result = await runCliCommand({
+            command: "publish",
+            args: ["--stage"],
+            cwd,
+            pmBinPath,
+            signal,
+            tty,
+          });
+          expect.soft(conflictName).toBeDefined();
+          expect.soft(result.exitCode === 0).toBe(state === "staged");
+          expect
+            .soft(await tagExists(`${conflictName}@1.0.0`, cwd))
+            .toBe(false);
+          const conflictIndex = registry.requests.findIndex(
+            (request) => request.statusCode === 409,
+          );
+          expect
+            .soft(
+              registry.requests
+                .slice(conflictIndex + 1)
+                .some(
+                  (request) =>
+                    request.method === "GET" &&
+                    decodeURIComponent(request.pathname) === `/${conflictName}`,
+                ),
+            )
+            .toBe(true);
+          expect.soft(state !== "staged" || writes === 4).toBe(true);
+        },
+      );
+
+      it.for(
+        [false, true].flatMap((tty) =>
+          [1, 2].map((failureAt) => ({ tty, failureAt })),
+        ),
+      )(
+        "rejects publishing over a staged version (TTY: $tty, request: $failureAt)",
+        async ({ tty, failureAt }, { signal }) => {
+          await using stack = new AbortableAsyncDisposableStack(signal);
+          const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+          let writes = 0;
+          let conflictName: string | undefined;
+          const registry = stack.use(
+            await createTestRegistry({
+              async middleware({ request, pnpr, record }) {
+                if (request.method !== "PUT") return;
+                if (++writes === failureAt) {
+                  conflictName = record.packageName;
+                  // Inferred HTTP body reconstructed from the supplied npm JSON.
+                  return Response.json(
+                    {
+                      error:
+                        'Cannot publish over previously staged version "1.0.0".',
+                    },
+                    { status: 409 },
+                  );
+                }
+                return pnpr.fetch(request);
+              },
+            }),
+          );
+          const fixture = createPkgAFixture();
+          for (const name of ["pkg-b", "pkg-c", "pkg-d"])
+            fixture[`packages/${name}/package.json`] = JSON.stringify({
+              name,
+              version: "1.0.0",
+            });
+          const cwd = await pm.gitdir(
+            createPmContext(registry, pmBinPath),
+            fixture,
+          );
+          const result = await runCliCommand({
+            command: "publish",
+            cwd,
+            pmBinPath,
+            signal,
+            tty,
+          });
+          expect.soft(result.exitCode).not.toBe(0);
+          expect.soft(conflictName).toBeDefined();
+          expect
+            .soft(await tagExists(`${conflictName}@1.0.0`, cwd))
+            .toBe(false);
+          expect
+            .soft(
+              registry.requests.some((request) => request.statusCode === 409),
+            )
+            .toBe(true);
+        },
+      );
+
+      it.for([false, true])(
+        "skips duplicate stages (TTY: %s)",
+        { timeout: 30_000 },
+        async (tty, { signal }) => {
+          await using stack = new AbortableAsyncDisposableStack(signal);
+          const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+          const duplicates = new Set<string>();
+          let stageCount = 0;
+          const registry = stack.use(
+            await createTestRegistry({
+              async middleware({ request }) {
+                const { pathname } = new URL(request.url);
+                if (
+                  request.method !== "POST" ||
+                  !pathname.startsWith("/-/stage/package/")
+                )
+                  return;
+                if (++stageCount === 1 || stageCount === 3) {
+                  duplicates.add(pathname.split("/").at(-1)!);
+                  // Reconstructed from npm-registry-fetch's HttpErrorGeneral formatting
+                  // and the user-supplied npm --json output, not a production HTTP capture.
+                  return Response.json(
+                    {
+                      error:
+                        'Cannot stage previously published version "1.0.0".',
+                    },
+                    { status: 409 },
+                  );
+                }
+                return Response.json(
+                  { stageId: randomUUID() },
+                  { status: 201 },
+                );
+              },
+            }),
+          );
+          const fixture = createPkgAFixture();
+          for (const name of ["pkg-b", "pkg-c", "pkg-d"]) {
+            fixture[`packages/${name}/package.json`] = JSON.stringify({
+              name,
+              version: "1.0.0",
+            });
+          }
+          const cwd = await pm.gitdir(
+            createPmContext(registry, pmBinPath),
+            fixture,
+          );
+          const result = await runCliCommand({
+            command: "publish",
+            args: ["--stage"],
+            cwd,
+            pmBinPath,
+            signal,
+            tty,
+          });
+          expect.soft(result.exitCode).toBe(0);
+          const requests = registry.requests.filter(
+            (request) =>
+              request.method === "POST" &&
+              request.pathname.startsWith("/-/stage/package/"),
+          );
+          expect
+            .soft(requests.slice(0, 2).map((request) => request.statusCode))
+            .toEqual([409, 201]);
+          expect
+            .soft(requests.map((request) => request.statusCode).sort())
+            .toEqual([201, 201, 409, 409]);
+          expect.soft(requests).toHaveLength(4);
+          for (const name of duplicates) {
+            const conflictIndex = registry.requests.findIndex(
+              (request) =>
+                request.statusCode === 409 &&
+                request.pathname === `/-/stage/package/${name}`,
+            );
+            expect
+              .soft(
+                registry.requests
+                  .slice(conflictIndex + 1)
+                  .some(
+                    (request) =>
+                      request.method === "GET" &&
+                      decodeURIComponent(request.pathname) === `/${name}`,
+                  ),
+              )
+              .toBe(true);
+          }
+          for (const name of ["pkg-a", "pkg-b", "pkg-c", "pkg-d"]) {
+            expect
+              .soft(await tagExists(`${name}@1.0.0`, cwd))
+              .toBe(!duplicates.has(name));
+          }
+          expect
+            .soft(result.stdout)
+            .not.toContain("Some packages failed to publish");
+        },
+      );
+
+      it.for(
+        [
+          { status: 409, error: "Another staging conflict" },
+          {
+            status: 403,
+            error: 'Cannot stage previously published version "1.0.0".',
+          },
+        ].flatMap((entry) => [false, true].map((tty) => ({ ...entry, tty }))),
+      )(
+        "rejects staging errors $status: $error (TTY: $tty)",
+        { timeout: 30_000 },
+        async ({ status, error, tty }, { signal }) => {
+          await using stack = new AbortableAsyncDisposableStack(signal);
+          const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+          const registry = stack.use(
+            await createTestRegistry({
+              async middleware({ request }) {
+                if (
+                  request.method === "POST" &&
+                  new URL(request.url).pathname.startsWith("/-/stage/package/")
+                ) {
+                  return Response.json({ error }, { status });
+                }
+              },
+            }),
+          );
+          const cwd = await pm.gitdir(
+            createPmContext(registry, pmBinPath),
+            createPkgAFixture(),
+          );
+          const result = await runCliCommand({
+            command: "publish",
+            args: ["--stage"],
+            cwd,
+            pmBinPath,
+            signal,
+            tty,
+          });
+          expect.soft(result.exitCode).not.toBe(0);
+          expect
+            .soft(
+              registry.requests
+                .filter((request) => request.method === "POST")
+                .map((request) => request.statusCode),
+            )
+            .toEqual([status]);
+          expect.soft(await tagExists("pkg-a@1.0.0", cwd)).toBe(false);
+        },
+      );
+
+      if (pm.name === "npm 12") {
+        it("reconstructs npm duplicate-stage JSON from an HTTP conflict", async ({
+          signal,
+        }) => {
+          await using stack = new AbortableAsyncDisposableStack(signal);
+          const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+          const version = "0.0.14-stage-test.20261113204138";
+          const name = "@kitchensink/changeset-pkg-b";
+          const error = `Cannot stage previously published version "${version}".`;
+          const registry = stack.use(
+            await createTestRegistry({
+              async middleware({ request }) {
+                if (
+                  request.method === "POST" &&
+                  new URL(request.url).pathname ===
+                    "/-/stage/package/@kitchensink%2fchangeset-pkg-b"
+                ) {
+                  return Response.json({ error }, { status: 409 });
+                }
+              },
+            }),
+          );
+          const fixture = createPkgAFixture({ version });
+          fixture["packages/pkg-a/package.json"] = JSON.stringify({
+            name,
+            version,
+          });
+          const cwd = await pm.gitdir(
+            createPmContext(registry, pmBinPath),
+            fixture,
+          );
+          const result = await exec(
+            "npm",
+            ["stage", "publish", "--json", "--tag", "stage-test"],
+            {
+              nodePath: false,
+              signal,
+              nodeOptions: {
+                cwd: path.join(cwd, "packages/pkg-a"),
+                env: await createPmBinEnv(cwd, pmBinPath),
+              },
+            },
+          );
+          expect.soft(result.exitCode).not.toBe(0);
+          expect(JSON.parse(result.stdout)).toEqual({
+            error: {
+              code: "E409",
+              summary: `409 Conflict - POST ${registry.url}-/stage/package/@kitchensink%2fchangeset-pkg-b - ${error}`,
+              detail: "",
+            },
+          });
+          const classified = await runCliCommand({
+            command: "publish",
+            args: ["--stage", "--tag", "stage-test"],
+            cwd,
+            pmBinPath,
+            signal,
+          });
+          expect.soft(classified.exitCode).toBe(0);
+          expect.soft(await tagExists(`${name}@${version}`, cwd)).toBe(false);
+        }, 30_000);
+      }
+
+      describe.each(["existing", "new"] as const)(
+        "%s package",
+        (packageState) => {
+          it("stages a package version", async ({ signal }) => {
+            await using stack = new AbortableAsyncDisposableStack(signal);
+            const { pmBinPath } = stack.use(
+              await getPmBinPath(signal, pm.bins),
+            );
+            const stageId = randomUUID();
+            let stagedRequest:
+              | { body: ArrayBuffer; headers: Headers }
+              | undefined;
+            const registry = stack.use(
+              await createTestRegistry({
+                packages:
+                  packageState === "existing"
+                    ? {
+                        "pkg-a": {
+                          versions: ["0.0.1"],
+                          tags: { latest: "0.0.1" },
+                        },
+                      }
+                    : {},
+                async middleware({ request }) {
+                  const { pathname } = new URL(request.url);
+                  if (
+                    request.method === "POST" &&
+                    pathname === "/-/stage/package/pkg-a"
+                  ) {
+                    stagedRequest = {
+                      body: await request.clone().arrayBuffer(),
+                      headers: new Headers(request.headers),
+                    };
+                    return Response.json({ stageId }, { status: 201 });
+                  }
+                  return undefined;
+                },
+              }),
+            );
+            const cwd = await pm.gitdir(
+              createPmContext(registry, pmBinPath),
+              createPkgAFixture(),
+            );
+
+            const stageResult = await runCliCommand({
+              command: "publish",
+              args: ["--stage"],
+              cwd,
+              pmBinPath,
+              signal,
+            });
+            expect.soft(stageResult.exitCode).toBe(0);
+            expect.soft(stagedRequest).toBeDefined();
+            expect.soft(await tagExists("pkg-a@1.0.0", cwd)).toBe(true);
+
+            const response = await fetch(new URL("pkg-a", registry.url));
+            expect
+              .soft(response.status)
+              .toBe(packageState === "existing" ? 200 : 404);
+            const packument =
+              packageState === "existing" ? await response.json() : {};
+            expect.soft(packument).not.toHaveProperty(["versions", "1.0.0"]);
+          }, 30_000);
+        },
+      );
+    }
+
     it("publishes a new version of a package", async ({ signal }) => {
       await using stack = new AbortableAsyncDisposableStack(signal);
       const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));

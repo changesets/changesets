@@ -59,12 +59,42 @@ ${c.red("except")} for packages that have not had normal releases, which will be
   }
 }
 
+async function publishPackage(
+  publishTool: PublishTool,
+  options: Parameters<PublishTool["publish"]>[0],
+): Promise<PublishResult> {
+  const result = await publishTool.publish(options);
+  // For normal publishing, already-done means the version is already published,
+  // so no further check is needed. Publishing over a staged version is a failure.
+  // Staging uses the same conflict message for published and pending versions.
+  // Only its already-done result needs an info lookup to reject published versions
+  // while tolerating pending stages. This checks metadata without retrying the upload.
+  if (!options.stage || result.result !== "failed:already-done") {
+    return result;
+  }
+
+  const { pkg, release } = options;
+  try {
+    const response = await publishTool.info({ cwd: pkg.dir, pkg });
+    if (
+      "error" in response ||
+      (response.published && response.info.versions.includes(release.version))
+    ) {
+      return { ...result, result: "failed" };
+    }
+  } catch {
+    return { ...result, result: "failed" };
+  }
+  return result;
+}
+
 async function bulkPublishPackages({
   publishTool,
   publishQueue,
   packagesByName,
   artifactDir,
   otpCode,
+  stage,
   onResult,
 }: {
   publishTool: PublishTool;
@@ -72,6 +102,7 @@ async function bulkPublishPackages({
   packagesByName: Map<string, Package>;
   artifactDir?: string;
   otpCode: string | null;
+  stage: boolean;
   onResult?: (result: PublishResult) => void;
 }): Promise<PublishQueueItem[]> {
   if (publishQueue.length === 0) return [];
@@ -79,7 +110,7 @@ async function bulkPublishPackages({
   const publishPromises = publishQueue.map(async (item) => {
     const pkg = packagesByName.get(item.release.name)!;
     const result = await npmPublishQueue.add(() =>
-      publishTool.publish({
+      publishPackage(publishTool, {
         pkg,
         release: item.release,
         tarballPath: artifactDir
@@ -87,6 +118,7 @@ async function bulkPublishPackages({
           : null,
         interactive: false,
         otpCode,
+        stage,
       }),
     );
 
@@ -105,6 +137,7 @@ export interface PublishOptions {
   output?: string;
   /** @default true */
   gitTag?: boolean;
+  stage?: boolean;
 }
 
 export async function publish(options?: PublishOptions) {
@@ -147,6 +180,7 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
   }
 
   const config = await readConfig(packages);
+  const stage = options?.stage ?? config.stagedPublishing ?? false;
   const plan = artifactDir
     ? await readPlanFile(path.join(artifactDir, "publish-plan.json"))
     : await getPublishPlan(packages.rootDir, config, {
@@ -178,8 +212,8 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
   const p = progress({ max: totalPublishCount });
   const renderProgressMessage = () =>
     finishedCount === 0
-      ? "Publishing packages"
-      : `Publishing packages (${finishedCount}/${totalPublishCount})`;
+      ? `${stage ? "Staging" : "Publishing"} packages`
+      : `${stage ? "Staging" : "Publishing"} packages (${finishedCount}/${totalPublishCount})`;
   const advanceProgress = () => {
     finishedCount++;
     p.advance(1, renderProgressMessage());
@@ -211,7 +245,7 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
         let result =
           item.result ??
           (await npmPublishQueue.add(() =>
-            publishTool.publish({
+            publishPackage(publishTool, {
               pkg: packagesByName.get(item.release.name)!,
               release: item.release,
               tarballPath: artifactDir
@@ -219,6 +253,7 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
                 : null,
               interactive,
               otpCode,
+              stage,
             }),
           ));
 
@@ -252,7 +287,7 @@ for every package being published after this!
             // run publish again in TTY mode, the user handle 2fa for us
             interactive = true;
             result = await npmPublishQueue.add(() =>
-              publishTool.publish({
+              publishPackage(publishTool, {
                 pkg: packagesByName.get(item.release.name)!,
                 release: item.release,
                 tarballPath: artifactDir
@@ -260,6 +295,7 @@ for every package being published after this!
                   : null,
                 interactive,
                 otpCode: null,
+                stage,
               }),
             );
           }
@@ -267,7 +303,7 @@ for every package being published after this!
 
         advanceProgress();
 
-        if (result.result === "failed:already-published") {
+        if (result.result === "failed:already-done") {
           // we don't trust this error to mean that the authentication works
           // this could be rejected by a preflight check (theoretically, we've not observed this in practice)
           // in general, we should *rarely* see this error as we only try to publish packages that have not been published yet
@@ -310,6 +346,7 @@ for every package being published after this!
         publishQueue,
         packagesByName,
         otpCode,
+        stage,
         artifactDir,
         onResult: (result) => {
           // those can be recovered in tty mode, so we don't want to advance the progress bar for them
@@ -334,7 +371,7 @@ for every package being published after this!
       if (failures.length > 0 || !process.stdin.isTTY) {
         // We could still retry the recoverable failures, but mixing recovery
         // with hard failures complicates the flow. Only recover when every
-        // failure is recoverable; failed:already-published is acceptable here.
+        // failure is recoverable. Same-operation duplicates are acceptable here.
         unsuccessfulNpmPublishes.push(
           ...recoverableItems.map((item) => item.result!),
         );
@@ -364,7 +401,7 @@ for every package being published after this!
   }
 
   if (successfulNpmPublishes.length !== 0) {
-    const message = `Successfully published:
+    const message = `Successfully ${stage ? "staged" : "published"}:
 ${formatPackageList(successfulNpmPublishes)}`;
 
     if (sequential) {

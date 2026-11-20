@@ -1,7 +1,7 @@
 import path from "node:path";
 import { exec } from "tinyexec";
 import { getLastJsonObjectFromString } from "../utils/getLastJsonObjectFromString.ts";
-import { isAlreadyPublishedError } from "./common.ts";
+import { isAlreadyPublishedError, isStageConflictError } from "./common.ts";
 import * as npm from "./npm.ts";
 import type {
   InfoOptions,
@@ -26,7 +26,7 @@ export type PnpmPublish2faRequiredError = {
 };
 
 export type PnpmPublishGenericError = {
-  code: "E403" | "E404";
+  code: "E403" | "E404" | "E409";
   message: string;
 };
 
@@ -177,7 +177,7 @@ export const getOtpCode: PublishTool["getOtpCode"] = (otp?: string) =>
   null;
 
 export async function publish(
-  { pkg, release, tarballPath, interactive, otpCode }: PublishOptions,
+  { pkg, release, tarballPath, interactive, otpCode, stage }: PublishOptions,
   options: PnpmOptions,
 ): Promise<PublishResult> {
   const cwd = pkg.dir;
@@ -195,9 +195,10 @@ export async function publish(
   if (otpCode) args.push("--otp", otpCode);
   if (tarballPath) args.unshift(path.relative(cwd, tarballPath));
 
+  const command = stage ? ["stage", "publish"] : ["publish"];
   const { exitCode, stdout, stderr } = await exec(
     "pnpm",
-    ["publish", ...args],
+    [...command, ...args],
     {
       nodePath: false,
       nodeOptions: {
@@ -209,9 +210,30 @@ export async function publish(
   );
   const resultBase = { name: release.name, version: release.version };
   if (exitCode === 0) {
+    if (stage) {
+      // pnpm 10 has no stage command, so its npm-dependent output formats don't apply.
+      // Native pnpm staging returns an object keyed by package name, not an array.
+      const json = getLastJsonObjectFromString(stdout);
+      const value =
+        json && typeof json === "object" && !Array.isArray(json)
+          ? json[release.name]
+          : undefined;
+      const stageId =
+        value &&
+        typeof value === "object" &&
+        "stageId" in value &&
+        typeof value.stageId === "string"
+          ? value.stageId
+          : undefined;
+      return {
+        ...resultBase,
+        result: "success",
+        stageId,
+      };
+    }
     return {
       ...resultBase,
-      result: "published",
+      result: "success",
     };
   }
 
@@ -231,7 +253,7 @@ export async function publish(
     // before that delegation, such as lifecycle failures, still use pnpm's
     // error shape. Only send non-pnpm output to npm's error handler.
     if (options.major <= 10) {
-      return npm.handlePublishError(resultBase, json, stderr || stdout);
+      return npm.handlePublishError(resultBase, json, stderr || stdout, stage);
     }
 
     return {
@@ -241,16 +263,21 @@ export async function publish(
     };
   }
 
-  if (isAlreadyPublishedError(json.error.message)) {
-    // we don't need to log anything here, it just turned out the version was already published so we gracefully exit the publish process
+  const message = json.error.message.trim();
+
+  if (
+    (!stage && isAlreadyPublishedError(json.error.message)) ||
+    (stage &&
+      json.error.code === "E409" &&
+      isStageConflictError(json.error.message))
+  ) {
     return {
       ...resultBase,
-      result: "failed:already-published",
+      result: "failed:already-done",
       code: json.error.code,
+      message: message || undefined,
     };
   }
-
-  const message = json.error.message.trim();
 
   if (json.error.code === "ERR_PNPM_OTP_NON_INTERACTIVE") {
     return {
