@@ -65,8 +65,8 @@ export async function version(options: VersionOptions) {
   }
 
   const [changesets, preState] = await Promise.all([
-    readChangesets(cwd),
-    readPreState(cwd),
+    readChangesets(packages.rootDir),
+    readPreState(packages.rootDir),
   ]);
 
   if (preState?.mode === "pre") {
@@ -126,7 +126,7 @@ You can then run ${c.cyan("changeset version")} again to do a normal release.
 
   const [{ getVersionMessage }, commitOpts] = await getCommitFunctions(
     releaseConfig.commit,
-    cwd,
+    packages.rootDir,
     contextDir,
   );
   if (getVersionMessage) {

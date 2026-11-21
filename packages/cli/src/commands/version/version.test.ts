@@ -231,6 +231,51 @@ describe("running version in a simple project", () => {
         expect.objectContaining({ name: "pkg-b", version: "1.0.1" }),
       );
     });
+
+    it("should bump releasedPackages when called from subdirectory", async () => {
+      const rootDir = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "package-lock.json": "",
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+          dependencies: {
+            "pkg-b": "1.0.0",
+          },
+        }),
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
+      });
+      await writeChangesets(
+        [
+          {
+            summary: "This is a summary too",
+            releases: [
+              { name: "pkg-a", type: "minor" },
+              { name: "pkg-b", type: "patch" },
+            ],
+          },
+        ],
+        rootDir,
+      );
+
+      const cwd = path.resolve(rootDir, "packages", "pkg-a");
+
+      await version({ cwd });
+
+      expect(await getPkgJSON("pkg-a", rootDir)).toEqual(
+        expect.objectContaining({ name: "pkg-a", version: "1.1.0" }),
+      );
+      expect(await getPkgJSON("pkg-b", rootDir)).toEqual(
+        expect.objectContaining({ name: "pkg-b", version: "1.0.1" }),
+      );
+    });
   });
 
   it("should not touch package.json of an ignored package when it is not a dependent of any releasedPackages", async () => {
