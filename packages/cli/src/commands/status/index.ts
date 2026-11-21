@@ -29,8 +29,10 @@ export async function status(
   await ensureChangesetFolder(packages.rootDir);
 
   const config = await readConfig(packages);
-  const preState = await readPreState(packages.rootDir);
-  const changesets = await readChangesets(packages.rootDir, options?.since);
+  const [changesets, preState] = await Promise.all([
+    readChangesets(packages.rootDir, options?.since),
+    readPreState(packages.rootDir),
+  ]);
 
   const releasePlan = assembleReleasePlan(
     changesets,
