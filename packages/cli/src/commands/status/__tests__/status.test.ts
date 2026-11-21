@@ -172,7 +172,7 @@ describe("status", { tags: ["slow"] }, () => {
     `);
   });
 
-  describe.only("missing changesets", () => {
+  describe("missing changesets", () => {
     it("should warn and exit with code 1 by default", async () => {
       const cwd = await gitdir({
         "package.json": JSON.stringify({
