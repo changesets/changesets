@@ -56,10 +56,17 @@ export async function getChangelogEntry(
   });
   const dependentReleases = releases.filter((rel) => {
     const dependencyVersionRange = release.packageJson.dependencies?.[rel.name];
+    const optionalDependencyVersionRange =
+      release.packageJson.optionalDependencies?.[rel.name];
     const peerDependencyVersionRange =
       release.packageJson.peerDependencies?.[rel.name];
 
-    const versionRange = dependencyVersionRange || peerDependencyVersionRange;
+    // Optional dependencies are consumer-facing too: when their range is
+    // rewritten the dependent is released, so the changelog has to list them.
+    const versionRange =
+      dependencyVersionRange ||
+      optionalDependencyVersionRange ||
+      peerDependencyVersionRange;
     const usesWorkspaceRange = versionRange?.startsWith("workspace:");
     return (
       versionRange &&
@@ -69,7 +76,11 @@ export async function getChangelogEntry(
         rel,
         {
           depVersionRange: versionRange,
-          depType: dependencyVersionRange ? "dependencies" : "peerDependencies",
+          depType: dependencyVersionRange
+            ? "dependencies"
+            : optionalDependencyVersionRange
+              ? "optionalDependencies"
+              : "peerDependencies",
         },
         {
           minReleaseType: updateInternalDependencies,
