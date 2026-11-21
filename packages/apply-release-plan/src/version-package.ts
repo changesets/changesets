@@ -123,11 +123,17 @@ function getNewDependencyRange(
   // A union has multiple comparator sets and cannot be rewritten as one bounded range.
   const comparators = comparatorSets.length === 1 ? comparatorSets[0] : [];
 
+  // Hyphen ranges (`1.0.0 - 2.0.0`) are bounded as well, but they don't contain
+  // explicit `>`/`<` characters. Caret, tilde and x-ranges also parse into two
+  // comparators, but they have to keep their shorthand form.
+  const isBoundedRange =
+    (versionRange.includes(">") && versionRange.includes("<")) ||
+    /\s+-\s+/.test(versionRange);
+
   if (
     // A bounded range has exactly one lower and one upper comparator.
     comparators.length === 2 &&
-    versionRange.includes(">") &&
-    versionRange.includes("<")
+    isBoundedRange
   ) {
     const lowerBound = comparators.find(({ operator }) =>
       operator.startsWith(">"),
