@@ -169,6 +169,10 @@ cli
   .option("--since <branch>", "Show changesets since the provided git ref")
   .option("-v, --verbose", "Show more information about the changesets")
   .option("-o, --output <file>", "Output the status as JSON to a file")
+  .option(
+    "--allow-no-changes",
+    "Exit with code 0 instead of 1 if there are no changesets",
+  )
   .action(async (options) => {
     withEnvOptions(normalizeOptions(options));
     const { status } = await import("./commands/status/index.ts");

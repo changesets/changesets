@@ -2,6 +2,6 @@
 "@changesets/cli": minor
 ---
 
-Added `--allow-no-changes` to `version` command, which makes it exit with code 0 if no changesets are found.
+Added `--allow-no-changes` to the `status` and `version` commands, which makes them exit with code 0 if no changesets are found.
 
-_This makes the command behave how it did in v2._
+_This should make them behave how they did in v2._

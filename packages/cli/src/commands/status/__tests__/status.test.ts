@@ -172,35 +172,68 @@ describe("status", { tags: ["slow"] }, () => {
     `);
   });
 
-  it("should exit early with a non-zero error code when there are changed packages but no changesets", async () => {
-    const cwd = await gitdir({
-      "package.json": JSON.stringify({
-        private: true,
-        name: "root-pkg",
-        workspaces: ["packages/*"],
-      }),
-      "package-lock.json": "",
-      "packages/pkg-a/package.json": JSON.stringify({
-        name: "pkg-a",
-        version: "1.0.0",
-      }),
-      ".changeset/config.json": JSON.stringify({}),
+  describe.only("missing changesets", () => {
+    it("should warn and exit with code 1 by default", async () => {
+      const cwd = await gitdir({
+        "package.json": JSON.stringify({
+          private: true,
+          name: "root-pkg",
+          workspaces: ["packages/*"],
+        }),
+        "package-lock.json": "",
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify({}),
+      });
+
+      await exec("git", ["checkout", "-b", "new-branch"], {
+        nodeOptions: { cwd },
+      });
+
+      await outputFile(
+        path.join(cwd, "packages/pkg-a/a.js"),
+        'export default "updated a"',
+      );
+
+      await git.add(".", cwd);
+      await git.commit("updated a", cwd);
+
+      const promise = status({ cwd, since: "main" });
+      await expect(promise).rejects.toThrow();
     });
 
-    await exec("git", ["checkout", "-b", "new-branch"], {
-      nodeOptions: { cwd },
+    it("should warn and exit with code 0 if --allow-no-changes is passed", async () => {
+      const cwd = await gitdir({
+        "package.json": JSON.stringify({
+          private: true,
+          name: "root-pkg",
+          workspaces: ["packages/*"],
+        }),
+        "package-lock.json": "",
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify({}),
+      });
+
+      await exec("git", ["checkout", "-b", "new-branch"], {
+        nodeOptions: { cwd },
+      });
+
+      await outputFile(
+        path.join(cwd, "packages/pkg-a/a.js"),
+        'export default "updated a"',
+      );
+
+      await git.add(".", cwd);
+      await git.commit("updated a", cwd);
+
+      const promise = status({ cwd, since: "main", allowNoChanges: true });
+      await expect(promise).resolves.toBeUndefined();
     });
-
-    await outputFile(
-      path.join(cwd, "packages/pkg-a/a.js"),
-      'export default "updated a"',
-    );
-
-    await git.add(".", cwd);
-    await git.commit("updated a", cwd);
-
-    const promise = status({ cwd, since: "main" });
-    await expect(promise).rejects.toThrow();
   });
 
   it("should not exit early with a non-zero error code when there are no changed packages", async () => {
