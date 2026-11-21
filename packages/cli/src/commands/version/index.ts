@@ -65,8 +65,8 @@ export async function version(options: VersionOptions) {
   }
 
   const [changesets, preState] = await Promise.all([
-    readChangesets(cwd),
-    readPreState(cwd),
+    readChangesets(packages.rootDir),
+    readPreState(packages.rootDir),
   ]);
 
   if (preState?.mode === "pre") {
