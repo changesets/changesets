@@ -414,6 +414,8 @@ describe("apply release plan", () => {
       [">=1.0.0 <3.0.0", "1.0.0", "2.0.0", "major", ">=2.0.0 <3.0.0"],
       [">=1.2.0 <1.3.0", "1.2.0", "1.3.0", "minor", ">=1.3.0 <1.4.0"],
       [">=1.2.3 <1.2.4", "1.2.3", "1.2.4", "patch", ">=1.2.4 <1.2.5"],
+      // Hyphen ranges are bounded too and have to keep their upper bound.
+      ["1.2.0 - 2.0.0", "1.2.0", "1.3.0", "minor", ">=1.3.0 <=2.0.0"],
     ] as const)(
       "should update the bounded dependency range %s",
       async (versionRange, oldVersion, newVersion, type, expected) => {
