@@ -75,8 +75,8 @@ beforeEach(() => {
 silenceLogsInBlock();
 
 describe("running version in a simple project", () => {
-  describe("when there are no changeset commits", () => {
-    it("should warn and exit with code 1 if no changeset commits exist", async () => {
+  describe("missing changesets", () => {
+    it("should warn and exit with code 1 by default", async () => {
       const cwd = await testdir({
         "package.json": JSON.stringify({
           private: true,
@@ -90,6 +90,28 @@ describe("running version in a simple project", () => {
         ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
       });
       await expect(version({ cwd })).rejects.toThrow(ExitError);
+      expect(mockedLogger.warn).toHaveBeenCalledExactlyOnceWith(
+        "No unreleased changesets found.",
+      );
+    });
+
+    it("should warn and exit with code 0 if --allow-no-changes is passed", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "package-lock.json": "",
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
+      });
+
+      await expect(
+        version({ cwd, allowNoChanges: true }),
+      ).resolves.toBeUndefined();
       expect(mockedLogger.warn).toHaveBeenCalledExactlyOnceWith(
         "No unreleased changesets found.",
       );

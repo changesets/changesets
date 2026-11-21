@@ -110,6 +110,10 @@ cli
     "--snapshot-prerelease-template <template>",
     "Template for snapshot prerelease",
   )
+  .option(
+    "--allow-no-changes",
+    "Exit with code 0 instead of 1 if there are no changesets",
+  )
   .action(async (options) => {
     normalizeOptions(options, { array: ["ignore"] });
     const { version } = await import("./commands/version/index.ts");
