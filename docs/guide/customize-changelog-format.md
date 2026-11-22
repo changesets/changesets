@@ -17,8 +17,15 @@ The changelog formatting can be customized with two functions: `getReleaseLine` 
 import type { ChangelogFunctions } from "@changesets/types";
 
 const functions: ChangelogFunctions = {
-  getReleaseLine() {}
-  getDependencyReleaseLine(){}
+  getReleaseLine({ summary }) {
+    return `- ${summary}`;
+  },
+  getDependencyReleaseLine(_changesets, dependenciesUpdated) {
+    return dependenciesUpdated
+      .filter(({ type }) => type !== "none")
+      .map(({ name, newVersion }) => `- Updated ${name} to ${newVersion}`)
+      .join("\n");
+  },
 };
 
 export default functions;
@@ -26,8 +33,15 @@ export default functions;
 
 ```js [JavaScript]
 const functions = {
-  getReleaseLine() {},
-  getDependencyReleaseLine() {},
+  getReleaseLine({ summary }) {
+    return `- ${summary}`;
+  },
+  getDependencyReleaseLine(_changesets, dependenciesUpdated) {
+    return dependenciesUpdated
+      .filter(({ type }) => type !== "none")
+      .map(({ name, newVersion }) => `- Updated ${name} to ${newVersion}`)
+      .join("\n");
+  },
 };
 
 export default functions;
@@ -35,45 +49,14 @@ export default functions;
 
 :::
 
-These functions are run during the [`version`](./cli.md#version) command and are expected to return a string (or a promise with a string).
+These functions are run during the [`version`](./cli.md#version) command. Each function must return a string or a promise of a string. Return an empty string when there is nothing to add to the changelog.
 
-```ts
-type VersionType = "major" | "minor" | "patch";
+- `getReleaseLine(changeset, type, changelogOpts)` receives one changeset and its release type.
+- `getDependencyReleaseLine(changesets, dependenciesUpdated, changelogOpts)` receives the changesets that caused the dependency updates and the corresponding dependency releases.
 
-type NewChangesetWithCommit = {
-  // The file name of the changeset, e.g. "cool-places-hug"
-  id: string;
-  // The Markdown summary of the changeset
-  summary: string;
-  // The package names to be released and their respective semver bump types
-  releases: Array<{ name: string; type: VersionType }>;
-  // The commit hash that introduced the changeset
-  commit?: string;
-};
+A changeset has an `id`, `summary`, `releases`, and, when available, a `commit` hash. An `_` mapping in its YAML frontmatter is available as `changeset.metadata`. The values are typed as `unknown`, so check their types before using them.
 
-type GetReleaseLine = (
-  // The changeset for this release
-  changeset: NewChangesetWithCommit,
-  // The type of change for this release: "major", "minor", or "patch"
-  type: VersionType,
-  // Options passed to the second item of the tuple
-  changelogOpts?: Record<string, any>,
-) => string | Promise<string>;
-
-type GetDependencyReleaseLine = (
-  // The changesets that causes a dependency update
-  changesets: NewChangesetWithCommit[],
-  // The dependencies that are being updated
-  dependenciesUpdated: ModCompWithPackage[],
-  // Options passed to the second item of the tuple
-  changelogOpts?: Record<string, any>,
-) => string | Promise<string>;
-
-type ChangelogFunctions = {
-  getReleaseLine: GetReleaseLine;
-  getDependencyReleaseLine: GetDependencyReleaseLine;
-};
-```
+For both functions, `changelogOpts` is the object from the second element of the [`changelog`](./config.md#changelog) tuple, or `null` if no options were supplied.
 
 ## Using a Custom Changelog Generator
 
