@@ -67,9 +67,10 @@ async function publishPackage(
   const result = await publishTool.publish(options);
   // For normal publishing, already-done means the version is already published,
   // so no further check is needed. Publishing over a staged version is a failure.
-  // Staging uses the same conflict message for published and pending versions.
-  // Only its already-done result needs an info lookup to reject published versions
-  // while tolerating pending stages. This checks metadata without retrying the upload.
+  // Staged publishes use the same conflict message for published and pending versions.
+  // Only staged publishes need their already-done result double-checked
+  // to reject published versions while tolerating pending stages.
+  // This checks metadata without retrying the upload.
   if (!options.stage || result.result !== "failed:already-done") {
     return result;
   }
