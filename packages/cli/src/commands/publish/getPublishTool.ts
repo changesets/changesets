@@ -7,11 +7,11 @@ import * as pnpm from "../../lib/pnpm.ts";
 import type { PublishTool } from "../../lib/types.ts";
 import * as yarn from "../../lib/yarn.ts";
 
-async function getVersion(packages: Packages, packageManager: string) {
+async function getPackageManagerVersion(cwd: string, packageManager: string) {
   const { stdout } = await exec(packageManager, ["--version"], {
     nodePath: false,
     nodeOptions: {
-      cwd: packages.rootDir,
+      cwd,
     },
   });
   return stdout.trim();
@@ -33,7 +33,7 @@ export async function getPublishTool(
 
   const version =
     stage || packageManager === "pnpm" || packageManager === "yarn"
-      ? await getVersion(packages, packageManager)
+      ? await getPackageManagerVersion(packages.rootDir, packageManager)
       : undefined;
 
   if (stage) {
