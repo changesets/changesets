@@ -212,11 +212,16 @@ function createWebServer(handler: (request: Request) => Promise<Response>) {
     void (async () => {
       try {
         await writeResponse(res, await handler(await createWebRequest(req)));
-      } catch {
-        await writeResponse(
-          res,
-          Response.json({ error: "Internal Server Error" }, { status: 500 }),
-        );
+      } catch (error) {
+        res.destroy();
+        // Clients can disconnect while the response body is still streaming.
+        if (
+          !(error instanceof Error) ||
+          !("code" in error) ||
+          error.code !== "ERR_STREAM_PREMATURE_CLOSE"
+        ) {
+          throw error;
+        }
       }
     })();
   });
