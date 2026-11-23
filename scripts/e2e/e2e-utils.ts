@@ -1,9 +1,12 @@
+import { execFile, type ExecException } from "node:child_process";
+import { addAbortListener, once } from "node:events";
 import fs from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { setTimeout } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 import { defaultConfig } from "@changesets/config";
-import { gitdir, type Fixture } from "@changesets/test-utils";
+import { createDisposableGitdir, type Fixture } from "@changesets/test-utils";
 import * as pty from "@lydell/node-pty";
 import { exec } from "tinyexec";
 
@@ -29,89 +32,22 @@ export type TestRegistryConfig = {
 export type PmGitdirContext = {
   pmBinPath: string;
   registry?: TestRegistryConfig;
+  signal: AbortSignal;
 };
 
 export type PmCase = {
   name: string;
   bins: PmBins;
-  gitdir: (context: PmGitdirContext, fixture?: Fixture) => Promise<string>;
+  gitdir: (
+    context: PmGitdirContext,
+    fixture?: Fixture,
+  ) => ReturnType<typeof createDisposableGitdir>;
 };
 
-function disposeValue(value: AsyncDisposable | Disposable | null | undefined) {
-  if (!value) {
-    return;
-  }
-  if (Symbol.asyncDispose in value) {
-    return value[Symbol.asyncDispose]();
-  }
-  return value[Symbol.dispose]();
-}
-
-export class AbortableAsyncDisposableStack extends AsyncDisposableStack {
-  #signal: AbortSignal;
-
-  #abort = () => {
-    void this.disposeAsync();
-  };
-
-  constructor(signal: AbortSignal) {
-    super();
-    this.#signal = signal;
-    signal.throwIfAborted();
-    signal.addEventListener("abort", this.#abort, { once: true });
-  }
-
-  override use<T extends AsyncDisposable | Disposable | null | undefined>(
-    value: T,
-  ): T {
-    if (this.#signal.aborted) {
-      void disposeValue(value);
-    }
-    this.#signal.throwIfAborted();
-    return super.use(value);
-  }
-
-  override adopt<T>(
-    value: T,
-    onDisposeAsync: (value: T) => PromiseLike<void> | void,
-  ) {
-    if (this.#signal.aborted) {
-      void onDisposeAsync(value);
-    }
-    this.#signal.throwIfAborted();
-    return super.adopt(value, onDisposeAsync);
-  }
-
-  override defer(onDisposeAsync: () => PromiseLike<void> | void): void {
-    if (this.#signal.aborted) {
-      void onDisposeAsync();
-    }
-    this.#signal.throwIfAborted();
-    return super.defer(onDisposeAsync);
-  }
-
-  override async disposeAsync() {
-    this.#signal.removeEventListener("abort", this.#abort);
-    await super.disposeAsync();
-  }
-
-  override async [Symbol.asyncDispose]() {
-    await this.disposeAsync();
-  }
-}
-
 export async function getFreePort() {
-  const server = (await import("node:net")).createServer();
-  await new Promise<void>((resolve) => {
-    server.listen(0, "127.0.0.1", resolve);
-  });
+  await using server = (await import("node:net")).createServer();
+  await once(server.listen(0, "127.0.0.1"), "listening");
   const address = server.address();
-  await new Promise<void>((resolve, reject) => {
-    server.close((error) => {
-      if (error) reject(error);
-      else resolve();
-    });
-  });
   if (!address || typeof address === "string") {
     throw new Error("Expected temporary server to listen on a TCP port");
   }
@@ -128,10 +64,16 @@ export async function createTempDir(prefix: string) {
   };
 }
 
-async function readInstalledPackageJson(packageName: string) {
+async function readInstalledPackageJson(
+  packageName: string,
+  signal: AbortSignal,
+) {
   const packageRoot = path.join(e2ePackageRoot, "node_modules", packageName);
   const packageJson: unknown = JSON.parse(
-    await fs.readFile(path.join(packageRoot, "package.json"), "utf8"),
+    await fs.readFile(path.join(packageRoot, "package.json"), {
+      encoding: "utf8",
+      signal,
+    }),
   );
 
   if (!packageJson || typeof packageJson !== "object") {
@@ -141,8 +83,12 @@ async function readInstalledPackageJson(packageName: string) {
   return packageJson as Record<string, unknown>;
 }
 
-async function resolvePackageBin(packageName: string, command: keyof PmBins) {
-  const packageJson = await readInstalledPackageJson(packageName);
+async function resolvePackageBin(
+  packageName: string,
+  command: keyof PmBins,
+  signal: AbortSignal,
+) {
+  const packageJson = await readInstalledPackageJson(packageName, signal);
   const packageRoot = path.join(e2ePackageRoot, "node_modules", packageName);
 
   if (!("bin" in packageJson)) {
@@ -167,8 +113,9 @@ async function resolvePackageBin(packageName: string, command: keyof PmBins) {
 async function resolvePackageManagerSpec(
   packageManager: "npm" | "pnpm" | "yarn",
   packageName: string,
+  signal: AbortSignal,
 ) {
-  const packageJson = await readInstalledPackageJson(packageName);
+  const packageJson = await readInstalledPackageJson(packageName, signal);
 
   if (typeof packageJson.version !== "string") {
     throw new Error(`Could not resolve version from ${packageName}`);
@@ -205,13 +152,15 @@ export async function createPmBinEnv(
 }
 
 export async function getPmBinPath(signal: AbortSignal, bins: PmBins) {
-  await using stack = new AbortableAsyncDisposableStack(signal);
+  signal.throwIfAborted();
+  await using stack = new AsyncDisposableStack();
   const root = stack.use(await createTempDir("changesets-pm-bins-"));
 
   for (const [command, packageName] of Object.entries(bins)) {
     const target = await resolvePackageBin(
       packageName,
       command as keyof PmBins,
+      signal,
     );
     const shimPath = path.join(
       root.path,
@@ -227,12 +176,13 @@ export async function getPmBinPath(signal: AbortSignal, bins: PmBins) {
     const shim = isWindows
       ? `@echo off\r\n${invocation} %*\r\n`
       : `#!/bin/sh\nexec ${invocation} "$@"\n`;
-    await fs.writeFile(shimPath, shim);
+    await fs.writeFile(shimPath, shim, { signal });
     if (!isWindows) {
       await fs.chmod(shimPath, 0o755);
     }
   }
 
+  signal.throwIfAborted();
   const cleanup = stack.move();
   return {
     pmBinPath: root.path,
@@ -240,6 +190,114 @@ export async function getPmBinPath(signal: AbortSignal, bins: PmBins) {
       await cleanup[Symbol.asyncDispose]();
     },
   };
+}
+
+export function execChild(
+  command: Parameters<typeof exec>[0],
+  args?: Parameters<typeof exec>[1],
+  options?: Omit<Parameters<typeof exec>[2], "persist">,
+) {
+  const child = exec(command, args, {
+    ...options,
+    // Give the command its own process group so disposal can stop its children too.
+    persist: true,
+  });
+
+  const processHandle = child.process;
+  const pid = child.pid;
+  let hasClosed = false;
+  processHandle?.once("close", () => {
+    hasClosed = true;
+  });
+  let disposing: Promise<void> | undefined;
+
+  async function dispose(): Promise<void> {
+    if (!processHandle || !pid || hasClosed) {
+      return;
+    }
+
+    const closed = once(processHandle, "close");
+
+    if (process.platform === "win32") {
+      const taskkillError = await new Promise<(ExecException & Error) | null>(
+        (resolve) => {
+          execFile(
+            "taskkill.exe",
+            ["/PID", String(pid), "/T", "/F"],
+            { windowsHide: true },
+            (error) => resolve(error),
+          );
+        },
+      );
+
+      if (taskkillError && taskkillError.code !== 128) {
+        // A child can exit while taskkill is walking the process tree. It then
+        // reports failure even when it successfully terminated the root.
+        const closedDespiteError = await Promise.race([
+          closed.then(() => true),
+          setTimeout(1_000, false),
+        ]);
+        if (!closedDespiteError) {
+          throw taskkillError;
+        }
+        return;
+      }
+
+      await closed;
+      return;
+    }
+
+    const killGroup = (signal: NodeJS.Signals) => {
+      try {
+        process.kill(-pid, signal);
+      } catch (error) {
+        if (
+          !(error instanceof Error) ||
+          !("code" in error) ||
+          error.code !== "ESRCH"
+        ) {
+          throw error;
+        }
+      }
+    };
+
+    killGroup("SIGTERM");
+
+    await Promise.race([closed, setTimeout(1_000, undefined, { ref: false })]);
+
+    // The root can exit while a child that ignored SIGTERM is still running.
+    killGroup("SIGKILL");
+    await closed;
+  }
+
+  return {
+    child,
+
+    [Symbol.asyncDispose]() {
+      return (disposing ??= dispose());
+    },
+  };
+}
+
+async function execCancellable(
+  command: string,
+  args: string[],
+  {
+    signal,
+    ...options
+  }: Omit<NonNullable<Parameters<typeof exec>[2]>, "persist">,
+) {
+  signal?.throwIfAborted();
+  await using subprocess = execChild(command, args, options);
+  if (!signal) {
+    return await subprocess.child;
+  }
+
+  const cancelled = Promise.withResolvers<never>();
+  using _listener = addAbortListener(signal, () =>
+    cancelled.reject(signal.reason),
+  );
+  return await Promise.race([subprocess.child, cancelled.promise]);
 }
 
 function execTty(
@@ -328,8 +386,10 @@ export async function runCliCommand(options: {
   signal?: AbortSignal;
   tty?: boolean;
 }): Promise<ExecResult> {
+  options.signal?.throwIfAborted();
   const args = [cliBinPath, options.command, ...(options.args ?? [])];
   const env = await createPmBinEnv(options.cwd, options.pmBinPath, options.env);
+  options.signal?.throwIfAborted();
   if (options.tty) {
     return execTty(process.execPath, args, {
       onData: options.onData,
@@ -341,111 +401,133 @@ export async function runCliCommand(options: {
     });
   }
 
-  return exec(process.execPath, args, {
+  return execCancellable(process.execPath, args, {
     nodePath: false,
+    nodeOptions: { cwd: options.cwd, env },
     signal: options.signal,
-    nodeOptions: {
-      cwd: options.cwd,
-      env,
-    },
   });
 }
 
 function createNpmGitdir(packageName: string) {
-  return async ({ registry }: PmGitdirContext, fixture: Fixture = {}) => {
-    const packageManager = await resolvePackageManagerSpec("npm", packageName);
+  return async (
+    { registry, signal }: PmGitdirContext,
+    fixture: Fixture = {},
+  ) => {
+    const packageManager = await resolvePackageManagerSpec(
+      "npm",
+      packageName,
+      signal,
+    );
 
-    return gitdir({
-      "package.json": JSON.stringify({
-        packageManager,
-        private: true,
-        workspaces: ["packages/*"],
-      }),
-      "package-lock.json": JSON.stringify({
-        lockfileVersion: 3,
-        packages: {
-          "": {
-            workspaces: ["packages/*"],
+    return createDisposableGitdir(
+      {
+        "package.json": JSON.stringify({
+          packageManager,
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "package-lock.json": JSON.stringify({
+          lockfileVersion: 3,
+          packages: {
+            "": {
+              workspaces: ["packages/*"],
+            },
           },
-        },
-      }),
-      ".npmrc": [
-        registry && `registry=${registry.url}`,
-        registry?.authToken &&
-          `//${registry.host}/:_authToken=${registry.authToken}`,
-      ].join("\n"),
-      ...fixture,
-    });
+        }),
+        ".npmrc": [
+          registry && `registry=${registry.url}`,
+          registry?.authToken &&
+            `//${registry.host}/:_authToken=${registry.authToken}`,
+        ].join("\n"),
+        ...fixture,
+      },
+      signal,
+    );
   };
 }
 
 function createPnpmGitdir(packageName: string) {
   return async (
-    { pmBinPath, registry }: PmGitdirContext,
+    { pmBinPath, registry, signal }: PmGitdirContext,
     fixture: Fixture = {},
   ) => {
-    const packageManager = await resolvePackageManagerSpec("pnpm", packageName);
+    const packageManager = await resolvePackageManagerSpec(
+      "pnpm",
+      packageName,
+      signal,
+    );
     const npmPath = path.join(pmBinPath, isWindows ? "npm.cmd" : "npm");
     const hasNpmShim = await fs
       .access(npmPath)
       .then(() => true)
       .catch(() => false);
 
-    return gitdir({
-      "package.json": JSON.stringify({
-        packageManager,
-        private: true,
-        workspaces: ["packages/*"],
-      }),
-      "pnpm-workspace.yaml": "packages:\n  - packages/*\n",
-      ".npmrc": [
-        registry && `registry=${registry.url}`,
-        registry?.authToken &&
-          `//${registry.host}/:_authToken=${registry.authToken}`,
-        // pnpm 10 publish delegates to npm and prepends the active Node binary's
-        // directory to PATH, which can otherwise pick the host-bundled npm.
-        hasNpmShim ? `npm-path=${npmPath}` : undefined,
-      ].join("\n"),
-      ...fixture,
-    });
+    return createDisposableGitdir(
+      {
+        "package.json": JSON.stringify({
+          packageManager,
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "pnpm-workspace.yaml": "packages:\n  - packages/*\n",
+        ".npmrc": [
+          registry && `registry=${registry.url}`,
+          registry?.authToken &&
+            `//${registry.host}/:_authToken=${registry.authToken}`,
+          // pnpm 10 publish delegates to npm and prepends the active Node binary's
+          // directory to PATH, which can otherwise pick the host-bundled npm.
+          hasNpmShim ? `npm-path=${npmPath}` : undefined,
+        ].join("\n"),
+        ...fixture,
+      },
+      signal,
+    );
   };
 }
 
 function createYarnBerryGitdir(packageName: string) {
   return async (
-    { registry, pmBinPath }: PmGitdirContext,
+    { registry, pmBinPath, signal }: PmGitdirContext,
     fixture: Fixture = {},
   ) => {
-    const packageManager = await resolvePackageManagerSpec("yarn", packageName);
+    const packageManager = await resolvePackageManagerSpec(
+      "yarn",
+      packageName,
+      signal,
+    );
 
-    const cwd = await gitdir({
-      "package.json": JSON.stringify({
-        packageManager,
-        private: true,
-        workspaces: ["packages/*"],
-      }),
-      "yarn.lock": "",
-      ".yarnrc.yml": [
-        registry && `npmRegistryServer: "${registry.url}"`,
-        registry?.authToken && `npmAuthToken: "${registry.authToken}"`,
-        // we want yarn.lock to be updated on yarn install below
-        // this ensures that doesn't fail on CI where yarn.lock is often immutable/readonly
-        "enableImmutableInstalls: false",
-        "nodeLinker: node-modules",
-        "unsafeHttpWhitelist:",
-        '  - "127.0.0.1"',
-      ].join("\n"),
-      ...fixture,
-    });
-    await exec("yarn", ["install"], {
-      nodePath: false,
-      nodeOptions: {
-        cwd,
-        env: await createPmBinEnv(cwd, pmBinPath),
+    return createDisposableGitdir(
+      {
+        "package.json": JSON.stringify({
+          packageManager,
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "yarn.lock": "",
+        ".yarnrc.yml": [
+          registry && `npmRegistryServer: "${registry.url}"`,
+          registry?.authToken && `npmAuthToken: "${registry.authToken}"`,
+          // we want yarn.lock to be updated on yarn install below
+          // this ensures that doesn't fail on CI where yarn.lock is often immutable/readonly
+          "enableImmutableInstalls: false",
+          "nodeLinker: node-modules",
+          "unsafeHttpWhitelist:",
+          '  - "127.0.0.1"',
+        ].join("\n"),
+        ...fixture,
       },
-      throwOnError: true,
-    });
-    return cwd;
+      signal,
+      async (cwd) => {
+        const env = await createPmBinEnv(cwd, pmBinPath);
+        signal.throwIfAborted();
+        await execCancellable("yarn", ["install"], {
+          nodePath: false,
+          nodeOptions: { cwd, env },
+          signal,
+          throwOnError: true,
+        });
+      },
+    );
   };
 }
 

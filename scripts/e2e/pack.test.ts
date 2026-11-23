@@ -3,7 +3,6 @@ import path from "node:path";
 import { stripVTControlCharacters } from "node:util";
 import { describe, expect, it } from "vitest";
 import {
-  AbortableAsyncDisposableStack,
   createPkgAFixture,
   getPmBinPath,
   pmCases,
@@ -38,11 +37,12 @@ function sanitizePackLog(message: unknown) {
 describe("Pack command e2e", () => {
   describe.each(pmCases)("$name", (pm) => {
     it("packs from a publish plan", async ({ signal }) => {
-      await using stack = new AbortableAsyncDisposableStack(signal);
-      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
-      const cwd = await pm.gitdir(
+      await using pmBin = await getPmBinPath(signal, pm.bins);
+      const { pmBinPath } = pmBin;
+      await using fixture = await pm.gitdir(
         {
           pmBinPath,
+          signal,
         },
         {
           ...createPkgAFixture(),
@@ -62,6 +62,7 @@ describe("Pack command e2e", () => {
           }),
         },
       );
+      const { cwd } = fixture;
 
       const result = await runCliCommand({
         command: "pack",
@@ -85,7 +86,10 @@ describe("Pack command e2e", () => {
       expect.soft(tarball.size).toBeGreaterThan(0);
 
       const packedPlan = JSON.parse(
-        await fs.readFile(path.join(cwd, ".packed/publish-plan.json"), "utf8"),
+        await fs.readFile(path.join(cwd, ".packed/publish-plan.json"), {
+          encoding: "utf8",
+          signal,
+        }),
       );
       expect.soft(packedPlan).toMatchObject({
         plan: [
@@ -106,11 +110,12 @@ describe("Pack command e2e", () => {
     });
 
     it("handles lifecycle stdout while packing", async ({ signal }) => {
-      await using stack = new AbortableAsyncDisposableStack(signal);
-      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
-      const cwd = await pm.gitdir(
+      await using pmBin = await getPmBinPath(signal, pm.bins);
+      const { pmBinPath } = pmBin;
+      await using fixture = await pm.gitdir(
         {
           pmBinPath,
+          signal,
         },
         {
           ...createPkgAFixture(),
@@ -142,6 +147,7 @@ describe("Pack command e2e", () => {
           }),
         },
       );
+      const { cwd } = fixture;
 
       const result = await runCliCommand({
         command: "pack",
@@ -166,11 +172,12 @@ describe("Pack command e2e", () => {
     });
 
     it("surfaces pack errors", async ({ signal }) => {
-      await using stack = new AbortableAsyncDisposableStack(signal);
-      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
-      const cwd = await pm.gitdir(
+      await using pmBin = await getPmBinPath(signal, pm.bins);
+      const { pmBinPath } = pmBin;
+      await using fixture = await pm.gitdir(
         {
           pmBinPath,
+          signal,
         },
         {
           ...createPkgAFixture(),
@@ -202,6 +209,7 @@ describe("Pack command e2e", () => {
           }),
         },
       );
+      const { cwd } = fixture;
 
       const result = await runCliCommand({
         command: "pack",

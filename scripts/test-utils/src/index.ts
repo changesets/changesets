@@ -98,8 +98,8 @@ export function stubIsTTY(value: boolean) {
   };
 }
 
-export async function testdir(dir?: Fixture) {
-  const fixture = await createFixture(dir, {
+function createTestFixture(dir?: Fixture) {
+  return createFixture(dir, {
     fs: {
       ...fsp,
       rm: (path, options) => {
@@ -113,35 +113,46 @@ export async function testdir(dir?: Fixture) {
       },
     },
   });
+}
+
+export async function testdir(dir?: Fixture) {
+  const fixture = await createTestFixture(dir);
   onTestFinished(() => fixture.rm());
   return fixture.path;
 }
 
-// Git's background maintenance can race in the background with fixture cleanup by touching pack files so we disable it.
-export async function disableGitBackgroundMaintenance(cwd: string) {
-  await exec("git", ["config", "gc.auto", "0"], { nodeOptions: { cwd } });
-  await exec("git", ["config", "maintenance.auto", "false"], {
-    nodeOptions: { cwd },
-  });
+function gitExec(cwd: string, signal?: AbortSignal) {
+  return async (args: string[]) => {
+    signal?.throwIfAborted();
+    const result = await exec("git", args, { nodeOptions: { cwd, signal } });
+    signal?.throwIfAborted();
+    return result;
+  };
 }
 
-export async function gitdir(dir: Fixture) {
-  const cwd = await testdir({
-    ".gitattributes": "* text=auto eol=lf\n",
-    ...dir,
-  });
+// Git's background maintenance can race in the background with fixture cleanup by touching pack files so we disable it.
+export async function disableGitBackgroundMaintenance(
+  cwd: string,
+  signal?: AbortSignal,
+) {
+  const git = gitExec(cwd, signal);
+  await git(["config", "gc.auto", "0"]);
+  await git(["config", "maintenance.auto", "false"]);
+}
 
-  await exec("git", ["init"], { nodeOptions: { cwd } });
-  await disableGitBackgroundMaintenance(cwd);
+function gitFixtureFiles(dir: Fixture): Fixture {
+  return { ".gitattributes": "* text=auto eol=lf\n", ...dir };
+}
+
+async function initializeGitdir(cwd: string, signal?: AbortSignal) {
+  const git = gitExec(cwd, signal);
+  await git(["init"]);
+  await disableGitBackgroundMaintenance(cwd, signal);
   // so that this works regardless of what the default branch of git init is and for git versions that don't support --initial-branch(like our CI)
   {
-    const { stdout } = await exec(
-      "git",
-      ["rev-parse", "--abbrev-ref", "HEAD"],
-      { nodeOptions: { cwd } },
-    );
+    const { stdout } = await git(["rev-parse", "--abbrev-ref", "HEAD"]);
     if (stdout.trim() !== "main") {
-      await exec("git", ["checkout", "-b", "main"], { nodeOptions: { cwd } });
+      await git(["checkout", "-b", "main"]);
     }
   }
 
@@ -155,14 +166,38 @@ export async function gitdir(dir: Fixture) {
     gpgSign = false
     forceSignAnnotated = false
   `.trim();
-  await fsp.appendFile(path.join(cwd, ".git/config"), gitConfig, "utf8");
-
-  await exec("git", ["add", "."], { nodeOptions: { cwd } });
-  await exec("git", ["commit", "-m", "initial commit", "--allow-empty"], {
-    nodeOptions: { cwd },
+  await fsp.writeFile(path.join(cwd, ".git/config"), gitConfig, {
+    encoding: "utf8",
+    flag: "a",
+    signal,
   });
 
+  await git(["add", "."]);
+  await git(["commit", "-m", "initial commit", "--allow-empty"]);
+}
+
+export async function gitdir(dir: Fixture) {
+  const cwd = await testdir(gitFixtureFiles(dir));
+  await initializeGitdir(cwd);
   return cwd;
+}
+
+export async function createDisposableGitdir(
+  dir: Fixture,
+  signal: AbortSignal,
+  prepare?: (cwd: string) => Promise<void>,
+) {
+  signal.throwIfAborted();
+  await using stack = new AsyncDisposableStack();
+  const fixture = stack.use(await createTestFixture(gitFixtureFiles(dir)));
+  await initializeGitdir(fixture.path, signal);
+  await prepare?.(fixture.path);
+  signal.throwIfAborted();
+  const cleanup = stack.move();
+  return {
+    cwd: fixture.path,
+    [Symbol.asyncDispose]: () => cleanup.disposeAsync(),
+  };
 }
 
 export async function shallowClone(cwd: string, depth = 1) {
