@@ -370,7 +370,7 @@ async function waitForRegistry(url: string) {
 async function createPnprUser(pnprUrl: string) {
   const username = `test-${randomUUID()}`;
   const response = await fetch(
-    new URL(`-/user/org.couchdb.user:${username}`, pnprUrl),
+    new URL(`/-/user/org.couchdb.user:${username}`, pnprUrl),
     {
       method: "PUT",
       headers: { "content-type": "application/json" },
@@ -658,6 +658,9 @@ async function createPnprRegistry() {
   const root = stack.use(await createTempDir("changesets-pnpr-"));
   const storage = path.join(root.path, "storage");
   const config = path.join(root.path, "pnpr.yaml");
+  const registries = path.join(root.path, "registries.yaml");
+  const grants = path.join(root.path, "grants.yaml");
+  const pnprBin = path.join(e2ePackageRoot, "node_modules", ".bin", "pnpr");
   // pnpr accepts `--listen 127.0.0.1:0`, but it currently doesn't expose the
   // actual bound port to the parent process, and its default/public tarball
   // URLs are derived from the configured address (`:0`) rather than the bound
@@ -671,33 +674,52 @@ async function createPnprRegistry() {
 storage: ${JSON.stringify(storage)}
 secret: changesets-test-secret-key-32-bytes
 auth:
-  htpasswd:
-    max_users: 100
-registries:
-  local:
-    type: hosted
-    access: $all
-    packages:
-      "**":
-        access: $all
-        publish: $authenticated
-        unpublish: $authenticated
-  main:
-    type: router
-    sources: [local]
-defaultRegistry: main
-web:
-  enable: false
+  users:
+    maxUsers: 100
+ui:
+  enabled: false
 log:
-  type: stdout
   format: pretty
   level: error
 `.trimStart(),
   );
+  await fs.writeFile(
+    registries,
+    `
+registries:
+  local:
+    type: hosted
+  main:
+    type: router
+    sources: [local]
+defaultRegistry: main
+`.trimStart(),
+  );
+  await fs.writeFile(
+    grants,
+    `
+grants:
+  local:
+    registries: [local]
+    subjects:
+      $all: [read]
+      $authenticated: [publish, annotate, delete]
+`.trimStart(),
+  );
+  await exec(
+    pnprBin,
+    ["--config", config, "registries", "import", registries],
+    {
+      throwOnError: true,
+    },
+  );
+  await exec(pnprBin, ["--config", config, "grants", "import", grants], {
+    throwOnError: true,
+  });
 
   const execResult = stack.use(
     execChild(
-      path.join(e2ePackageRoot, "node_modules", ".bin", "pnpr"),
+      pnprBin,
       [
         "--config",
         config,
@@ -758,7 +780,7 @@ log:
 
   const cleanup = stack.move();
   return {
-    url,
+    url: new URL("npm/", url).href,
     async [Symbol.asyncDispose]() {
       await cleanup[Symbol.asyncDispose]();
     },
@@ -768,7 +790,7 @@ log:
 async function fetchPnpr(pnprUrl: string, request: Request): Promise<Response> {
   const requestUrl = new URL(request.url);
   const upstream = new URL(
-    `${requestUrl.pathname}${requestUrl.search}`,
+    `${requestUrl.pathname.slice(1)}${requestUrl.search}`,
     pnprUrl,
   );
   const headers = new Headers(request.headers);
