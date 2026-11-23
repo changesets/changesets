@@ -12,6 +12,16 @@ dedupePeers: true
 dedupePeerDependents: true
 
 minimumReleaseAge: 10080
+minimumReleaseAgeExclude:
+  - "@pnpm/pnpr@0.1.0-alpha.22"
+  - "@pnpm/pnpr.darwin-arm64@0.1.0-alpha.22"
+  - "@pnpm/pnpr.darwin-x64@0.1.0-alpha.22"
+  - "@pnpm/pnpr.linux-arm64-musl@0.1.0-alpha.22"
+  - "@pnpm/pnpr.linux-arm64@0.1.0-alpha.22"
+  - "@pnpm/pnpr.linux-x64-musl@0.1.0-alpha.22"
+  - "@pnpm/pnpr.linux-x64@0.1.0-alpha.22"
+  - "@pnpm/pnpr.win32-arm64@0.1.0-alpha.22"
+  - "@pnpm/pnpr.win32-x64@0.1.0-alpha.22"
 
 overrides:
   "vitepress>@docsearch/js": "-"
