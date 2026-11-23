@@ -37,9 +37,9 @@ function sanitizePackLog(message: unknown) {
 describe("Pack command e2e", () => {
   describe.each(pmCases)("$name", (pm) => {
     it("packs from a publish plan", async ({ signal }) => {
-      await using pmBin = await getPmBinPath(signal, pm.bins);
-      const { pmBinPath } = pmBin;
-      await using fixture = await pm.gitdir(
+      await using stack = new AsyncDisposableStack();
+      const { pmBinPath } = stack.use(await getPmBinPath(pm.bins));
+      const cwd = await pm.gitdir(
         {
           pmBinPath,
           signal,
@@ -62,7 +62,6 @@ describe("Pack command e2e", () => {
           }),
         },
       );
-      const { cwd } = fixture;
 
       const result = await runCliCommand({
         command: "pack",
@@ -86,10 +85,7 @@ describe("Pack command e2e", () => {
       expect.soft(tarball.size).toBeGreaterThan(0);
 
       const packedPlan = JSON.parse(
-        await fs.readFile(path.join(cwd, ".packed/publish-plan.json"), {
-          encoding: "utf8",
-          signal,
-        }),
+        await fs.readFile(path.join(cwd, ".packed/publish-plan.json"), "utf8"),
       );
       expect.soft(packedPlan).toMatchObject({
         plan: [
@@ -110,9 +106,9 @@ describe("Pack command e2e", () => {
     });
 
     it("handles lifecycle stdout while packing", async ({ signal }) => {
-      await using pmBin = await getPmBinPath(signal, pm.bins);
-      const { pmBinPath } = pmBin;
-      await using fixture = await pm.gitdir(
+      await using stack = new AsyncDisposableStack();
+      const { pmBinPath } = stack.use(await getPmBinPath(pm.bins));
+      const cwd = await pm.gitdir(
         {
           pmBinPath,
           signal,
@@ -147,7 +143,6 @@ describe("Pack command e2e", () => {
           }),
         },
       );
-      const { cwd } = fixture;
 
       const result = await runCliCommand({
         command: "pack",
@@ -172,9 +167,9 @@ describe("Pack command e2e", () => {
     });
 
     it("surfaces pack errors", async ({ signal }) => {
-      await using pmBin = await getPmBinPath(signal, pm.bins);
-      const { pmBinPath } = pmBin;
-      await using fixture = await pm.gitdir(
+      await using stack = new AsyncDisposableStack();
+      const { pmBinPath } = stack.use(await getPmBinPath(pm.bins));
+      const cwd = await pm.gitdir(
         {
           pmBinPath,
           signal,
@@ -209,7 +204,6 @@ describe("Pack command e2e", () => {
           }),
         },
       );
-      const { cwd } = fixture;
 
       const result = await runCliCommand({
         command: "pack",

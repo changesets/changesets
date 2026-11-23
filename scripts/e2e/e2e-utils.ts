@@ -6,7 +6,7 @@ import path from "node:path";
 import { setTimeout } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 import { defaultConfig } from "@changesets/config";
-import { createDisposableGitdir, type Fixture } from "@changesets/test-utils";
+import { gitdir, type Fixture } from "@changesets/test-utils";
 import * as pty from "@lydell/node-pty";
 import { exec } from "tinyexec";
 
@@ -38,16 +38,21 @@ export type PmGitdirContext = {
 export type PmCase = {
   name: string;
   bins: PmBins;
-  gitdir: (
-    context: PmGitdirContext,
-    fixture?: Fixture,
-  ) => ReturnType<typeof createDisposableGitdir>;
+  gitdir: (context: PmGitdirContext, fixture?: Fixture) => Promise<string>;
 };
 
 export async function getFreePort() {
-  await using server = (await import("node:net")).createServer();
-  await once(server.listen(0, "127.0.0.1"), "listening");
+  const server = (await import("node:net")).createServer();
+  await new Promise<void>((resolve) => {
+    server.listen(0, "127.0.0.1", resolve);
+  });
   const address = server.address();
+  await new Promise<void>((resolve, reject) => {
+    server.close((error) => {
+      if (error) reject(error);
+      else resolve();
+    });
+  });
   if (!address || typeof address === "string") {
     throw new Error("Expected temporary server to listen on a TCP port");
   }
@@ -64,16 +69,10 @@ export async function createTempDir(prefix: string) {
   };
 }
 
-async function readInstalledPackageJson(
-  packageName: string,
-  signal: AbortSignal,
-) {
+async function readInstalledPackageJson(packageName: string) {
   const packageRoot = path.join(e2ePackageRoot, "node_modules", packageName);
   const packageJson: unknown = JSON.parse(
-    await fs.readFile(path.join(packageRoot, "package.json"), {
-      encoding: "utf8",
-      signal,
-    }),
+    await fs.readFile(path.join(packageRoot, "package.json"), "utf8"),
   );
 
   if (!packageJson || typeof packageJson !== "object") {
@@ -83,12 +82,8 @@ async function readInstalledPackageJson(
   return packageJson as Record<string, unknown>;
 }
 
-async function resolvePackageBin(
-  packageName: string,
-  command: keyof PmBins,
-  signal: AbortSignal,
-) {
-  const packageJson = await readInstalledPackageJson(packageName, signal);
+async function resolvePackageBin(packageName: string, command: keyof PmBins) {
+  const packageJson = await readInstalledPackageJson(packageName);
   const packageRoot = path.join(e2ePackageRoot, "node_modules", packageName);
 
   if (!("bin" in packageJson)) {
@@ -113,9 +108,8 @@ async function resolvePackageBin(
 async function resolvePackageManagerSpec(
   packageManager: "npm" | "pnpm" | "yarn",
   packageName: string,
-  signal: AbortSignal,
 ) {
-  const packageJson = await readInstalledPackageJson(packageName, signal);
+  const packageJson = await readInstalledPackageJson(packageName);
 
   if (typeof packageJson.version !== "string") {
     throw new Error(`Could not resolve version from ${packageName}`);
@@ -151,8 +145,7 @@ export async function createPmBinEnv(
   };
 }
 
-export async function getPmBinPath(signal: AbortSignal, bins: PmBins) {
-  signal.throwIfAborted();
+export async function getPmBinPath(bins: PmBins) {
   await using stack = new AsyncDisposableStack();
   const root = stack.use(await createTempDir("changesets-pm-bins-"));
 
@@ -160,7 +153,6 @@ export async function getPmBinPath(signal: AbortSignal, bins: PmBins) {
     const target = await resolvePackageBin(
       packageName,
       command as keyof PmBins,
-      signal,
     );
     const shimPath = path.join(
       root.path,
@@ -176,13 +168,12 @@ export async function getPmBinPath(signal: AbortSignal, bins: PmBins) {
     const shim = isWindows
       ? `@echo off\r\n${invocation} %*\r\n`
       : `#!/bin/sh\nexec ${invocation} "$@"\n`;
-    await fs.writeFile(shimPath, shim, { signal });
+    await fs.writeFile(shimPath, shim);
     if (!isWindows) {
       await fs.chmod(shimPath, 0o755);
     }
   }
 
-  signal.throwIfAborted();
   const cleanup = stack.move();
   return {
     pmBinPath: root.path,
@@ -386,10 +377,8 @@ export async function runCliCommand(options: {
   signal?: AbortSignal;
   tty?: boolean;
 }): Promise<ExecResult> {
-  options.signal?.throwIfAborted();
   const args = [cliBinPath, options.command, ...(options.args ?? [])];
   const env = await createPmBinEnv(options.cwd, options.pmBinPath, options.env);
-  options.signal?.throwIfAborted();
   if (options.tty) {
     return execTty(process.execPath, args, {
       onData: options.onData,
@@ -409,79 +398,62 @@ export async function runCliCommand(options: {
 }
 
 function createNpmGitdir(packageName: string) {
-  return async (
-    { registry, signal }: PmGitdirContext,
-    fixture: Fixture = {},
-  ) => {
-    const packageManager = await resolvePackageManagerSpec(
-      "npm",
-      packageName,
-      signal,
-    );
+  return async ({ registry }: PmGitdirContext, fixture: Fixture = {}) => {
+    const packageManager = await resolvePackageManagerSpec("npm", packageName);
 
-    return createDisposableGitdir(
-      {
-        "package.json": JSON.stringify({
-          packageManager,
-          private: true,
-          workspaces: ["packages/*"],
-        }),
-        "package-lock.json": JSON.stringify({
-          lockfileVersion: 3,
-          packages: {
-            "": {
-              workspaces: ["packages/*"],
-            },
+    return gitdir({
+      "package.json": JSON.stringify({
+        packageManager,
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": JSON.stringify({
+        lockfileVersion: 3,
+        packages: {
+          "": {
+            workspaces: ["packages/*"],
           },
-        }),
-        ".npmrc": [
-          registry && `registry=${registry.url}`,
-          registry?.authToken &&
-            `//${registry.host}/:_authToken=${registry.authToken}`,
-        ].join("\n"),
-        ...fixture,
-      },
-      signal,
-    );
+        },
+      }),
+      ".npmrc": [
+        registry && `registry=${registry.url}`,
+        registry?.authToken &&
+          `//${registry.host}/:_authToken=${registry.authToken}`,
+      ].join("\n"),
+      ...fixture,
+    });
   };
 }
 
 function createPnpmGitdir(packageName: string) {
   return async (
-    { pmBinPath, registry, signal }: PmGitdirContext,
+    { pmBinPath, registry }: PmGitdirContext,
     fixture: Fixture = {},
   ) => {
-    const packageManager = await resolvePackageManagerSpec(
-      "pnpm",
-      packageName,
-      signal,
-    );
+    const packageManager = await resolvePackageManagerSpec("pnpm", packageName);
     const npmPath = path.join(pmBinPath, isWindows ? "npm.cmd" : "npm");
     const hasNpmShim = await fs
       .access(npmPath)
       .then(() => true)
       .catch(() => false);
 
-    return createDisposableGitdir(
-      {
-        "package.json": JSON.stringify({
-          packageManager,
-          private: true,
-          workspaces: ["packages/*"],
-        }),
-        "pnpm-workspace.yaml": "packages:\n  - packages/*\n",
-        ".npmrc": [
-          registry && `registry=${registry.url}`,
-          registry?.authToken &&
-            `//${registry.host}/:_authToken=${registry.authToken}`,
-          // pnpm 10 publish delegates to npm and prepends the active Node binary's
-          // directory to PATH, which can otherwise pick the host-bundled npm.
-          hasNpmShim ? `npm-path=${npmPath}` : undefined,
-        ].join("\n"),
-        ...fixture,
-      },
-      signal,
-    );
+    return gitdir({
+      "package.json": JSON.stringify({
+        packageManager,
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "pnpm-workspace.yaml": "packages:\n  - packages/*\n",
+      ".npmrc": [
+        registry && `registry=${registry.url}`,
+        registry?.authToken &&
+          `//${registry.host}/:_authToken=${registry.authToken}`,
+        // pnpm 10 publish delegates to npm and prepends the active Node binary's
+        // directory to PATH, which can otherwise pick the host-bundled npm.
+        hasNpmShim ? `npm-path=${npmPath}` : undefined,
+      ].join("\n"),
+      ...fixture,
+    });
   };
 }
 
@@ -490,44 +462,37 @@ function createYarnBerryGitdir(packageName: string) {
     { registry, pmBinPath, signal }: PmGitdirContext,
     fixture: Fixture = {},
   ) => {
-    const packageManager = await resolvePackageManagerSpec(
-      "yarn",
-      packageName,
-      signal,
-    );
+    const packageManager = await resolvePackageManagerSpec("yarn", packageName);
 
-    return createDisposableGitdir(
-      {
-        "package.json": JSON.stringify({
-          packageManager,
-          private: true,
-          workspaces: ["packages/*"],
-        }),
-        "yarn.lock": "",
-        ".yarnrc.yml": [
-          registry && `npmRegistryServer: "${registry.url}"`,
-          registry?.authToken && `npmAuthToken: "${registry.authToken}"`,
-          // we want yarn.lock to be updated on yarn install below
-          // this ensures that doesn't fail on CI where yarn.lock is often immutable/readonly
-          "enableImmutableInstalls: false",
-          "nodeLinker: node-modules",
-          "unsafeHttpWhitelist:",
-          '  - "127.0.0.1"',
-        ].join("\n"),
-        ...fixture,
-      },
+    const cwd = await gitdir({
+      "package.json": JSON.stringify({
+        packageManager,
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "yarn.lock": "",
+      ".yarnrc.yml": [
+        registry && `npmRegistryServer: "${registry.url}"`,
+        registry?.authToken && `npmAuthToken: "${registry.authToken}"`,
+        // we want yarn.lock to be updated on yarn install below
+        // this ensures that doesn't fail on CI where yarn.lock is often immutable/readonly
+        "enableImmutableInstalls: false",
+        "nodeLinker: node-modules",
+        "unsafeHttpWhitelist:",
+        '  - "127.0.0.1"',
+      ].join("\n"),
+      ...fixture,
+    });
+    await execCancellable("yarn", ["install"], {
       signal,
-      async (cwd) => {
-        const env = await createPmBinEnv(cwd, pmBinPath);
-        signal.throwIfAborted();
-        await execCancellable("yarn", ["install"], {
-          nodePath: false,
-          nodeOptions: { cwd, env },
-          signal,
-          throwOnError: true,
-        });
+      nodePath: false,
+      nodeOptions: {
+        cwd,
+        env: await createPmBinEnv(cwd, pmBinPath),
       },
-    );
+      throwOnError: true,
+    });
+    return cwd;
   };
 }
 
