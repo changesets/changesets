@@ -116,6 +116,7 @@ describe("getPublishPlan", () => {
     ]);
     expect(mockedGit.remoteTagExists).toHaveBeenCalledExactlyOnceWith(
       "pkg-b_1.0.0",
+      cwd,
     );
   });
 

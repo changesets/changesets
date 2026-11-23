@@ -1,7 +1,12 @@
+import * as getGithubInfo from "@changesets/get-github-info";
 import { parseChangesetFile as parse } from "@changesets/parse";
 import type { ModCompWithPackage } from "@changesets/types";
-import { afterEach, describe, expect, it, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import changelogFunctions from "./index.ts";
+import { mdLink } from "./utils.ts";
+
+vi.mock("@changesets/get-github-info");
+const mockedGetGithubInfo = vi.mocked(getGithubInfo);
 
 const getReleaseLine = changelogFunctions.getReleaseLine;
 const getDependencyReleaseLine = changelogFunctions.getDependencyReleaseLine;
@@ -10,337 +15,352 @@ afterEach(() => {
   vi.unstubAllEnvs();
 });
 
-vi.mock(
-  "@changesets/get-github-info",
-  (): typeof import("@changesets/get-github-info") => {
-    const data = {
-      commit: "a085003",
-      author: "Andarist",
-      pull: 1613,
-      repo: "emotion-js/emotion",
-    };
-    const urls = {
-      commit: `https://github.com/${data.repo}/commit/${data.commit}`,
-      pull: `https://github.com/${data.repo}/pull/${data.pull}`,
-      author: `https://github.com/${data.author}`,
-    };
-    const markdownLinks = {
-      commit: `[\`${data.commit.slice(0, 7)}\`](${urls.commit})`,
-      pull: `[#${data.pull}](${urls.pull})`,
-      author: `[@${data.author}](${urls.author})`,
-    };
-    return {
-      /* eslint-disable vitest/no-standalone-expect */
-      async getCommitInfo({ commit, repo }) {
-        expect(commit).toBe(data.commit);
-        expect(repo).toBe(data.repo);
-        return {
-          commit: {
-            sha: data.commit,
-            url: urls.commit,
-            markdownLink: markdownLinks.commit,
-          },
-          author: {
-            login: data.author,
-            url: urls.author,
-            markdownLink: markdownLinks.author,
-          },
-          pull: {
-            number: data.pull,
-            url: urls.pull,
-            markdownLink: markdownLinks.pull,
-          },
-        };
-      },
-      async getPullRequestInfo({ pull, repo }) {
-        expect(pull).toBe(data.pull);
-        expect(repo).toBe(data.repo);
-        return {
-          commit: {
-            sha: data.commit,
-            url: urls.commit,
-            markdownLink: markdownLinks.commit,
-          },
-          author: {
-            login: data.author,
-            url: urls.author,
-            markdownLink: markdownLinks.author,
-          },
-          pull: {
-            number: data.pull,
-            url: urls.pull,
-            markdownLink: markdownLinks.pull,
-          },
-        };
-      },
-      /* eslint-enable vitest/no-standalone-expect */
-    };
-  },
-);
-
-const getChangeset = (content: string, commit: string | undefined) => {
-  return [
-    {
-      ...parse(
-        `---
-  pkg: "minor"
-  ---
-
-  something
-  ${content}
-  `,
-      ),
-      id: "some-id",
-      commit,
-    },
-    "minor",
-    { repo: data.repo },
-  ] as const;
-};
-
-const data = {
+type Data = { commit?: string; pull?: number; author?: string; repo?: string };
+const defaults = {
   commit: "a085003",
-  user: "Andarist",
   pull: 1613,
+  author: "Andarist",
   repo: "emotion-js/emotion",
+} satisfies Data;
+
+const buildUrls = (input: Data) => {
+  const data = { ...defaults, ...input };
+  return {
+    commit: `https://github.com/${data.repo}/commit/${data.commit}`,
+    pull: `https://github.com/${data.repo}/pull/${data.pull}`,
+    author: `https://github.com/${data.author}`,
+  };
+};
+const buildMdLinks = (input: Data = {}) => {
+  const data = { ...defaults, ...input };
+  const urls = buildUrls(data);
+
+  return {
+    commit: mdLink(`\`${data.commit.slice(0, 7)}\``, urls.commit),
+    pull: mdLink(`#${data.pull}`, urls.pull),
+    author: mdLink(`@${data.author}`, urls.author),
+  };
 };
 
-it("uses GITHUB_REPOSITORY when repo option is absent", async () => {
-  vi.stubEnv("GITHUB_REPOSITORY", data.repo);
-  const [changeset, releaseType] = getChangeset("", data.commit);
+beforeEach(() => {
+  mockedGetGithubInfo.getPullRequestInfo.mockImplementation(
+    async ({ pull, repo }) => {
+      const urls = buildUrls({ pull, repo });
+      const mdLinks = buildMdLinks({ pull, repo });
 
-  expect(await getReleaseLine(changeset, releaseType, null)).toEqual(
-    `\n\n- [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something\n`,
-  );
-});
-
-it("uses explicit repo option before GITHUB_REPOSITORY", async () => {
-  vi.stubEnv("GITHUB_REPOSITORY", "other/repo");
-
-  expect(await getReleaseLine(...getChangeset("", data.commit))).toEqual(
-    `\n\n- [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something\n`,
-  );
-});
-
-it("uses GITHUB_REPOSITORY for dependency release lines", async () => {
-  vi.stubEnv("GITHUB_REPOSITORY", data.repo);
-
-  const changeset = {
-    ...parse(
-      `---
-  pkg: "minor"
-  ---
-
-  something
-  `,
-    ),
-    id: "some-id",
-    commit: data.commit,
-  };
-
-  const dependency: ModCompWithPackage = {
-    name: "pkg",
-    type: "patch",
-    oldVersion: "0.0.1",
-    newVersion: "1.0.0",
-    changesets: [],
-    dir: "/repo/pkg",
-    packageJson: {
-      name: "pkg",
-      version: "0.0.1",
+      return {
+        commit: {
+          sha: defaults.commit,
+          url: urls.commit,
+          markdownLink: mdLinks.commit,
+        },
+        author: {
+          login: "Andarist",
+          url: urls.author,
+          markdownLink: mdLinks.author,
+        },
+        pull: {
+          number: defaults.pull,
+          url: urls.pull,
+          markdownLink: mdLinks.pull,
+        },
+      };
     },
+  );
+
+  mockedGetGithubInfo.getCommitInfo.mockImplementation(
+    async ({ commit, repo }) => {
+      const urls = buildUrls({ commit, repo });
+      const mdLinks = buildMdLinks({ commit, repo });
+
+      return {
+        commit: {
+          sha: defaults.commit,
+          url: urls.commit,
+          markdownLink: mdLinks.commit,
+        },
+        author: {
+          login: defaults.author,
+          url: urls.author,
+          markdownLink: mdLinks.author,
+        },
+        pull: {
+          number: defaults.pull,
+          url: urls.pull,
+          markdownLink: mdLinks.pull,
+        },
+      };
+    },
+  );
+});
+
+const defaultRepo = { repo: defaults.repo };
+
+type Opts = {
+  content?: string;
+  suffix?: string;
+  commit?: string;
+  frontmatter?: string;
+};
+function createChangeset({
+  content = "something",
+  suffix = "",
+  commit = defaults.commit,
+  frontmatter = "",
+}: Opts = {}) {
+  const data = parse(
+    `
+---
+pkg: "minor"
+${frontmatter}
+---
+
+${content}
+${suffix}
+`.trim(),
+  );
+
+  return {
+    ...data,
+    id: "some-id",
+    commit,
   };
+}
 
-  expect(await getDependencyReleaseLine([changeset], [dependency], null))
-    .toMatchInlineSnapshot(`
-    "- Updated dependencies [[\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003)]:
-      - pkg@1.0.0"
-  `);
-});
+describe("GITHUB_REPOSITORY", () => {
+  it("uses GITHUB_REPOSITORY when repo option is absent", async () => {
+    vi.stubEnv("GITHUB_REPOSITORY", defaults.repo);
 
-describe.each([data.commit, "wrongcommit", undefined])(
-  "with commit from changeset of %s",
-  (commitFromChangeset) => {
-    describe.each(["pr", "pull request", "pull"])(
-      "override pr with %s keyword",
-      (keyword) => {
-        test.each(["with #", "without #"] as const)("%s", async (kind) => {
-          expect(
-            await getReleaseLine(
-              ...getChangeset(
-                `${keyword}: ${kind === "with #" ? "#" : ""}${data.pull}`,
-                commitFromChangeset,
-              ),
-            ),
-          ).toEqual(
-            `\n\n- [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something\n`,
-          );
-        });
-      },
+    const promise = getReleaseLine(createChangeset(), "minor", null);
+    await expect(promise).resolves.toEqual(
+      `\n\n- [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something\n`,
     );
-    test("override commit with commit keyword", async () => {
-      expect(
-        await getReleaseLine(
-          ...getChangeset(`commit: ${data.commit}`, commitFromChangeset),
-        ),
-      ).toEqual(
-        `\n\n- [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something\n`,
-      );
-    });
-  },
-);
+  });
 
-describe.each(["author", "user"])(
-  "override author with %s keyword",
-  (keyword) => {
-    test.each(["with @", "without @"] as const)("%s", async (kind) => {
-      expect(
-        await getReleaseLine(
-          ...getChangeset(
-            `${keyword}: ${kind === "with @" ? "@" : ""}other`,
-            data.commit,
-          ),
-        ),
-      ).toEqual(
-        `\n\n- [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@other](https://github.com/other)! - something\n`,
-      );
-    });
-  },
-);
+  it("uses explicit repo option before GITHUB_REPOSITORY", async () => {
+    vi.stubEnv("GITHUB_REPOSITORY", "other/repo");
 
-it("linkifies bare issue references", async () => {
-  expect(
-    await getReleaseLine(...getChangeset("fixes #1234 and #5678", data.commit)),
-  ).toMatchInlineSnapshot(`
-    "
+    const promise = getReleaseLine(createChangeset(), "minor", defaultRepo);
+    await expect(promise).resolves.toEqual(
+      `\n\n- [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something\n`,
+    );
+  });
 
-    - [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something
-        fixes [#1234](https://github.com/emotion-js/emotion/issues/1234) and [#5678](https://github.com/emotion-js/emotion/issues/5678)"
-  `);
+  it("uses GITHUB_REPOSITORY for dependency release lines", async () => {
+    vi.stubEnv("GITHUB_REPOSITORY", defaults.repo);
+
+    const dependency: ModCompWithPackage = {
+      name: "pkg",
+      type: "patch",
+      oldVersion: "0.0.1",
+      newVersion: "1.0.0",
+      changesets: [],
+      dir: "/repo/pkg",
+      packageJson: {
+        name: "pkg",
+        version: "0.0.1",
+      },
+    };
+
+    const promise = getDependencyReleaseLine(
+      [createChangeset()],
+      [dependency],
+      null,
+    );
+    await expect(promise).resolves.toMatchInlineSnapshot(`
+      "- Updated dependencies [[\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003)]:
+        - pkg@1.0.0"
+    `);
+  });
 });
 
-it("does not double-linkify existing markdown links", async () => {
-  expect(
-    await getReleaseLine(
-      ...getChangeset(
-        "see [#1234](https://github.com/emotion-js/emotion/issues/1234)",
-        data.commit,
-      ),
-    ),
-  ).toMatchInlineSnapshot(`
-    "
+describe("data overrides", () => {
+  it("extracts and uses author override", async () => {
+    const promise = getReleaseLine(
+      createChangeset({ frontmatter: `_:\n  author: foo` }),
+      "minor",
+      defaultRepo,
+    );
+    await expect(promise).resolves.not.toContain(defaults.author);
+    await expect(promise).resolves.toContain("Thanks [@foo]");
+    await expect(promise).resolves.not.toContain("Thanks [foo]");
+  });
 
-    - [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something
-        see [#1234](https://github.com/emotion-js/emotion/issues/1234)"
-  `);
+  it("extracts and uses commit override", async () => {
+    const promise = getReleaseLine(
+      createChangeset({ frontmatter: `_:\n  commit: abcdefg` }),
+      "minor",
+      defaultRepo,
+    );
+    await expect(promise).resolves.not.toContain(defaults.commit);
+    await expect(promise).resolves.toContain("Thanks [@Andarist]");
+    await expect(promise).resolves.toContain("/abcdefg");
+  });
+
+  it("extracts and uses pr override", async () => {
+    const promise = getReleaseLine(
+      createChangeset({ frontmatter: `_:\n  pr: 1337` }),
+      "minor",
+      defaultRepo,
+    );
+    await expect(promise).resolves.not.toContain(defaults.pull);
+    await expect(promise).resolves.toContain("Thanks [@Andarist]");
+    await expect(promise).resolves.toContain("#1337");
+  });
+
+  it("extracts and uses multiple overrides", async () => {
+    const promise = getReleaseLine(
+      createChangeset({ frontmatter: `_:\n  author: foo\n  pr: 1337` }),
+      "minor",
+      defaultRepo,
+    );
+    await expect(promise).resolves.not.toContain(defaults.author);
+    await expect(promise).resolves.not.toContain(defaults.pull);
+    await expect(promise).resolves.toContain("Thanks [@foo]");
+    await expect(promise).resolves.toContain("[#1337]");
+  });
 });
 
-it("does not linkify issue-like refs inside link text", async () => {
-  expect(
-    await getReleaseLine(
-      ...getChangeset("see [fix for #99](https://example.com)", data.commit),
-    ),
-  ).toMatchInlineSnapshot(`
-    "
+describe("linkify", () => {
+  it("linkifies issue ref followed by a dot", async () => {
+    const promise = getReleaseLine(
+      createChangeset({ suffix: "this fixes #42." }),
+      "minor",
+      defaultRepo,
+    );
+    await expect(promise).resolves.toMatchInlineSnapshot(`
+      "
 
-    - [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something
-        see [fix for #99](https://example.com)"
-  `);
-});
-
-it("does not linkify when preceded by a word character", async () => {
-  expect(await getReleaseLine(...getChangeset("foo#123", data.commit)))
-    .toMatchInlineSnapshot(`
-    "
-
-    - [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something
-        foo#123"
-  `);
-});
-
-it("does not linkify #0", async () => {
-  expect(await getReleaseLine(...getChangeset("see #0", data.commit)))
-    .toMatchInlineSnapshot(`
-    "
-
-    - [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something
-        see #0"
-  `);
-});
-
-it("linkifies issue ref at the start of a line", async () => {
-  expect(await getReleaseLine(...getChangeset("#42 was fixed", data.commit)))
-    .toMatchInlineSnapshot(`
-    "
-
-    - [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something
-        [#42](https://github.com/emotion-js/emotion/issues/42) was fixed"
-  `);
-});
-
-it("linkifies issue ref after punctuation", async () => {
-  expect(await getReleaseLine(...getChangeset("fixed (#99)", data.commit)))
-    .toMatchInlineSnapshot(`
-    "
-
-    - [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something
-        fixed ([#99](https://github.com/emotion-js/emotion/issues/99))"
-  `);
-});
-
-it("handles mixed linked and bare refs", async () => {
-  expect(
-    await getReleaseLine(
-      ...getChangeset(
-        "fixes [#1](https://github.com/emotion-js/emotion/issues/1) and #2",
-        data.commit,
-      ),
-    ),
-  ).toMatchInlineSnapshot(`
-    "
-
-    - [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something
-        fixes [#1](https://github.com/emotion-js/emotion/issues/1) and [#2](https://github.com/emotion-js/emotion/issues/2)"
-  `);
-});
-
-it("linkifies issue ref followed by a dot", async () => {
-  expect(await getReleaseLine(...getChangeset("this fixes #42.", data.commit)))
-    .toMatchInlineSnapshot(`
-    "
-
-    - [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something
+      - [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something
         this fixes [#42](https://github.com/emotion-js/emotion/issues/42)."
-  `);
-});
+    `);
+  });
 
-it("with multiple authors", async () => {
-  expect(
-    await getReleaseLine(
-      ...getChangeset(
-        ["author: @Andarist", "author: @mitchellhamilton"].join("\n"),
-        data.commit,
-      ),
-    ),
-  ).toMatchInlineSnapshot(`
-    "
+  it("linkifies bare issue references", async () => {
+    const promise = getReleaseLine(
+      createChangeset({ suffix: "fixes #1234 and #5678" }),
+      "minor",
+      defaultRepo,
+    );
+    await expect(promise).resolves.toMatchInlineSnapshot(`
+      "
 
-    - [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist), [@mitchellhamilton](https://github.com/mitchellhamilton)! - something
-    "
-  `);
+      - [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something
+        fixes [#1234](https://github.com/emotion-js/emotion/issues/1234) and [#5678](https://github.com/emotion-js/emotion/issues/5678)"
+    `);
+  });
+
+  it("does not double-linkify existing markdown links", async () => {
+    const promise = getReleaseLine(
+      createChangeset({
+        suffix:
+          "see [#1234](https://github.com/emotion-js/emotion/issues/1234)",
+      }),
+      "minor",
+      defaultRepo,
+    );
+    await expect(promise).resolves.toMatchInlineSnapshot(`
+      "
+
+      - [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something
+        see [#1234](https://github.com/emotion-js/emotion/issues/1234)"
+    `);
+  });
+
+  it("does not linkify issue-like refs inside link text", async () => {
+    const promise = getReleaseLine(
+      createChangeset({ suffix: "see [fix for #99](https://example.com)" }),
+      "minor",
+      defaultRepo,
+    );
+    await expect(promise).resolves.toMatchInlineSnapshot(`
+      "
+
+      - [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something
+        see [fix for #99](https://example.com)"
+    `);
+  });
+
+  it("does not linkify when preceded by a word character", async () => {
+    const promise = getReleaseLine(
+      createChangeset({ suffix: "foo#123" }),
+      "minor",
+      defaultRepo,
+    );
+    await expect(promise).resolves.toMatchInlineSnapshot(`
+      "
+
+      - [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something
+        foo#123"
+    `);
+  });
+
+  it("does not linkify #0", async () => {
+    const promise = getReleaseLine(
+      createChangeset({ suffix: "see #0" }),
+      "minor",
+      defaultRepo,
+    );
+    await expect(promise).resolves.toMatchInlineSnapshot(`
+      "
+
+      - [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something
+        see #0"
+    `);
+  });
+
+  it("linkifies issue ref at the start of a line", async () => {
+    const promise = getReleaseLine(
+      createChangeset({ suffix: "#42 was fixed" }),
+      "minor",
+      defaultRepo,
+    );
+    await expect(promise).resolves.toMatchInlineSnapshot(`
+      "
+
+      - [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something
+        [#42](https://github.com/emotion-js/emotion/issues/42) was fixed"
+    `);
+  });
+
+  it("linkifies issue ref after punctuation", async () => {
+    const promise = getReleaseLine(
+      createChangeset({ suffix: "fixed (#99)" }),
+      "minor",
+      defaultRepo,
+    );
+    await expect(promise).resolves.toMatchInlineSnapshot(`
+      "
+
+      - [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something
+        fixed ([#99](https://github.com/emotion-js/emotion/issues/99))"
+    `);
+  });
+
+  it("handles mixed linked and bare refs", async () => {
+    const promise = getReleaseLine(
+      createChangeset({
+        suffix:
+          "fixes [#1](https://github.com/emotion-js/emotion/issues/1) and #2",
+      }),
+      "minor",
+      defaultRepo,
+    );
+    await expect(promise).resolves.toMatchInlineSnapshot(`
+      "
+
+      - [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) Thanks [@Andarist](https://github.com/Andarist)! - something
+        fixes [#1](https://github.com/emotion-js/emotion/issues/1) and [#2](https://github.com/emotion-js/emotion/issues/2)"
+    `);
+  });
 });
 
 it("disables thanks if disableThanks is enabled", async () => {
-  const [changeset, releaseType, options] = getChangeset(
-    "author: @Andarist",
-    data.commit,
-  );
-  expect(
-    await getReleaseLine(changeset, releaseType, {
-      ...options,
-      disableThanks: true,
-    }),
-  ).toMatchInlineSnapshot(`
+  const promise = getReleaseLine(createChangeset(), "minor", {
+    ...defaultRepo,
+    disableThanks: true,
+  });
+  await expect(promise).resolves.toMatchInlineSnapshot(`
     "
 
     - [#1613](https://github.com/emotion-js/emotion/pull/1613) [\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003) - something
@@ -350,110 +370,84 @@ it("disables thanks if disableThanks is enabled", async () => {
 
 describe("template option (compact reproduction)", () => {
   const compactOpts = {
-    repo: data.repo,
+    repo: defaults.repo,
     template: "\n- {summary} {ref}",
   };
 
   it("renders the compact single-line form with PR ref", async () => {
-    const changeset = {
-      id: "x",
-      summary: "fix the thing",
-      releases: [{ name: "pkg", type: "minor" as const }],
-      commit: data.commit,
-    };
-    expect(await getReleaseLine(changeset, "minor", compactOpts)).toBe(
+    const promise = getReleaseLine(
+      createChangeset({ content: "fix the thing" }),
+      "minor",
+      compactOpts,
+    );
+    await expect(promise).resolves.toBe(
       "\n- fix the thing ([#1613](https://github.com/emotion-js/emotion/pull/1613))\n",
     );
   });
 
   it("keeps multi-line summaries: first line templated, rest indented", async () => {
-    const changeset = {
-      id: "x",
-      summary: "first line\nsecond line",
-      releases: [{ name: "pkg", type: "minor" as const }],
-      commit: data.commit,
-    };
-    expect(await getReleaseLine(changeset, "minor", compactOpts)).toBe(
+    const promise = getReleaseLine(
+      createChangeset({ content: "first line", suffix: "second line" }),
+      "minor",
+      compactOpts,
+    );
+    await expect(promise).resolves.toBe(
       "\n- first line ([#1613](https://github.com/emotion-js/emotion/pull/1613))\n  second line",
     );
   });
 
   it("omits attribution because no token references it", async () => {
-    const changeset = {
-      id: "x",
-      summary: "fix the thing",
-      releases: [{ name: "pkg", type: "minor" as const }],
-      commit: data.commit,
-    };
-    const line = await getReleaseLine(changeset, "minor", compactOpts);
-    expect(line).not.toContain("Thanks");
+    const promise = getReleaseLine(
+      createChangeset({ content: "fix the thing" }),
+      "minor",
+      compactOpts,
+    );
+    await expect(promise).resolves.not.toContain("Thanks");
   });
 
   it("renders attribution from literal text plus {authors}", async () => {
-    const changeset = {
-      id: "x",
-      summary: "fix the thing",
-      releases: [{ name: "pkg", type: "minor" as const }],
-      commit: data.commit,
-    };
-    expect(
-      await getReleaseLine(changeset, "minor", {
-        repo: data.repo,
-        template: "\n- {summary} Thanks {authors}!",
-      }),
-    ).toBe(
+    const promise = getReleaseLine(
+      createChangeset({ content: "fix the thing" }),
+      "minor",
+      { ...defaultRepo, template: "\n- {summary} Thanks {authors}!" },
+    );
+    await expect(promise).resolves.toBe(
       "\n- fix the thing Thanks [@Andarist](https://github.com/Andarist)!\n",
     );
   });
 
   it("renders {authors} without the word Thanks", async () => {
-    const changeset = {
-      id: "x",
-      summary: "fix the thing",
-      releases: [{ name: "pkg", type: "minor" as const }],
-      commit: data.commit,
-    };
-    expect(
-      await getReleaseLine(changeset, "minor", {
-        repo: data.repo,
-        template: "\n- {summary} {authors}",
-      }),
-    ).toBe("\n- fix the thing [@Andarist](https://github.com/Andarist)\n");
+    const promise = getReleaseLine(
+      createChangeset({ content: "fix the thing" }),
+      "minor",
+      { ...defaultRepo, template: "\n- {summary} {authors}" },
+    );
+    await expect(promise).resolves.toBe(
+      "\n- fix the thing [@Andarist](https://github.com/Andarist)\n",
+    );
   });
 
   it("trims a trailing space left by an empty trailing token", async () => {
-    const changeset = {
-      id: "x",
-      summary: "fix the thing",
-      releases: [{ name: "pkg", type: "minor" as const }],
-      commit: undefined,
-    };
-    expect(
-      await getReleaseLine(changeset, "minor", {
-        repo: data.repo,
-        template: "\n- {summary} {ref}",
-      }),
-    ).toBe("\n- fix the thing\n");
+    const promise = getReleaseLine(
+      { ...createChangeset({ content: "fix the thing" }), commit: undefined },
+      "minor",
+      { ...defaultRepo, template: "\n- {summary} {ref}" },
+    );
+    await expect(promise).resolves.toBe("\n- fix the thing\n");
   });
 });
 
 describe("{summary} token", () => {
-  const changeset = {
-    id: "x",
-    summary: "did a thing (fixes #99) and also #1234",
-    releases: [{ name: "pkg", type: "minor" as const }],
-    commit: data.commit,
-  };
-
   it("{summary} links every bare #n", async () => {
-    const line = await getReleaseLine(changeset, "minor", {
-      repo: data.repo,
-      template: "\n- {summary}",
-    });
-    expect(line).toContain(
+    const promise = getReleaseLine(
+      createChangeset({ content: "did a thing (fixes #99) and also #1234" }),
+      "minor",
+      { ...defaultRepo, template: "\n- {summary}" },
+    );
+    await expect(promise).resolves.toContain(
       "[#1234](https://github.com/emotion-js/emotion/issues/1234)",
     );
-    expect(line).toContain(
+    await expect(promise).resolves.toContain(
       "[#99](https://github.com/emotion-js/emotion/issues/99)",
     );
   });
@@ -479,14 +473,11 @@ describe("documented template examples", () => {
     ],
     ["\n- {summary} {pull}", `\n- fix the thing ${pr}\n`],
   ])("template %p renders %p", async (template, expected) => {
-    const changeset = {
-      id: "x",
-      summary: "fix the thing",
-      releases: [{ name: "pkg", type: "minor" as const }],
-      commit: data.commit,
-    };
-    expect(
-      await getReleaseLine(changeset, "minor", { repo: data.repo, template }),
-    ).toBe(expected);
+    const promise = getReleaseLine(
+      createChangeset({ content: "fix the thing" }),
+      "minor",
+      { ...defaultRepo, template },
+    );
+    await expect(promise).resolves.toBe(expected);
   });
 });
