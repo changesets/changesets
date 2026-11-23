@@ -21,12 +21,10 @@
 
 Repeating a publish or stage is OK. Switching between them is an error.
 
-npm uses the same stage-conflict message for already-staged and already-published
-versions. We check again using the package manager's `info()`:
+npm uses the same stage-conflict message for already-staged and already-published versions. We check again using the package manager's `info()`:
 
 - Version is published -> fail.
 - Version is absent -> assume it is already staged and continue.
 - Lookup fails -> fail.
 
-A version removed with `npm unpublish` also appears absent, so it can be mistaken
-for an already-staged version.
+A version removed with `npm unpublish` also appears absent, so it can be mistaken for an already-staged version.
