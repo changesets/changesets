@@ -193,6 +193,9 @@ async function recordRequestBody(
 }
 
 async function writeResponse(res: http.ServerResponse, response: Response) {
+  if (res.destroyed || res.writableEnded || res.socket?.destroyed) {
+    return;
+  }
   const headers: http.OutgoingHttpHeaders = {};
   response.headers.forEach((value, key) => {
     headers[key] = value;
@@ -213,15 +216,33 @@ function createWebServer(handler: (request: Request) => Promise<Response>) {
       try {
         await writeResponse(res, await handler(await createWebRequest(req)));
       } catch (error) {
-        res.destroy();
         // Clients can disconnect while the response body is still streaming.
         if (
-          !(error instanceof Error) ||
-          !("code" in error) ||
-          error.code !== "ERR_STREAM_PREMATURE_CLOSE"
+          error instanceof Error &&
+          "code" in error &&
+          error.code === "ERR_STREAM_PREMATURE_CLOSE"
         ) {
-          throw error;
+          res.destroy();
+          return;
         }
+        try {
+          if (!res.headersSent) {
+            await writeResponse(
+              res,
+              Response.json(
+                { error: "Internal Server Error" },
+                { status: 500 },
+              ),
+            );
+          } else if (!res.writableFinished) {
+            res.destroy();
+          }
+        } catch {
+          // A failed error response must not replace the original failure.
+          res.destroy();
+        }
+        // Vitest reports unexpected server failures as unhandled rejections.
+        throw error;
       }
     })();
   });
