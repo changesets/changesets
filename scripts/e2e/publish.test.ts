@@ -59,7 +59,7 @@ type RegistryProxyConfig = {
 
 type SeedPackageState = {
   tags: Record<string, string>;
-  versions: string[];
+  versions: (string | { version: string; staged: true })[];
 };
 
 type SeedRegistryState = Record<string, SeedPackageState>;
@@ -68,7 +68,6 @@ type ProxyMiddlewareContext = {
   pnpr: {
     fetch(request: Request): Promise<Response>;
     seedPackage(packageName: string, state: SeedPackageState): Promise<void>;
-    stagePackage(packageName: string, version: string): Promise<void>;
   };
   record: RegistryRequestRecord;
   request: Request;
@@ -498,7 +497,7 @@ async function createPackedDir(cwd: string, packages: PackedPackage[]) {
   return packedDir;
 }
 
-async function publishSeedPackage(
+async function seedPackageVersion(
   pnprUrl: string,
   pnprToken: string,
   packageName: string,
@@ -580,7 +579,10 @@ async function seedPackage(
   packageName: string,
   state: SeedPackageState,
 ) {
-  const versionSet = new Set(state.versions);
+  const versions = state.versions.map((version) =>
+    typeof version === "string" ? { version, staged: false } : version,
+  );
+  const versionSet = new Set(versions.map(({ version }) => version));
   for (const [tag, version] of Object.entries(state.tags)) {
     if (!versionSet.has(version)) {
       throw new Error(
@@ -589,11 +591,18 @@ async function seedPackage(
     }
   }
 
-  for (const version of state.versions) {
+  for (const { version, staged } of versions) {
     const tags = Object.entries(state.tags)
       .filter(([, taggedVersion]) => taggedVersion === version)
       .map(([tag]) => tag);
-    await publishSeedPackage(pnprUrl, pnprToken, packageName, version, tags);
+    await seedPackageVersion(
+      pnprUrl,
+      pnprToken,
+      packageName,
+      version,
+      tags,
+      staged,
+    );
   }
 }
 
@@ -928,16 +937,6 @@ async function createAuthProxy(
         fetch(pnprRequest) {
           return fetchPnpr(pnprUrl, pnprRequest);
         },
-        stagePackage(packageName, version) {
-          return publishSeedPackage(
-            pnprUrl,
-            pnprToken,
-            packageName,
-            version,
-            ["latest"],
-            true,
-          );
-        },
         seedPackage(packageName, state) {
           return seedPackage(pnprUrl, pnprToken, packageName, state);
         },
@@ -1000,7 +999,6 @@ async function createAuthProxy(
 async function createTestRegistry(options?: {
   auth?: AuthProxyConfig;
   middleware?: RegistryProxyConfig["middleware"];
-  stages?: PackedPackage[];
   packages?: SeedRegistryState;
 }): Promise<TestRegistry> {
   await using stack = new AsyncDisposableStack();
@@ -1008,16 +1006,6 @@ async function createTestRegistry(options?: {
   const pnprToken = await createPnprUser(pnpr.url);
   for (const [packageName, state] of Object.entries(options?.packages ?? {})) {
     await seedPackage(pnpr.url, pnprToken, packageName, state);
-  }
-  for (const { name, version } of options?.stages ?? []) {
-    await publishSeedPackage(
-      pnpr.url,
-      pnprToken,
-      name,
-      version,
-      ["latest"],
-      true,
-    );
   }
   const proxy = stack.use(
     await createAuthProxy(pnpr.url, pnprToken, {
@@ -1275,10 +1263,19 @@ describe("Publish command e2e", () => {
         const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
         const registry = stack.use(
           await createTestRegistry({
-            stages: [{ name: "pkg-a", version: "1.0.0" }],
+            packages: {
+              "pkg-a": {
+                versions: ["0.9.0", { version: "1.0.0", staged: true }],
+                tags: { latest: "0.9.0" },
+              },
+            },
             middleware: npmStagingConflict({ recoveryStatus: 401 }),
           }),
         );
+        const packument = await fetchPackument(registry, "pkg-a");
+        expect.soft(packument).toHaveProperty(["versions", "0.9.0"]);
+        expect.soft(packument).not.toHaveProperty(["versions", "1.0.0"]);
+        expect.soft(packument).toHaveProperty(["dist-tags", "latest"], "0.9.0");
         const cwd = await pm.gitdir(
           createPmContext(registry, pmBinPath),
           createPkgAFixture(),
@@ -1324,7 +1321,10 @@ describe("Publish command e2e", () => {
               attempts: [1],
               async beforeConflict({ pnpr, record }) {
                 conflictName = record.packageName;
-                await pnpr.stagePackage(conflictName!, "1.0.0");
+                await pnpr.seedPackage(conflictName!, {
+                  versions: [{ version: "1.0.0", staged: true }],
+                  tags: { latest: "1.0.0" },
+                });
               },
             }),
           }),
@@ -1362,7 +1362,10 @@ describe("Publish command e2e", () => {
               attempts: [2],
               async beforeConflict({ pnpr, record }) {
                 conflictName = record.packageName;
-                await pnpr.stagePackage(conflictName!, "1.0.0");
+                await pnpr.seedPackage(conflictName!, {
+                  versions: [{ version: "1.0.0", staged: true }],
+                  tags: { latest: "1.0.0" },
+                });
               },
             }),
           }),
@@ -1402,10 +1405,10 @@ describe("Publish command e2e", () => {
               attempts: [1, 3],
               async beforeConflict({ record, pnpr }) {
                 duplicates.add(record.pathname.split("/").at(-1)!);
-                await pnpr.stagePackage(
-                  record.pathname.split("/").at(-1)!,
-                  "1.0.0",
-                );
+                await pnpr.seedPackage(record.pathname.split("/").at(-1)!, {
+                  versions: [{ version: "1.0.0", staged: true }],
+                  tags: { latest: "1.0.0" },
+                });
               },
             }),
           }),
@@ -1543,7 +1546,12 @@ describe("Publish command e2e", () => {
           const error = `Cannot stage previously published version "${version}".`;
           const registry = stack.use(
             await createTestRegistry({
-              stages: [{ name, version }],
+              packages: {
+                [name]: {
+                  versions: [{ version, staged: true }],
+                  tags: { latest: version },
+                },
+              },
               middleware: npmStagingConflict({ version }),
             }),
           );
