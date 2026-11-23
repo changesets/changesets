@@ -1,4 +1,6 @@
+import { execFile, type ExecException } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
+import { once } from "node:events";
 import fs from "node:fs/promises";
 import http from "node:http";
 import path from "node:path";
@@ -9,11 +11,11 @@ import { stripVTControlCharacters } from "node:util";
 import { createGzip } from "node:zlib";
 import { tagExists } from "@changesets/git";
 import { packTar, type TarSource } from "modern-tar/fs";
+import { exec } from "tinyexec";
 import { describe, expect, it } from "vitest";
 import {
   createPkgAFixture,
   createTempDir,
-  execChild,
   getFreePort,
   getPmBinPath,
   pmCases,
@@ -571,6 +573,99 @@ async function seedPackage(
       signal,
     );
   }
+}
+
+function execChild(
+  command: Parameters<typeof exec>[0],
+  args?: Parameters<typeof exec>[1],
+  options?: Omit<Parameters<typeof exec>[2], "persist">,
+) {
+  const child = exec(command, args, {
+    ...options,
+    // so the dispose can kill the whole process group
+    persist: true,
+  });
+
+  let disposing: Promise<void> | undefined;
+
+  async function dispose(): Promise<void> {
+    const processHandle = child.process;
+    const pid = child.pid;
+
+    if (
+      !processHandle ||
+      !pid ||
+      processHandle.exitCode != null ||
+      processHandle.signalCode != null
+    ) {
+      return;
+    }
+
+    const closed = once(processHandle, "close");
+
+    if (process.platform === "win32") {
+      const taskkillError = await new Promise<(ExecException & Error) | null>(
+        (resolve) => {
+          execFile(
+            "taskkill.exe",
+            ["/PID", String(pid), "/T", "/F"],
+            { windowsHide: true },
+            (error) => resolve(error),
+          );
+        },
+      );
+
+      if (taskkillError && taskkillError.code !== 128) {
+        // A child can exit while taskkill is walking the process tree. It then
+        // reports failure even when it successfully terminated the root.
+        const closedDespiteError = await Promise.race([
+          closed.then(() => true),
+          setTimeout(1_000, false),
+        ]);
+        if (!closedDespiteError) {
+          throw taskkillError;
+        }
+        return;
+      }
+
+      await closed;
+      return;
+    }
+
+    const killGroup = (signal: NodeJS.Signals) => {
+      try {
+        process.kill(-pid, signal);
+      } catch (error) {
+        if (
+          !(error instanceof Error) ||
+          !("code" in error) ||
+          error.code !== "ESRCH"
+        ) {
+          throw error;
+        }
+      }
+    };
+
+    killGroup("SIGTERM");
+
+    const closedGracefully = await Promise.race([
+      closed.then(() => true),
+      setTimeout(1_000, false),
+    ]);
+
+    if (!closedGracefully) {
+      killGroup("SIGKILL");
+      await closed;
+    }
+  }
+
+  return {
+    child,
+
+    [Symbol.asyncDispose]() {
+      return (disposing ??= dispose());
+    },
+  };
 }
 
 async function createPnprRegistry(signal: AbortSignal) {

@@ -1,9 +1,6 @@
-import { execFile, type ExecException } from "node:child_process";
-import { addAbortListener, once } from "node:events";
 import fs from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { setTimeout } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 import { defaultConfig } from "@changesets/config";
 import { gitdir, type Fixture } from "@changesets/test-utils";
@@ -183,114 +180,6 @@ export async function getPmBinPath(bins: PmBins) {
   };
 }
 
-export function execChild(
-  command: Parameters<typeof exec>[0],
-  args?: Parameters<typeof exec>[1],
-  options?: Omit<Parameters<typeof exec>[2], "persist">,
-) {
-  const child = exec(command, args, {
-    ...options,
-    // Give the command its own process group so disposal can stop its children too.
-    persist: true,
-  });
-
-  const processHandle = child.process;
-  const pid = child.pid;
-  let hasClosed = false;
-  processHandle?.once("close", () => {
-    hasClosed = true;
-  });
-  let disposing: Promise<void> | undefined;
-
-  async function dispose(): Promise<void> {
-    if (!processHandle || !pid || hasClosed) {
-      return;
-    }
-
-    const closed = once(processHandle, "close");
-
-    if (process.platform === "win32") {
-      const taskkillError = await new Promise<(ExecException & Error) | null>(
-        (resolve) => {
-          execFile(
-            "taskkill.exe",
-            ["/PID", String(pid), "/T", "/F"],
-            { windowsHide: true },
-            (error) => resolve(error),
-          );
-        },
-      );
-
-      if (taskkillError && taskkillError.code !== 128) {
-        // A child can exit while taskkill is walking the process tree. It then
-        // reports failure even when it successfully terminated the root.
-        const closedDespiteError = await Promise.race([
-          closed.then(() => true),
-          setTimeout(1_000, false),
-        ]);
-        if (!closedDespiteError) {
-          throw taskkillError;
-        }
-        return;
-      }
-
-      await closed;
-      return;
-    }
-
-    const killGroup = (signal: NodeJS.Signals) => {
-      try {
-        process.kill(-pid, signal);
-      } catch (error) {
-        if (
-          !(error instanceof Error) ||
-          !("code" in error) ||
-          error.code !== "ESRCH"
-        ) {
-          throw error;
-        }
-      }
-    };
-
-    killGroup("SIGTERM");
-
-    await Promise.race([closed, setTimeout(1_000, undefined, { ref: false })]);
-
-    // The root can exit while a child that ignored SIGTERM is still running.
-    killGroup("SIGKILL");
-    await closed;
-  }
-
-  return {
-    child,
-
-    [Symbol.asyncDispose]() {
-      return (disposing ??= dispose());
-    },
-  };
-}
-
-async function execCancellable(
-  command: string,
-  args: string[],
-  {
-    signal,
-    ...options
-  }: Omit<NonNullable<Parameters<typeof exec>[2]>, "persist">,
-) {
-  signal?.throwIfAborted();
-  await using subprocess = execChild(command, args, options);
-  if (!signal) {
-    return await subprocess.child;
-  }
-
-  const cancelled = Promise.withResolvers<never>();
-  using _listener = addAbortListener(signal, () =>
-    cancelled.reject(signal.reason),
-  );
-  return await Promise.race([subprocess.child, cancelled.promise]);
-}
-
 function execTty(
   command: string,
   args: string[],
@@ -390,10 +279,13 @@ export async function runCliCommand(options: {
     });
   }
 
-  return execCancellable(process.execPath, args, {
+  return exec(process.execPath, args, {
     nodePath: false,
-    nodeOptions: { cwd: options.cwd, env },
     signal: options.signal,
+    nodeOptions: {
+      cwd: options.cwd,
+      env,
+    },
   });
 }
 
@@ -483,9 +375,9 @@ function createYarnBerryGitdir(packageName: string) {
       ].join("\n"),
       ...fixture,
     });
-    await execCancellable("yarn", ["install"], {
-      signal,
+    await exec("yarn", ["install"], {
       nodePath: false,
+      signal,
       nodeOptions: {
         cwd,
         env: await createPmBinEnv(cwd, pmBinPath),
