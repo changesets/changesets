@@ -959,6 +959,47 @@ function createPmContext(
 
 describe("Publish command e2e", () => {
   describe.each(pmCases)("$name", (pm) => {
+    if (pm.name === "npm 10" || pm.name === "pnpm 10 + npm 12") {
+      it.for([
+        { configured: false, args: ["--stage"], rejected: true },
+        { configured: true, args: [], rejected: true },
+        { configured: true, args: ["--no-stage"], rejected: false },
+      ])(
+        "checks staging support before registry access (config: $configured, args: $args)",
+        async ({ configured, args, rejected }, { signal }) => {
+          await using stack = new AbortableAsyncDisposableStack(signal);
+          const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+          const registry = stack.use(await createTestRegistry());
+          const fixture = createPkgAFixture();
+          fixture[".changeset/config.json"] = JSON.stringify({
+            ...JSON.parse(fixture[".changeset/config.json"] as string),
+            stagedPublishing: configured,
+          });
+          const cwd = await pm.gitdir(
+            createPmContext(registry, pmBinPath),
+            fixture,
+          );
+          const result = await runCliCommand({
+            command: "publish",
+            args,
+            cwd,
+            pmBinPath,
+            signal,
+          });
+          expect(result.exitCode === 0).toBe(!rejected);
+          expect(
+            (result.stdout + result.stderr).includes(
+              `Staged publishing requires ${pm.name === "npm 10" ? "npm >=11.15.0" : "pnpm >=11.3.0"}`,
+            ),
+          ).toBe(rejected);
+          expect(registry.requests.length === 0).toBe(rejected);
+          expect(
+            registry.requests.some((request) => request.method === "PUT"),
+          ).toBe(!rejected);
+        },
+      );
+    }
+
     it.for([false, true])(
       "tolerates duplicate publishes sequentially and in bulk (TTY: %s)",
       async (tty, { signal }) => {

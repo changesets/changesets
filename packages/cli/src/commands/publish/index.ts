@@ -153,7 +153,6 @@ export async function publish(options?: PublishOptions) {
   const packagesByName = new Map(
     packages.packages.map((pkg) => [pkg.packageJson.name, pkg]),
   );
-  const publishTool = await getPublishTool(packages);
   await ensureChangesetFolder(packages.rootDir);
 
   const releaseTag =
@@ -183,6 +182,7 @@ To resolve this exit the pre mode by running ${c.cyan("changeset pre exit")}.
 
   const config = await readConfig(packages);
   const stage = options?.stage ?? config.stagedPublishing ?? false;
+  const publishTool = await getPublishTool(packages, stage);
   const plan = artifactDir
     ? await readPlanFile(path.join(artifactDir, "publish-plan.json"))
     : await getPublishPlan(packages.rootDir, config, {

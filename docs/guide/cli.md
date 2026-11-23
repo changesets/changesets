@@ -121,6 +121,8 @@ $ changeset publish --tag beta
 them immediately. `--no-stage` disables a `stagedPublishing` config value for
 one invocation.
 
+Staged publishing requires npm >=11.15.0, pnpm >=11.3.0, or Yarn >=4.16.0. Older supported versions can still publish directly with `--no-stage`.
+
 Staged packages do not get Git tags by default. Explicit `--git-tag` still
 creates them immediately; `--no-git-tag` disables tags. Private packages
 configured for tag-only releases are tagged immediately because they do not
