@@ -521,9 +521,8 @@ async function publishSeedPackage(
     },
     { path: "package/index.js", content: "export default 1;\n" },
   ]);
-  // pnpr staging validates npm's unscoped tarball filename.
   const filename = getPackageTarballFilename(
-    staged ? packageName.split("/").at(-1)! : packageName,
+    packageName.split("/").at(-1)!,
     version,
   );
   const response = await fetch(
