@@ -319,6 +319,34 @@ describe("Publish command", () => {
     expect(git.tag).not.toHaveBeenCalled();
   });
 
+  it("rejects before publishing when the output path cannot be opened", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+      ".changeset/config.json": JSON.stringify(defaultConfig),
+      "output-dir/.gitkeep": "",
+    });
+    // A directory cannot be opened for appending (EISDIR).
+    const outputDir = path.join(cwd, "output-dir");
+
+    mockExecImplementation(async () => {
+      throw new Error("nothing should be executed");
+    });
+
+    await expect(
+      publishCommand({ cwd, output: outputDir }),
+    ).rejects.toMatchObject({ code: "EISDIR" });
+    expect(mockedExec).not.toHaveBeenCalled();
+    expect(git.tag).not.toHaveBeenCalled();
+  });
+
   it("stops publishing after a failed chunk", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
