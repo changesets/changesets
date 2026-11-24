@@ -1026,59 +1026,6 @@ async function createTestRegistry(options?: {
   };
 }
 
-// pnpr accepts duplicate stages and conflicting publications. Inject only npm's
-// conflict response while leaving stage records, metadata and approval to pnpr.
-// These HTTP bodies are reconstructed from npm JSON rather than production captures.
-function npmStagingConflict(
-  options: {
-    operation?: "stage" | "publish";
-    attempts?: number[];
-    version?: string;
-    status?: number;
-    error?: string;
-    beforeConflict?: (context: ProxyMiddlewareContext) => Promise<void>;
-    recoveryStatus?: number;
-  } = {},
-): RegistryMiddleware {
-  let attempts = 0;
-  let conflictedPackage: string | undefined;
-  return async (context) => {
-    const { request } = context;
-    const pathname = new URL(request.url).pathname;
-    const matches =
-      options.operation === "publish"
-        ? request.method === "PUT"
-        : request.method === "POST" && pathname.startsWith("/-/stage/package/");
-    if (
-      matches &&
-      (!options.attempts || options.attempts.includes(++attempts))
-    ) {
-      await options.beforeConflict?.(context);
-      conflictedPackage =
-        options.operation === "publish"
-          ? context.record.packageName
-          : context.record.pathname.slice("/-/stage/package/".length);
-      const version = options.version ?? "1.0.0";
-      const error =
-        options.error ??
-        (options.operation === "publish"
-          ? `Cannot publish over previously staged version "${version}".`
-          : `Cannot stage previously published version "${version}".`);
-      return Response.json({ error }, { status: options.status ?? 409 });
-    }
-    if (
-      options.recoveryStatus &&
-      request.method === "GET" &&
-      context.record.pathname === `/${conflictedPackage}`
-    ) {
-      return Response.json(
-        { error: "Unauthorized" },
-        { status: options.recoveryStatus },
-      );
-    }
-  };
-}
-
 async function fetchStage(registry: TestRegistry, stageId: string) {
   const response = await fetch(new URL(`-/stage/${stageId}`, registry.url), {
     headers: { authorization: `Bearer ${registry.pnprToken}` },
@@ -1158,7 +1105,7 @@ describe("Publish command e2e", () => {
         expect
           .soft(await tagExists(`${name}@1.0.0`, cwd))
           .toBe(!duplicates.has(name));
-    }, 30_000);
+    });
 
     it("tolerates duplicate publishes before and after switching to bulk", async ({
       signal,
@@ -1204,7 +1151,7 @@ describe("Publish command e2e", () => {
         expect
           .soft(await tagExists(`${name}@1.0.0`, cwd))
           .toBe(!duplicates.has(name));
-    }, 30_000);
+    });
 
     if (pm.name === "npm 12" || pm.name === "pnpm 11" || pm.name === "yarn 4") {
       it("rejects staging a version published after preflight", async ({
@@ -1214,14 +1161,21 @@ describe("Publish command e2e", () => {
         const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
         const registry = stack.use(
           await createTestRegistry({
-            middleware: npmStagingConflict({
-              async beforeConflict({ pnpr }) {
-                await pnpr.seedPackage("pkg-a", {
-                  versions: ["1.0.0"],
-                  tags: { latest: "1.0.0" },
-                });
-              },
-            }),
+            async middleware({ request, record, pnpr }) {
+              if (
+                request.method !== "POST" ||
+                record.pathname !== "/-/stage/package/pkg-a"
+              )
+                return;
+              await pnpr.seedPackage("pkg-a", {
+                versions: ["1.0.0"],
+                tags: { latest: "1.0.0" },
+              });
+              return Response.json(
+                { error: 'Cannot stage previously published version "1.0.0".' },
+                { status: 409 },
+              );
+            },
           }),
         );
         const cwd = await pm.gitdir(
@@ -1254,13 +1208,14 @@ describe("Publish command e2e", () => {
         expect
           .soft(result.stdout + result.stderr)
           .toContain('Cannot stage previously published version "1.0.0".');
-      }, 30_000);
+      });
 
       it("preserves the staging conflict when recovery info is unauthorized", async ({
         signal,
       }) => {
         await using stack = new AbortableAsyncDisposableStack(signal);
         const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+        let conflicted = false;
         const registry = stack.use(
           await createTestRegistry({
             packages: {
@@ -1269,7 +1224,30 @@ describe("Publish command e2e", () => {
                 tags: { latest: "0.9.0" },
               },
             },
-            middleware: npmStagingConflict({ recoveryStatus: 401 }),
+            async middleware({ request, record }) {
+              if (
+                request.method === "POST" &&
+                record.pathname === "/-/stage/package/pkg-a"
+              ) {
+                conflicted = true;
+                return Response.json(
+                  {
+                    error: 'Cannot stage previously published version "1.0.0".',
+                  },
+                  { status: 409 },
+                );
+              }
+              if (
+                conflicted &&
+                request.method === "GET" &&
+                record.pathname === "/pkg-a"
+              ) {
+                return Response.json(
+                  { error: "Unauthorized" },
+                  { status: 401 },
+                );
+              }
+            },
           }),
         );
         const packument = await fetchPackument(registry, "pkg-a");
@@ -1306,27 +1284,32 @@ describe("Publish command e2e", () => {
         expect
           .soft(result.stdout + result.stderr)
           .toContain('Cannot stage previously published version "1.0.0".');
-      }, 30_000);
+      });
 
       it("rejects publishing over a staged version during sequential publishing", async ({
         signal,
       }) => {
         await using stack = new AbortableAsyncDisposableStack(signal);
         const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+        let writes = 0;
         let conflictName: string | undefined;
         const registry = stack.use(
           await createTestRegistry({
-            middleware: npmStagingConflict({
-              operation: "publish",
-              attempts: [1],
-              async beforeConflict({ pnpr, record }) {
-                conflictName = record.packageName;
-                await pnpr.seedPackage(conflictName!, {
-                  versions: [{ version: "1.0.0", staged: true }],
-                  tags: { latest: "1.0.0" },
-                });
-              },
-            }),
+            async middleware({ request, pnpr, record }) {
+              if (request.method !== "PUT" || ++writes !== 1) return;
+              conflictName = record.packageName;
+              await pnpr.seedPackage(conflictName!, {
+                versions: [{ version: "1.0.0", staged: true }],
+                tags: { latest: "1.0.0" },
+              });
+              return Response.json(
+                {
+                  error:
+                    'Cannot publish over previously staged version "1.0.0".',
+                },
+                { status: 409 },
+              );
+            },
           }),
         );
         const fixture = createFourPackageFixture();
@@ -1347,27 +1330,32 @@ describe("Publish command e2e", () => {
         expect
           .soft(registry.requests.some((request) => request.statusCode === 409))
           .toBe(true);
-      }, 30_000);
+      });
 
       it("rejects publishing over a staged version during bulk publishing", async ({
         signal,
       }) => {
         await using stack = new AbortableAsyncDisposableStack(signal);
         const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+        let writes = 0;
         let conflictName: string | undefined;
         const registry = stack.use(
           await createTestRegistry({
-            middleware: npmStagingConflict({
-              operation: "publish",
-              attempts: [2],
-              async beforeConflict({ pnpr, record }) {
-                conflictName = record.packageName;
-                await pnpr.seedPackage(conflictName!, {
-                  versions: [{ version: "1.0.0", staged: true }],
-                  tags: { latest: "1.0.0" },
-                });
-              },
-            }),
+            async middleware({ request, pnpr, record }) {
+              if (request.method !== "PUT" || ++writes !== 2) return;
+              conflictName = record.packageName;
+              await pnpr.seedPackage(conflictName!, {
+                versions: [{ version: "1.0.0", staged: true }],
+                tags: { latest: "1.0.0" },
+              });
+              return Response.json(
+                {
+                  error:
+                    'Cannot publish over previously staged version "1.0.0".',
+                },
+                { status: 409 },
+              );
+            },
           }),
         );
         const fixture = createFourPackageFixture();
@@ -1388,29 +1376,38 @@ describe("Publish command e2e", () => {
         expect
           .soft(registry.requests.some((request) => request.statusCode === 409))
           .toBe(true);
-      }, 30_000);
+      });
 
       it("skips duplicate stages before and after switching to bulk", async ({
         signal,
       }) => {
         await using stack = new AbortableAsyncDisposableStack(signal);
         const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+        let stages = 0;
         const duplicates = new Set<string>();
         const registry = stack.use(
           await createTestRegistry({
             packages: {
               "pkg-a": { versions: ["0.9.0"], tags: { latest: "0.9.0" } },
             },
-            middleware: npmStagingConflict({
-              attempts: [1, 3],
-              async beforeConflict({ record, pnpr }) {
-                duplicates.add(record.pathname.split("/").at(-1)!);
-                await pnpr.seedPackage(record.pathname.split("/").at(-1)!, {
-                  versions: [{ version: "1.0.0", staged: true }],
-                  tags: { latest: "1.0.0" },
-                });
-              },
-            }),
+            async middleware({ request, record, pnpr }) {
+              if (
+                request.method !== "POST" ||
+                !record.pathname.startsWith("/-/stage/package/")
+              )
+                return;
+              if (++stages !== 1 && stages !== 3) return;
+              const name = record.pathname.slice("/-/stage/package/".length);
+              duplicates.add(name);
+              await pnpr.seedPackage(name, {
+                versions: [{ version: "1.0.0", staged: true }],
+                tags: { latest: "1.0.0" },
+              });
+              return Response.json(
+                { error: 'Cannot stage previously published version "1.0.0".' },
+                { status: 409 },
+              );
+            },
           }),
         );
         const fixture = createFourPackageFixture();
@@ -1465,7 +1462,7 @@ describe("Publish command e2e", () => {
         expect
           .soft(result.stdout)
           .not.toContain("Some packages failed to publish");
-      }, 30_000);
+      });
 
       it("rejects unrelated staging conflicts", async ({ signal }) => {
         const status = 409;
@@ -1474,7 +1471,14 @@ describe("Publish command e2e", () => {
         const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
         const registry = stack.use(
           await createTestRegistry({
-            middleware: npmStagingConflict({ status, error }),
+            async middleware({ request, record }) {
+              if (
+                request.method === "POST" &&
+                record.pathname === "/-/stage/package/pkg-a"
+              ) {
+                return Response.json({ error }, { status });
+              }
+            },
           }),
         );
         const cwd = await pm.gitdir(
@@ -1498,7 +1502,7 @@ describe("Publish command e2e", () => {
           )
           .toEqual([status]);
         expect.soft(await tagExists("pkg-a@1.0.0", cwd)).toBe(false);
-      }, 30_000);
+      });
 
       it("rejects duplicate-stage wording with a different HTTP status", async ({
         signal,
@@ -1509,7 +1513,14 @@ describe("Publish command e2e", () => {
         const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
         const registry = stack.use(
           await createTestRegistry({
-            middleware: npmStagingConflict({ status, error }),
+            async middleware({ request, record }) {
+              if (
+                request.method === "POST" &&
+                record.pathname === "/-/stage/package/pkg-a"
+              ) {
+                return Response.json({ error }, { status });
+              }
+            },
           }),
         );
         const cwd = await pm.gitdir(
@@ -1533,7 +1544,7 @@ describe("Publish command e2e", () => {
           )
           .toEqual([status]);
         expect.soft(await tagExists("pkg-a@1.0.0", cwd)).toBe(false);
-      }, 30_000);
+      });
 
       if (pm.name === "npm 12") {
         it("reconstructs npm duplicate-stage JSON from an HTTP conflict", async ({
@@ -1552,7 +1563,14 @@ describe("Publish command e2e", () => {
                   tags: { latest: version },
                 },
               },
-              middleware: npmStagingConflict({ version }),
+              async middleware({ request, record }) {
+                if (
+                  request.method === "POST" &&
+                  record.pathname === `/-/stage/package/${name}`
+                ) {
+                  return Response.json({ error }, { status: 409 });
+                }
+              },
             }),
           );
           const fixture = createPkgAFixture({ version });
@@ -1593,7 +1611,7 @@ describe("Publish command e2e", () => {
           });
           expect.soft(classified.exitCode).toBe(0);
           expect.soft(await tagExists(`${name}@${version}`, cwd)).toBe(false);
-        }, 30_000);
+        });
       }
 
       it("stages the first version of a package with --stage", async ({
@@ -1601,9 +1619,23 @@ describe("Publish command e2e", () => {
       }) => {
         await using stack = new AbortableAsyncDisposableStack(signal);
         const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+        let stages = 0;
         const registry = stack.use(
           await createTestRegistry({
-            middleware: npmStagingConflict({ attempts: [2] }),
+            async middleware({ request, record }) {
+              if (
+                request.method === "POST" &&
+                record.pathname === "/-/stage/package/pkg-a" &&
+                ++stages === 2
+              ) {
+                return Response.json(
+                  {
+                    error: 'Cannot stage previously published version "1.0.0".',
+                  },
+                  { status: 409 },
+                );
+              }
+            },
           }),
         );
         const fixture = createPkgAFixture();
@@ -1649,7 +1681,7 @@ describe("Publish command e2e", () => {
               .map((request) => request.statusCode),
           )
           .toEqual([201, 409]);
-      }, 30_000);
+      });
 
       it("stages an existing package when enabled in config", async ({
         signal,
@@ -1698,7 +1730,7 @@ describe("Publish command e2e", () => {
         expect.soft(response.status).toBe(200);
         const packument = await response.json();
         expect.soft(packument).not.toHaveProperty(["versions", "1.0.0"]);
-      }, 30_000);
+      });
 
       it("publishes with --no-stage when staging is enabled in config", async ({
         signal,
@@ -1734,7 +1766,7 @@ describe("Publish command e2e", () => {
             ),
           )
           .toBe(false);
-      }, 30_000);
+      });
 
       it.runIf(pm.name !== "yarn 4")(
         "stages a package from a packed publish plan",
@@ -1766,7 +1798,6 @@ describe("Publish command e2e", () => {
             .toEqual(["/-/stage/package/pkg-a"]);
           expect.soft(await tagExists("pkg-a@1.0.0", cwd)).toBe(true);
         },
-        30_000,
       );
     }
 
