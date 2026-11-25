@@ -13,6 +13,7 @@ export interface CommitInfo {
     markdownLink: string;
   };
   author?: {
+    isBot?: boolean;
     login: string;
     url: string;
     markdownLink: string;
@@ -64,6 +65,7 @@ export async function getCommitInfo(
     },
     author: author
       ? {
+          ...(author.__typename === "Bot" ? { isBot: true } : {}),
           login: author.login,
           url: author.url,
           markdownLink: `[@${author.login}](${author.url})`,

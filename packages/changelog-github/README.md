@@ -44,6 +44,28 @@ Set `true` to drop the `"Thanks [@user]!"` attribution from each line.
 > [!NOTE]
 > It is recommended to not set `"disableThanks": true` when using the `template` option as the `{authors}` token would return an empty string, which could lead to unexpected results.
 
+### `excludeFromThanks`
+
+- **Type:** `string[]`
+- **Default:** `[]`
+
+List the GitHub logins to omit from attribution, without the `@` prefix. Matching
+is case-insensitive and applies to authors resolved from GitHub and authors
+specified in changeset metadata. Other authors on the same entry keep their
+credit. When the list of credited authors is empty, the default formatter omits
+the entire thanks clause and the `{authors}` template token returns an empty
+string.
+
+### `excludeBotsFromThanks`
+
+- **Type:** `boolean`
+- **Default:** `true`
+
+Omit accounts that GitHub identifies as bots, logins ending in `[bot]`, and the
+known aliases `dependabot`, `renovate`, and `github-actions`. Set this option to
+`false` to include bot credits. The `excludeFromThanks` and `disableThanks`
+options still apply.
+
 ### `template`
 
 - **Type:** `string`

@@ -368,6 +368,118 @@ it("disables thanks if disableThanks is enabled", async () => {
   `);
 });
 
+describe("attribution exclusions", () => {
+  const links = buildMdLinks();
+
+  it.each(["", "_:\n  pr: 1613"])(
+    "filters GitHub-resolved authors case-insensitively (metadata %j)",
+    async (frontmatter) => {
+      const promise = getReleaseLine(
+        createChangeset({ frontmatter }),
+        "minor",
+        { ...defaultRepo, excludeFromThanks: ["andarist"] },
+      );
+      await expect(promise).resolves.toBe(
+        `\n\n- ${links.pull} ${links.commit} - something\n`,
+      );
+    },
+  );
+
+  it("preserves eligible explicit authors and their order", async () => {
+    const promise = getReleaseLine(
+      createChangeset({
+        frontmatter: '_:\n  author: [Alice, Bob, "my-app[bot]", Carol]',
+        suffix: "More details.",
+      }),
+      "minor",
+      { ...defaultRepo, excludeFromThanks: ["ALICE"] },
+    );
+    await expect(promise).resolves.toBe(
+      `\n\n- ${links.pull} ${links.commit} Thanks [@Bob](https://github.com/Bob),[@Carol](https://github.com/Carol)! - something\n  More details.`,
+    );
+  });
+
+  it("does not fall back to the GitHub author after excluding every override", async () => {
+    const promise = getReleaseLine(
+      createChangeset({ frontmatter: "_:\n  author: [Alice, Renovate]" }),
+      "minor",
+      { ...defaultRepo, excludeFromThanks: ["alice"] },
+    );
+    await expect(promise).resolves.toBe(
+      `\n\n- ${links.pull} ${links.commit} - something\n`,
+    );
+  });
+
+  it("omits the clause and separator when there are no references", async () => {
+    const promise = getReleaseLine(
+      {
+        ...createChangeset({ frontmatter: "_:\n  author: Dependabot" }),
+        commit: undefined,
+      },
+      "minor",
+      defaultRepo,
+    );
+    await expect(promise).resolves.toBe("\n\n- something\n");
+  });
+
+  it("filters authors that GitHub identifies as bots by default", async () => {
+    const urls = buildUrls({});
+    mockedGetGithubInfo.getCommitInfo.mockResolvedValueOnce({
+      commit: {
+        sha: defaults.commit,
+        url: urls.commit,
+        markdownLink: links.commit,
+      },
+      pull: { number: defaults.pull, url: urls.pull, markdownLink: links.pull },
+      author: {
+        login: "custom-automation",
+        url: "https://github.com/apps/custom-automation",
+        markdownLink:
+          "[@custom-automation](https://github.com/apps/custom-automation)",
+        isBot: true,
+      },
+    });
+    const promise = getReleaseLine(createChangeset(), "minor", defaultRepo);
+    await expect(promise).resolves.toBe(
+      `\n\n- ${links.pull} ${links.commit} - something\n`,
+    );
+  });
+
+  it("allows bot credits when automatic bot filtering is disabled", async () => {
+    const promise = getReleaseLine(
+      createChangeset({ frontmatter: "_:\n  author: [alice, dependabot]" }),
+      "minor",
+      {
+        ...defaultRepo,
+        excludeBotsFromThanks: false,
+        excludeFromThanks: ["alice"],
+      },
+    );
+    await expect(promise).resolves.toBe(
+      `\n\n- ${links.pull} ${links.commit} Thanks [@dependabot](https://github.com/dependabot)! - something\n`,
+    );
+  });
+
+  it.each([
+    [["alice"], "- something [@bob](https://github.com/bob)\n"],
+    [["alice", "bob"], "- something\n"],
+  ])(
+    "filters the authors token with exclusions %j",
+    async (excludeFromThanks, expected) => {
+      const promise = getReleaseLine(
+        createChangeset({ frontmatter: "_:\n  author: [alice, bob]" }),
+        "minor",
+        {
+          ...defaultRepo,
+          excludeFromThanks,
+          template: "- {summary} {authors}",
+        },
+      );
+      await expect(promise).resolves.toBe(expected);
+    },
+  );
+});
+
 describe("template option (compact reproduction)", () => {
   const compactOpts = {
     repo: defaults.repo,

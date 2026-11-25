@@ -23,6 +23,12 @@ interface PullInput {
   repo: string;
 }
 
+interface Actor {
+  __typename: string;
+  login: string;
+  url: string;
+}
+
 // TODO: Look into auto-generating this
 interface CommitOutput {
   commitUrl: string;
@@ -31,27 +37,18 @@ interface CommitOutput {
       number: number;
       url: string;
       mergedAt: string | null;
-      author: {
-        login: string;
-        url: string;
-      } | null;
+      author: Actor | null;
     }>;
   };
   author: {
-    user: {
-      login: string;
-      url: string;
-    } | null;
+    user: Actor | null;
   } | null;
 }
 
 // TODO: Look into auto-generating this
 interface PullOutput {
   url: string;
-  author: {
-    login: string;
-    url: string;
-  } | null;
+  author: Actor | null;
   mergeCommit: {
     commitUrl: string;
     abbreviatedOid: string;
@@ -204,6 +201,7 @@ fragment CommitFragment on Commit {
       url
       mergedAt
       author {
+        __typename
         login
         url
       }
@@ -211,6 +209,7 @@ fragment CommitFragment on Commit {
   }
   author {
     user {
+      __typename
       login
       url
     }
@@ -223,6 +222,7 @@ fragment CommitFragment on Commit {
 fragment PullFragment on PullRequest {
   url
   author {
+    __typename
     login
     url
   }

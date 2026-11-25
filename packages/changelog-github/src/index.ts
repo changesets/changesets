@@ -11,6 +11,10 @@ import { mdLink } from "./utils.ts";
 const arrayify = <T>(input: T | T[] | null | undefined): T[] | null =>
   input != null ? (Array.isArray(input) ? input : [input]) : null;
 
+const KNOWN_BOT_LOGINS = new Set(["dependabot", "renovate", "github-actions"]);
+
+type Author = { login: string; markdownLink?: string; isBot?: boolean };
+
 const ISSUE_REF_REGEX = /\[.*?\]\(.*?\)|\B#([1-9]\d*)\b/g;
 
 function verifyMetadata(input: unknown): InferOutput<typeof MetadataSchema> {
@@ -129,17 +133,14 @@ const changelogFunctions: ChangelogFunctions = {
       .split("\n")
       .map((l) => l.trimEnd());
 
-    const links: { commit?: string; pull?: string; user?: string } = {
-      commit: undefined,
-      pull: undefined,
-      user: undefined,
-    };
+    const links: { commit?: string; pull?: string } = {};
+    let githubAuthor: Author | undefined;
 
     if (metadata?.pr != null) {
       const info = await getPullRequestInfo({ pull: metadata.pr, repo });
       links.commit = info?.commit?.markdownLink;
       links.pull = info?.pull.markdownLink;
-      links.user = info?.author?.markdownLink;
+      githubAuthor = info?.author;
 
       if (metadata?.commit != null) {
         const text = `\`${metadata.commit.slice(0, 7)}\``;
@@ -151,16 +152,40 @@ const changelogFunctions: ChangelogFunctions = {
       const info = await getCommitInfo({ commit: commitToFetchFrom, repo });
       links.commit = info?.commit.markdownLink;
       links.pull = info?.pull?.markdownLink;
-      links.user = info?.author?.markdownLink;
+      githubAuthor = info?.author;
     }
 
-    // ugly, but works...
-    const users = arrayify(metadata?.author);
-    const usersLinks = users
-      ?.map((user) => mdLink(`@${user}`, GITHUB_SERVER_URL, user))
-      .join(",");
+    const exclusions = options?.excludeFromThanks;
+    const excludedLogins = new Set(
+      Array.isArray(exclusions)
+        ? exclusions
+            .filter((login) => typeof login === "string")
+            .map((login) => login.toLowerCase())
+        : [],
+    );
+    const excludeBots = options?.excludeBotsFromThanks !== false;
+    const explicitAuthors = arrayify(metadata?.author);
+    const authors: Author[] =
+      explicitAuthors?.map((login) => ({ login })) ??
+      (githubAuthor ? [githubAuthor] : []);
+
     const usersString =
-      options?.disableThanks !== true ? (usersLinks ?? links.user) : null;
+      options?.disableThanks === true
+        ? ""
+        : authors
+            .filter(({ login, isBot }) => {
+              const normalized = login.toLowerCase();
+              const bot =
+                isBot ||
+                normalized.endsWith("[bot]") ||
+                KNOWN_BOT_LOGINS.has(normalized);
+              return !excludedLogins.has(normalized) && (!excludeBots || !bot);
+            })
+            .map(
+              ({ login, markdownLink }) =>
+                markdownLink ?? mdLink(`@${login}`, GITHUB_SERVER_URL, login),
+            )
+            .join(",");
 
     const linkOpts = { serverUrl: GITHUB_SERVER_URL, repo };
     const summaryLinked = linkifyIssueRefs(firstLine, linkOpts);
@@ -184,7 +209,7 @@ const changelogFunctions: ChangelogFunctions = {
     const prefix = [
       links.pull == null ? "" : ` ${links.pull}`,
       links.commit == null ? "" : ` ${links.commit}`,
-      usersString == null ? "" : ` Thanks ${usersString}!`,
+      usersString ? ` Thanks ${usersString}!` : "",
     ].join("");
 
     return `\n\n-${prefix ? `${prefix} -` : ""} ${summaryLinked}\n${continuation}`;

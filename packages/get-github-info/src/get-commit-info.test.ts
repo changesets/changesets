@@ -92,8 +92,9 @@ test("associated with multiple PRs with only one merged", async () => {
                     url: "https://github.com/emotion-js/emotion/pull/1613",
                     mergedAt: "2019-11-07T06:43:58Z",
                     author: {
-                      login: "Andarist",
-                      url: "https://github.com/Andarist",
+                      __typename: "Bot",
+                      login: "automation",
+                      url: "https://github.com/apps/automation",
                     },
                   },
                   {
@@ -135,9 +136,10 @@ test("associated with multiple PRs with only one merged", async () => {
   expect(result).toMatchInlineSnapshot(`
     {
       "author": {
-        "login": "Andarist",
-        "markdownLink": "[@Andarist](https://github.com/Andarist)",
-        "url": "https://github.com/Andarist",
+        "isBot": true,
+        "login": "automation",
+        "markdownLink": "[@automation](https://github.com/apps/automation)",
+        "url": "https://github.com/apps/automation",
       },
       "commit": {
         "markdownLink": "[\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003d4c8ca284c116668d7217fb747802ed85)",
@@ -173,6 +175,7 @@ test("associated with multiple PRs with only one merged", async () => {
           url
           mergedAt
           author {
+            __typename
             login
             url
           }
@@ -180,6 +183,7 @@ test("associated with multiple PRs with only one merged", async () => {
       }
       author {
         user {
+          __typename
           login
           url
         }
@@ -315,6 +319,7 @@ test("associated with multiple PRs with multiple merged gets the one that was me
           url
           mergedAt
           author {
+            __typename
             login
             url
           }
@@ -322,6 +327,7 @@ test("associated with multiple PRs with multiple merged gets the one that was me
       }
       author {
         user {
+          __typename
           login
           url
         }
@@ -421,6 +427,7 @@ test("gets the author of the associated pull request if it exists rather than th
           url
           mergedAt
           author {
+            __typename
             login
             url
           }
@@ -428,6 +435,7 @@ test("gets the author of the associated pull request if it exists rather than th
       }
       author {
         user {
+          __typename
           login
           url
         }
@@ -527,6 +535,7 @@ test("uses custom GITHUB_GRAPHQL_URL when set", async () => {
             url
             mergedAt
             author {
+              __typename
               login
               url
             }
@@ -534,6 +543,7 @@ test("uses custom GITHUB_GRAPHQL_URL when set", async () => {
         }
         author {
           user {
+            __typename
             login
             url
           }

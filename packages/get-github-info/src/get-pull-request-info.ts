@@ -13,6 +13,7 @@ export interface PullRequestInfo {
     markdownLink: string;
   };
   author?: {
+    isBot?: boolean;
     login: string;
     url: string;
     markdownLink: string;
@@ -44,6 +45,7 @@ export async function getPullRequestInfo(
     },
     author: data.author
       ? {
+          ...(data.author.__typename === "Bot" ? { isBot: true } : {}),
           login: data.author.login,
           url: data.author.url,
           markdownLink: `[@${data.author.login}](${data.author.url})`,

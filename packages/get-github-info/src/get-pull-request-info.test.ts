@@ -64,8 +64,9 @@ test("returns pull request info", async () => {
             pull__1613: {
               url: "https://github.com/emotion-js/emotion/pull/1613",
               author: {
-                login: "Andarist",
-                url: "https://github.com/Andarist",
+                __typename: "Bot",
+                login: "automation",
+                url: "https://github.com/apps/automation",
               },
               mergeCommit: {
                 commitUrl:
@@ -85,9 +86,10 @@ test("returns pull request info", async () => {
   expect(result).toMatchInlineSnapshot(`
     {
       "author": {
-        "login": "Andarist",
-        "markdownLink": "[@Andarist](https://github.com/Andarist)",
-        "url": "https://github.com/Andarist",
+        "isBot": true,
+        "login": "automation",
+        "markdownLink": "[@automation](https://github.com/apps/automation)",
+        "url": "https://github.com/apps/automation",
       },
       "commit": {
         "markdownLink": "[\`a085003\`](https://github.com/emotion-js/emotion/commit/a085003d4c8ca284c116668d7217fb747802ed85)",
@@ -116,6 +118,7 @@ test("returns pull request info", async () => {
     fragment PullFragment on PullRequest {
       url
       author {
+        __typename
         login
         url
       }
