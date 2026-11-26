@@ -1,0 +1,79 @@
+name: Build CLI executables
+
+on:
+  pull_request:
+  # Replace pull_request with this trigger after testing.
+  # push:
+  #   branches:
+  #     - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build CLI on ${{ matrix.os }}
+    if: github.event_name == 'push' || github.head_ref == 'porffor-cli'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        # Porffor alpha 25 doesn't support native Windows executables.
+        include:
+          # Porffor needs newer libuv and OpenSSL headers than Ubuntu 24.04 provides.
+          - os: ubuntu-26.04
+            target: linux-x64
+            sha256: 3aad90352f8596ade39428fe636b00deb75ae9558a63bb0b7b9b5ab707f85ef9
+          - os: macos-latest
+            target: darwin-arm64
+            sha256: bea416997b52c4cf4d4b4845b1bfdee8c60e529a8aac6469515958dc062d29a1
+      fail-fast: false
+    env:
+      TARGET: ${{ matrix.target }}
+    steps:
+      - uses: $/.github/actions/ci-setup
+
+      - name: Build packages
+        run: pnpm build
+
+      - name: Install Porffor
+        env:
+          SHA256: ${{ matrix.sha256 }}
+        working-directory: ${{ runner.temp }}
+        run: |
+          curl -fsSLo porffor.tar.gz "https://github.com/CanadaHonk/porffor/releases/download/alpha-25/porffor-$TARGET.tar.gz"
+          echo "$SHA256  porffor.tar.gz" | shasum -a 256 -c -
+          tar -xzf porffor.tar.gz porf
+
+      - name: Install build dependencies on Linux
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libjitterentropy3-dev libssl-dev libuv1-dev libzstd-dev pkg-config zlib1g-dev
+
+      - name: Install build dependencies on macOS
+        if: runner.os == 'macOS'
+        run: |
+          brew install libuv openssl@3 pkgconf
+          echo "PKG_CONFIG_PATH=$(brew --prefix openssl@3)/lib/pkgconfig" >> "$GITHUB_ENV"
+
+      - name: Build executable
+        run: '"$RUNNER_TEMP/porf" native packages/cli/bin.js -O3 -o changeset'
+
+      - name: Check executable version
+        run: test "$(./changeset --version)" = "$(node -p "require('./packages/cli/package.json').version")"
+
+      # Keep the executable permission when downloading the artifact.
+      - name: Package executable
+        run: tar -czf "changeset-$TARGET.tar.gz" changeset
+
+      - name: Upload executable
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          archive: false
+          if-no-files-found: error
+          path: changeset-${{ matrix.target }}.tar.gz
