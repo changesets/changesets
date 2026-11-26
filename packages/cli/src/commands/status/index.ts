@@ -5,7 +5,7 @@ import c from "@changesets/color";
 import { ExitError } from "@changesets/errors";
 import { readPreState } from "@changesets/pre";
 import { readChangesets } from "@changesets/read";
-import type { ComprehensiveRelease } from "@changesets/types";
+import type { ComprehensiveRelease, ReleasePlan } from "@changesets/types";
 import { log } from "@clack/prompts";
 import { getPackages } from "@manypkg/get-packages";
 import { readConfig } from "../../utils/read-config.ts";
@@ -17,17 +17,22 @@ export interface StatusOptions {
   since?: string;
   verbose?: boolean;
   output?: string;
+  allowNoChanges?: boolean;
 }
 
-export async function status(options?: StatusOptions) {
+export async function status(
+  options?: StatusOptions,
+): Promise<ReleasePlan | undefined> {
   const cwd = options?.cwd ?? process.cwd();
 
   const packages = await getPackages(cwd);
   await ensureChangesetFolder(packages.rootDir);
 
   const config = await readConfig(packages);
-  const preState = await readPreState(packages.rootDir);
-  const changesets = await readChangesets(packages.rootDir, options?.since);
+  const [changesets, preState] = await Promise.all([
+    readChangesets(packages.rootDir, options?.since),
+    readPreState(packages.rootDir),
+  ]);
 
   const releasePlan = assembleReleasePlan(
     changesets,
@@ -41,12 +46,15 @@ export async function status(options?: StatusOptions) {
   });
 
   if (changedPackages.length > 0 && releasePlan.changesets.length === 0) {
-    log.error(
+    log.warn(
       `
 Some packages have been changed but no changesets were found. Run ${c.cyan("changeset add")} to resolve this error.
 If this change doesn't need a release, run ${c.cyan("changeset add --empty")}.
       `.trim(),
     );
+
+    if (options?.allowNoChanges) return;
+
     throw new ExitError(1);
   }
 

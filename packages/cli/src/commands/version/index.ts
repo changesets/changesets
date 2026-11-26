@@ -22,9 +22,10 @@ export interface VersionOptions {
   ignore?: string[];
   snapshot?: string | boolean;
   snapshotPrereleaseTemplate?: string;
+  allowNoChanges?: boolean;
 }
 
-export async function version(options: VersionOptions) {
+export async function version(options: VersionOptions): Promise<void> {
   const cwd = options.cwd ?? process.cwd();
 
   const packages = await getPackages(cwd);
@@ -94,6 +95,9 @@ You can then run ${c.cyan("changeset version")} again to do a normal release.
     (preState == null || preState.mode !== "exit")
   ) {
     log.warn("No unreleased changesets found.");
+
+    if (options.allowNoChanges) return;
+
     throw new ExitError(1);
   }
 
