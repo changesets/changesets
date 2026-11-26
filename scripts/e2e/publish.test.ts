@@ -14,7 +14,6 @@ import { packTar, type TarSource } from "modern-tar/fs";
 import { exec } from "tinyexec";
 import { describe, expect, it } from "vitest";
 import {
-  AbortableAsyncDisposableStack,
   createPkgAFixture,
   createTempDir,
   getFreePort,
@@ -210,6 +209,10 @@ function createWebServer(handler: (request: Request) => Promise<Response>) {
       try {
         await writeResponse(res, await handler(await createWebRequest(req)));
       } catch {
+        if (res.destroyed || res.headersSent) {
+          res.destroy();
+          return;
+        }
         await writeResponse(
           res,
           Response.json({ error: "Internal Server Error" }, { status: 500 }),
@@ -347,31 +350,34 @@ async function fetchPackument(registry: TestRegistry, packageName: string) {
   return response.json();
 }
 
-async function waitForRegistry(url: string) {
+async function waitForRegistry(url: string, signal: AbortSignal) {
   let lastError: unknown;
   for (let attempt = 0; attempt < 50; attempt++) {
+    signal.throwIfAborted();
     try {
       const response = await fetch(url, {
         method: "HEAD",
-        signal: AbortSignal.timeout(250),
+        signal: AbortSignal.any([signal, AbortSignal.timeout(250)]),
       });
       if (response.status < 500) return;
     } catch (error) {
+      signal.throwIfAborted();
       lastError = error;
     }
-    await setTimeout(100);
+    await setTimeout(100, undefined, { signal });
   }
   throw new Error(`Timed out waiting for pnpr at ${url}`, {
     cause: lastError,
   });
 }
 
-async function createPnprUser(pnprUrl: string) {
+async function createPnprUser(pnprUrl: string, signal: AbortSignal) {
   const username = `test-${randomUUID()}`;
   const response = await fetch(
     new URL(`-/user/org.couchdb.user:${username}`, pnprUrl),
     {
       method: "PUT",
+      signal,
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         _id: `org.couchdb.user:${username}`,
@@ -475,6 +481,7 @@ async function publishSeedPackage(
   packageName: string,
   version: string,
   tags: string[],
+  signal?: AbortSignal,
 ) {
   const manifest = {
     name: packageName,
@@ -496,6 +503,7 @@ async function publishSeedPackage(
     new URL(encodeURIComponent(packageName), pnprUrl),
     {
       method: "PUT",
+      signal,
       headers: {
         authorization: `Bearer ${pnprToken}`,
         "content-type": "application/json",
@@ -541,6 +549,7 @@ async function seedPackage(
   pnprToken: string,
   packageName: string,
   state: SeedPackageState,
+  signal?: AbortSignal,
 ) {
   const versionSet = new Set(state.versions);
   for (const [tag, version] of Object.entries(state.tags)) {
@@ -555,7 +564,14 @@ async function seedPackage(
     const tags = Object.entries(state.tags)
       .filter(([, taggedVersion]) => taggedVersion === version)
       .map(([tag]) => tag);
-    await publishSeedPackage(pnprUrl, pnprToken, packageName, version, tags);
+    await publishSeedPackage(
+      pnprUrl,
+      pnprToken,
+      packageName,
+      version,
+      tags,
+      signal,
+    );
   }
 }
 
@@ -652,7 +668,8 @@ function execChild(
   };
 }
 
-async function createPnprRegistry() {
+async function createPnprRegistry(signal: AbortSignal) {
+  signal.throwIfAborted();
   await using stack = new AsyncDisposableStack();
   const root = stack.use(await createTempDir("changesets-pnpr-"));
   const storage = path.join(root.path, "storage");
@@ -694,6 +711,7 @@ log:
 `.trimStart(),
   );
 
+  signal.throwIfAborted();
   const execResult = stack.use(
     execChild(
       path.join(e2ePackageRoot, "node_modules", ".bin", "pnpr"),
@@ -746,15 +764,21 @@ log:
     rejectStartupOnExit(pnprProcess.exitCode, pnprProcess.signalCode);
   }
 
+  const readiness = new AbortController();
   try {
-    await Promise.race([waitForRegistry(url), startupFailure.promise]);
+    await Promise.race([
+      waitForRegistry(url, AbortSignal.any([signal, readiness.signal])),
+      startupFailure.promise,
+    ]);
   } finally {
+    readiness.abort();
     pnprProcess.removeListener("error", rejectStartupOnError);
     pnprProcess.removeListener("exit", rejectStartupOnExit);
     pnprStdout.removeListener("data", collectOutput);
     pnprStderr.removeListener("data", collectOutput);
   }
 
+  signal.throwIfAborted();
   const cleanup = stack.move();
   return {
     url,
@@ -911,22 +935,26 @@ async function createAuthProxy(
   };
 }
 
-async function createTestRegistry(options?: {
+async function createTestRegistry({
+  auth,
+  middleware,
+  packages = {},
+  signal,
+}: {
   auth?: AuthProxyConfig;
   middleware?: RegistryProxyConfig["middleware"];
   packages?: SeedRegistryState;
+  signal: AbortSignal;
 }): Promise<TestRegistry> {
   await using stack = new AsyncDisposableStack();
-  const pnpr = stack.use(await createPnprRegistry());
-  const pnprToken = await createPnprUser(pnpr.url);
-  for (const [packageName, state] of Object.entries(options?.packages ?? {})) {
-    await seedPackage(pnpr.url, pnprToken, packageName, state);
+  const pnpr = stack.use(await createPnprRegistry(signal));
+  const pnprToken = await createPnprUser(pnpr.url, signal);
+  for (const [packageName, state] of Object.entries(packages)) {
+    await seedPackage(pnpr.url, pnprToken, packageName, state, signal);
   }
+  signal.throwIfAborted();
   const proxy = stack.use(
-    await createAuthProxy(pnpr.url, pnprToken, {
-      auth: options?.auth,
-      middleware: options?.middleware,
-    }),
+    await createAuthProxy(pnpr.url, pnprToken, { auth, middleware }),
   );
   const cleanup = stack.move();
 
@@ -944,10 +972,14 @@ async function createTestRegistry(options?: {
 function createPmContext(
   registry: TestRegistry,
   pmBinPath: string,
-  authToken: TestRegistryConfig["authToken"] = registry.pnprToken,
+  {
+    authToken = registry.pnprToken,
+    signal,
+  }: { authToken?: TestRegistryConfig["authToken"]; signal: AbortSignal },
 ) {
   return {
     pmBinPath,
+    signal,
     registry: {
       authToken,
       host: registry.host,
@@ -959,10 +991,11 @@ function createPmContext(
 describe("Publish command e2e", () => {
   describe.each(pmCases)("$name", (pm) => {
     it("publishes a new version of a package", async ({ signal }) => {
-      await using stack = new AbortableAsyncDisposableStack(signal);
-      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+      await using stack = new AsyncDisposableStack();
+      const { pmBinPath } = stack.use(await getPmBinPath(pm.bins));
       const registry = stack.use(
         await createTestRegistry({
+          signal,
           packages: {
             "pkg-a": {
               versions: ["0.0.1"],
@@ -972,7 +1005,7 @@ describe("Publish command e2e", () => {
         }),
       );
       const cwd = await pm.gitdir(
-        createPmContext(registry, pmBinPath),
+        createPmContext(registry, pmBinPath, { signal }),
         createPkgAFixture(),
       );
 
@@ -1015,10 +1048,11 @@ describe("Publish command e2e", () => {
     });
 
     it("surfaces pre-publish errors", async ({ signal }) => {
-      await using stack = new AbortableAsyncDisposableStack(signal);
-      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+      await using stack = new AsyncDisposableStack();
+      const { pmBinPath } = stack.use(await getPmBinPath(pm.bins));
       const registry = stack.use(
         await createTestRegistry({
+          signal,
           packages: {
             "pkg-a": {
               versions: ["0.0.1"],
@@ -1027,21 +1061,24 @@ describe("Publish command e2e", () => {
           },
         }),
       );
-      const cwd = await pm.gitdir(createPmContext(registry, pmBinPath), {
-        ...createPkgAFixture(),
-        "packages/pkg-a/package.json": JSON.stringify({
-          name: "pkg-a",
-          version: "1.0.0",
-          description: "",
-          files: ["index.js"],
-          license: "MIT",
-          scripts: {
-            prepack:
-              "node -e \"console.log(JSON.stringify({ lifecycle: 'output' })); console.error('prepack failed'); process.exit(1)\"",
-          },
-          type: "module",
-        }),
-      });
+      const cwd = await pm.gitdir(
+        createPmContext(registry, pmBinPath, { signal }),
+        {
+          ...createPkgAFixture(),
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+            description: "",
+            files: ["index.js"],
+            license: "MIT",
+            scripts: {
+              prepack:
+                "node -e \"console.log(JSON.stringify({ lifecycle: 'output' })); console.error('prepack failed'); process.exit(1)\"",
+            },
+            type: "module",
+          }),
+        },
+      );
 
       const result = await runCliCommand({
         command: "publish",
@@ -1080,11 +1117,11 @@ describe("Publish command e2e", () => {
     });
 
     it("publishes a first version of a package", async ({ signal }) => {
-      await using stack = new AbortableAsyncDisposableStack(signal);
-      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
-      const registry = stack.use(await createTestRegistry());
+      await using stack = new AsyncDisposableStack();
+      const { pmBinPath } = stack.use(await getPmBinPath(pm.bins));
+      const registry = stack.use(await createTestRegistry({ signal }));
       const cwd = await pm.gitdir(
-        createPmContext(registry, pmBinPath),
+        createPmContext(registry, pmBinPath, { signal }),
         createPkgAFixture(),
       );
 
@@ -1127,24 +1164,27 @@ describe("Publish command e2e", () => {
     });
 
     it("handles lifecycle stdout while publishing", async ({ signal }) => {
-      await using stack = new AbortableAsyncDisposableStack(signal);
-      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
-      const registry = stack.use(await createTestRegistry());
-      const cwd = await pm.gitdir(createPmContext(registry, pmBinPath), {
-        ...createPkgAFixture(),
-        "packages/pkg-a/package.json": JSON.stringify({
-          name: "pkg-a",
-          version: "1.0.0",
-          description: "",
-          files: ["index.js"],
-          license: "MIT",
-          scripts: {
-            prepack:
-              "node -e \"console.log(JSON.stringify({ lifecycle: 'output' }))\"",
-          },
-          type: "module",
-        }),
-      });
+      await using stack = new AsyncDisposableStack();
+      const { pmBinPath } = stack.use(await getPmBinPath(pm.bins));
+      const registry = stack.use(await createTestRegistry({ signal }));
+      const cwd = await pm.gitdir(
+        createPmContext(registry, pmBinPath, { signal }),
+        {
+          ...createPkgAFixture(),
+          "packages/pkg-a/package.json": JSON.stringify({
+            name: "pkg-a",
+            version: "1.0.0",
+            description: "",
+            files: ["index.js"],
+            license: "MIT",
+            scripts: {
+              prepack:
+                "node -e \"console.log(JSON.stringify({ lifecycle: 'output' }))\"",
+            },
+            type: "module",
+          }),
+        },
+      );
 
       const result = await runCliCommand({
         command: "publish",
@@ -1187,10 +1227,11 @@ describe("Publish command e2e", () => {
     it("publishes a new pre version of an only-pre package without existing latest tag", async ({
       signal,
     }) => {
-      await using stack = new AbortableAsyncDisposableStack(signal);
-      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+      await using stack = new AsyncDisposableStack();
+      const { pmBinPath } = stack.use(await getPmBinPath(pm.bins));
       const registry = stack.use(
         await createTestRegistry({
+          signal,
           packages: {
             "pkg-a": {
               versions: ["1.0.0-beta.0"],
@@ -1200,7 +1241,7 @@ describe("Publish command e2e", () => {
         }),
       );
       const cwd = await pm.gitdir(
-        createPmContext(registry, pmBinPath),
+        createPmContext(registry, pmBinPath, { signal }),
         createPkgAFixture({ version: "1.0.0-beta.1", pre: "beta" }),
       );
 
@@ -1261,10 +1302,11 @@ describe("Publish command e2e", () => {
     it("publishes a new pre version of an only-pre package with existing latest tag", async ({
       signal,
     }) => {
-      await using stack = new AbortableAsyncDisposableStack(signal);
-      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+      await using stack = new AsyncDisposableStack();
+      const { pmBinPath } = stack.use(await getPmBinPath(pm.bins));
       const registry = stack.use(
         await createTestRegistry({
+          signal,
           packages: {
             "pkg-a": {
               versions: ["1.0.0-beta.0"],
@@ -1277,7 +1319,7 @@ describe("Publish command e2e", () => {
         }),
       );
       const cwd = await pm.gitdir(
-        createPmContext(registry, pmBinPath),
+        createPmContext(registry, pmBinPath, { signal }),
         createPkgAFixture({ version: "1.0.0-beta.1", pre: "beta" }),
       );
 
@@ -1335,10 +1377,11 @@ describe("Publish command e2e", () => {
     it("skips already-published pre version of an only-pre package without existing latest tag", async ({
       signal,
     }) => {
-      await using stack = new AbortableAsyncDisposableStack(signal);
-      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+      await using stack = new AsyncDisposableStack();
+      const { pmBinPath } = stack.use(await getPmBinPath(pm.bins));
       const registry = stack.use(
         await createTestRegistry({
+          signal,
           packages: {
             "pkg-a": {
               versions: ["1.0.0-beta.1"],
@@ -1348,7 +1391,7 @@ describe("Publish command e2e", () => {
         }),
       );
       const cwd = await pm.gitdir(
-        createPmContext(registry, pmBinPath),
+        createPmContext(registry, pmBinPath, { signal }),
         createPkgAFixture({ version: "1.0.0-beta.1", pre: "beta" }),
       );
 
@@ -1405,10 +1448,11 @@ describe("Publish command e2e", () => {
     it("skips already-published pre version of an only-pre package with existing latest tag", async ({
       signal,
     }) => {
-      await using stack = new AbortableAsyncDisposableStack(signal);
-      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+      await using stack = new AsyncDisposableStack();
+      const { pmBinPath } = stack.use(await getPmBinPath(pm.bins));
       const registry = stack.use(
         await createTestRegistry({
+          signal,
           packages: {
             "pkg-a": {
               versions: ["1.0.0-beta.1"],
@@ -1421,7 +1465,7 @@ describe("Publish command e2e", () => {
         }),
       );
       const cwd = await pm.gitdir(
-        createPmContext(registry, pmBinPath),
+        createPmContext(registry, pmBinPath, { signal }),
         createPkgAFixture({ version: "1.0.0-beta.1", pre: "beta" }),
       );
 
@@ -1467,11 +1511,11 @@ describe("Publish command e2e", () => {
     it.runIf(pm.name !== "yarn 4")(
       "publishes from a pack directory",
       async ({ signal }) => {
-        await using stack = new AbortableAsyncDisposableStack(signal);
-        const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
-        const registry = stack.use(await createTestRegistry());
+        await using stack = new AsyncDisposableStack();
+        const { pmBinPath } = stack.use(await getPmBinPath(pm.bins));
+        const registry = stack.use(await createTestRegistry({ signal }));
         const cwd = await pm.gitdir(
-          createPmContext(registry, pmBinPath),
+          createPmContext(registry, pmBinPath, { signal }),
           createPkgAFixture(),
         );
         const packedDir = await createPackedDir(cwd, [
@@ -1518,10 +1562,11 @@ describe("Publish command e2e", () => {
     );
 
     it("surfaces publish failures for bad credentials", async ({ signal }) => {
-      await using stack = new AbortableAsyncDisposableStack(signal);
-      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+      await using stack = new AsyncDisposableStack();
+      const { pmBinPath } = stack.use(await getPmBinPath(pm.bins));
       const registry = stack.use(
         await createTestRegistry({
+          signal,
           packages: {
             "pkg-a": {
               versions: ["0.0.1"],
@@ -1531,7 +1576,10 @@ describe("Publish command e2e", () => {
         }),
       );
       const cwd = await pm.gitdir(
-        createPmContext(registry, pmBinPath, BAD_CLIENT_AUTH_TOKEN),
+        createPmContext(registry, pmBinPath, {
+          signal,
+          authToken: BAD_CLIENT_AUTH_TOKEN,
+        }),
         createPkgAFixture(),
       );
 
@@ -1578,10 +1626,11 @@ describe("Publish command e2e", () => {
     });
 
     it("surfaces publish failures when not logged in", async ({ signal }) => {
-      await using stack = new AbortableAsyncDisposableStack(signal);
-      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+      await using stack = new AsyncDisposableStack();
+      const { pmBinPath } = stack.use(await getPmBinPath(pm.bins));
       const registry = stack.use(
         await createTestRegistry({
+          signal,
           packages: {
             "pkg-a": {
               versions: ["0.0.1"],
@@ -1591,7 +1640,7 @@ describe("Publish command e2e", () => {
         }),
       );
       const cwd = await pm.gitdir(
-        createPmContext(registry, pmBinPath, null),
+        createPmContext(registry, pmBinPath, { signal, authToken: null }),
         createPkgAFixture(),
       );
 
@@ -1646,10 +1695,11 @@ describe("Publish command e2e", () => {
     });
 
     it("does not publish an already-published version", async ({ signal }) => {
-      await using stack = new AbortableAsyncDisposableStack(signal);
-      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+      await using stack = new AsyncDisposableStack();
+      const { pmBinPath } = stack.use(await getPmBinPath(pm.bins));
       const registry = stack.use(
         await createTestRegistry({
+          signal,
           packages: {
             "pkg-a": {
               versions: ["1.0.0"],
@@ -1659,7 +1709,7 @@ describe("Publish command e2e", () => {
         }),
       );
       const cwd = await pm.gitdir(
-        createPmContext(registry, pmBinPath),
+        createPmContext(registry, pmBinPath, { signal }),
         createPkgAFixture(),
       );
 
@@ -1702,11 +1752,12 @@ describe("Publish command e2e", () => {
     it("skips already-published version publish errors after our publish plan preflight", async ({
       signal,
     }) => {
-      await using stack = new AbortableAsyncDisposableStack(signal);
-      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+      await using stack = new AsyncDisposableStack();
+      const { pmBinPath } = stack.use(await getPmBinPath(pm.bins));
       let packageSeeded = false;
       const registry = stack.use(
         await createTestRegistry({
+          signal,
           packages: {
             "pkg-a": {
               versions: ["0.0.1"],
@@ -1745,7 +1796,7 @@ describe("Publish command e2e", () => {
         }),
       );
       const cwd = await pm.gitdir(
-        createPmContext(registry, pmBinPath),
+        createPmContext(registry, pmBinPath, { signal }),
         createPkgAFixture(),
       );
 
@@ -1775,10 +1826,11 @@ describe("Publish command e2e", () => {
     it("skips already-published version publish errors after possible package manager preflights", async ({
       signal,
     }) => {
-      await using stack = new AbortableAsyncDisposableStack(signal);
-      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+      await using stack = new AsyncDisposableStack();
+      const { pmBinPath } = stack.use(await getPmBinPath(pm.bins));
       const registry = stack.use(
         await createTestRegistry({
+          signal,
           packages: {
             "pkg-a": {
               versions: ["0.0.1"],
@@ -1823,7 +1875,7 @@ describe("Publish command e2e", () => {
         }),
       );
       const cwd = await pm.gitdir(
-        createPmContext(registry, pmBinPath),
+        createPmContext(registry, pmBinPath, { signal }),
         createPkgAFixture(),
       );
 
@@ -1870,10 +1922,11 @@ describe("Publish command e2e", () => {
     it.runIf(pm.name !== "yarn 4")(
       "reads initial otp from env in non-tty mode",
       async ({ signal }) => {
-        await using stack = new AbortableAsyncDisposableStack(signal);
-        const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+        await using stack = new AsyncDisposableStack();
+        const { pmBinPath } = stack.use(await getPmBinPath(pm.bins));
         const registry = stack.use(
           await createTestRegistry({
+            signal,
             packages: {
               "pkg-a": {
                 versions: ["0.0.1"],
@@ -1891,7 +1944,10 @@ describe("Publish command e2e", () => {
           }),
         );
         const cwd = await pm.gitdir(
-          createPmContext(registry, pmBinPath, CLIENT_AUTH_TOKEN),
+          createPmContext(registry, pmBinPath, {
+            signal,
+            authToken: CLIENT_AUTH_TOKEN,
+          }),
           createPkgAFixture(),
         );
 
@@ -1943,10 +1999,11 @@ describe("Publish command e2e", () => {
     it("surfaces web-auth OTP publish failures in non-tty mode", async ({
       signal,
     }) => {
-      await using stack = new AbortableAsyncDisposableStack(signal);
-      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+      await using stack = new AsyncDisposableStack();
+      const { pmBinPath } = stack.use(await getPmBinPath(pm.bins));
       const registry = stack.use(
         await createTestRegistry({
+          signal,
           packages: {
             "pkg-a": {
               versions: ["0.0.1"],
@@ -1964,7 +2021,10 @@ describe("Publish command e2e", () => {
         }),
       );
       const cwd = await pm.gitdir(
-        createPmContext(registry, pmBinPath, CLIENT_AUTH_TOKEN),
+        createPmContext(registry, pmBinPath, {
+          signal,
+          authToken: CLIENT_AUTH_TOKEN,
+        }),
         createPkgAFixture(),
       );
 
@@ -2022,10 +2082,11 @@ describe("Publish command e2e", () => {
     it("retries interactively after an OTP auth challenge", async ({
       signal,
     }) => {
-      await using stack = new AbortableAsyncDisposableStack(signal);
-      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+      await using stack = new AsyncDisposableStack();
+      const { pmBinPath } = stack.use(await getPmBinPath(pm.bins));
       const registry = stack.use(
         await createTestRegistry({
+          signal,
           packages: {
             "pkg-a": {
               versions: ["0.0.1"],
@@ -2043,7 +2104,10 @@ describe("Publish command e2e", () => {
         }),
       );
       const cwd = await pm.gitdir(
-        createPmContext(registry, pmBinPath, CLIENT_AUTH_TOKEN),
+        createPmContext(registry, pmBinPath, {
+          signal,
+          authToken: CLIENT_AUTH_TOKEN,
+        }),
         createPkgAFixture(),
       );
 

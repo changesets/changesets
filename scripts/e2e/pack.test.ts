@@ -3,7 +3,6 @@ import path from "node:path";
 import { stripVTControlCharacters } from "node:util";
 import { describe, expect, it } from "vitest";
 import {
-  AbortableAsyncDisposableStack,
   createPkgAFixture,
   getPmBinPath,
   pmCases,
@@ -38,11 +37,12 @@ function sanitizePackLog(message: unknown) {
 describe("Pack command e2e", () => {
   describe.each(pmCases)("$name", (pm) => {
     it("packs from a publish plan", async ({ signal }) => {
-      await using stack = new AbortableAsyncDisposableStack(signal);
-      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+      await using stack = new AsyncDisposableStack();
+      const { pmBinPath } = stack.use(await getPmBinPath(pm.bins));
       const cwd = await pm.gitdir(
         {
           pmBinPath,
+          signal,
         },
         {
           ...createPkgAFixture(),
@@ -106,11 +106,12 @@ describe("Pack command e2e", () => {
     });
 
     it("handles lifecycle stdout while packing", async ({ signal }) => {
-      await using stack = new AbortableAsyncDisposableStack(signal);
-      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+      await using stack = new AsyncDisposableStack();
+      const { pmBinPath } = stack.use(await getPmBinPath(pm.bins));
       const cwd = await pm.gitdir(
         {
           pmBinPath,
+          signal,
         },
         {
           ...createPkgAFixture(),
@@ -166,11 +167,12 @@ describe("Pack command e2e", () => {
     });
 
     it("surfaces pack errors", async ({ signal }) => {
-      await using stack = new AbortableAsyncDisposableStack(signal);
-      const { pmBinPath } = stack.use(await getPmBinPath(signal, pm.bins));
+      await using stack = new AsyncDisposableStack();
+      const { pmBinPath } = stack.use(await getPmBinPath(pm.bins));
       const cwd = await pm.gitdir(
         {
           pmBinPath,
+          signal,
         },
         {
           ...createPkgAFixture(),

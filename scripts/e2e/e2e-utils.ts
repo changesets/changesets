@@ -29,6 +29,7 @@ export type TestRegistryConfig = {
 export type PmGitdirContext = {
   pmBinPath: string;
   registry?: TestRegistryConfig;
+  signal: AbortSignal;
 };
 
 export type PmCase = {
@@ -36,69 +37,6 @@ export type PmCase = {
   bins: PmBins;
   gitdir: (context: PmGitdirContext, fixture?: Fixture) => Promise<string>;
 };
-
-function disposeValue(value: AsyncDisposable | Disposable | null | undefined) {
-  if (!value) {
-    return;
-  }
-  if (Symbol.asyncDispose in value) {
-    return value[Symbol.asyncDispose]();
-  }
-  return value[Symbol.dispose]();
-}
-
-export class AbortableAsyncDisposableStack extends AsyncDisposableStack {
-  #signal: AbortSignal;
-
-  #abort = () => {
-    void this.disposeAsync();
-  };
-
-  constructor(signal: AbortSignal) {
-    super();
-    this.#signal = signal;
-    signal.throwIfAborted();
-    signal.addEventListener("abort", this.#abort, { once: true });
-  }
-
-  override use<T extends AsyncDisposable | Disposable | null | undefined>(
-    value: T,
-  ): T {
-    if (this.#signal.aborted) {
-      void disposeValue(value);
-    }
-    this.#signal.throwIfAborted();
-    return super.use(value);
-  }
-
-  override adopt<T>(
-    value: T,
-    onDisposeAsync: (value: T) => PromiseLike<void> | void,
-  ) {
-    if (this.#signal.aborted) {
-      void onDisposeAsync(value);
-    }
-    this.#signal.throwIfAborted();
-    return super.adopt(value, onDisposeAsync);
-  }
-
-  override defer(onDisposeAsync: () => PromiseLike<void> | void): void {
-    if (this.#signal.aborted) {
-      void onDisposeAsync();
-    }
-    this.#signal.throwIfAborted();
-    return super.defer(onDisposeAsync);
-  }
-
-  override async disposeAsync() {
-    this.#signal.removeEventListener("abort", this.#abort);
-    await super.disposeAsync();
-  }
-
-  override async [Symbol.asyncDispose]() {
-    await this.disposeAsync();
-  }
-}
 
 export async function getFreePort() {
   const server = (await import("node:net")).createServer();
@@ -204,8 +142,8 @@ export async function createPmBinEnv(
   };
 }
 
-export async function getPmBinPath(signal: AbortSignal, bins: PmBins) {
-  await using stack = new AbortableAsyncDisposableStack(signal);
+export async function getPmBinPath(bins: PmBins) {
+  await using stack = new AsyncDisposableStack();
   const root = stack.use(await createTempDir("changesets-pm-bins-"));
 
   for (const [command, packageName] of Object.entries(bins)) {
@@ -413,7 +351,7 @@ function createPnpmGitdir(packageName: string) {
 
 function createYarnBerryGitdir(packageName: string) {
   return async (
-    { registry, pmBinPath }: PmGitdirContext,
+    { registry, pmBinPath, signal }: PmGitdirContext,
     fixture: Fixture = {},
   ) => {
     const packageManager = await resolvePackageManagerSpec("yarn", packageName);
@@ -439,6 +377,7 @@ function createYarnBerryGitdir(packageName: string) {
     });
     await exec("yarn", ["install"], {
       nodePath: false,
+      signal,
       nodeOptions: {
         cwd,
         env: await createPmBinEnv(cwd, pmBinPath),
