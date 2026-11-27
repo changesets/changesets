@@ -1,5 +1,43 @@
 # @changesets/write
 
+## 1.1.0
+
+### Minor Changes
+
+- [#2346](https://github.com/changesets/changesets/pull/2346) [`b09779a`](https://github.com/changesets/changesets/commit/b09779a3d503a581df98a81384d5849db969eb03) Thanks [@Netail](https://github.com/Netail)! - Added support for formatting with [Biome](https://biomejs.dev/) (version 2.6+).
+
+- [#2365](https://github.com/changesets/changesets/pull/2365) [`1ed9edd`](https://github.com/changesets/changesets/commit/1ed9edda6ed9e7576afea79503b593bba8cd2d9b) Thanks [@beeequeue](https://github.com/beeequeue)! - Now supports arbitrary frontmatter metadata inside `_`:
+
+  ```markdown
+  ---
+  foo: minor
+  _:
+    your: "metadata here"
+    any: yaml
+    number: 123
+  ---
+
+  Something changed!
+  ```
+
+  ```typescript
+  {
+    id: "foo-bar-biz",
+    summary: "Something changed!",
+    releases: [/* ... */],
+    metadata: {
+      your: "metadata here",
+      any: "yaml",
+      number: 123,
+    }
+  }
+  ```
+
+### Patch Changes
+
+- Updated dependencies [[`b09779a`](https://github.com/changesets/changesets/commit/b09779a3d503a581df98a81384d5849db969eb03), [`bb2ff9b`](https://github.com/changesets/changesets/commit/bb2ff9b1cc8dc12c11eb323f1ac3b26339edf43d), [`1ed9edd`](https://github.com/changesets/changesets/commit/1ed9edda6ed9e7576afea79503b593bba8cd2d9b)]:
+  - @changesets/types@7.1.0
+
 ## 1.0.1
 
 ### Patch Changes
