@@ -2856,6 +2856,93 @@ describe("apply release plan", () => {
       `);
     });
 
+    it("should not list a package that receives no release as an updated dependency", async () => {
+      const { changedFiles } = await testSetup(
+        {
+          "package.json": JSON.stringify({
+            private: true,
+            workspaces: ["packages/*"],
+          }),
+          "package-lock.json": "",
+          "packages/app/package.json": JSON.stringify({
+            name: "app",
+            version: "1.0.0",
+            dependencies: {
+              lib: "workspace:*",
+            },
+          }),
+          "packages/lib/package.json": JSON.stringify({
+            name: "lib",
+            version: "1.0.0",
+            devDependencies: {
+              tool: "workspace:*",
+            },
+          }),
+          "packages/tool/package.json": JSON.stringify({
+            name: "tool",
+            version: "1.0.0",
+          }),
+        },
+        {
+          changesets: [
+            {
+              id: "quick-lions-devour",
+              summary: "Hey, let's have fun with testing!",
+              releases: [
+                { name: "tool", type: "patch" },
+                { name: "app", type: "patch" },
+              ],
+            },
+          ],
+          releases: [
+            {
+              name: "tool",
+              type: "patch",
+              oldVersion: "1.0.0",
+              newVersion: "1.0.1",
+              changesets: ["quick-lions-devour"],
+            },
+            {
+              name: "app",
+              type: "patch",
+              oldVersion: "1.0.0",
+              newVersion: "1.0.1",
+              changesets: ["quick-lions-devour"],
+            },
+            {
+              name: "lib",
+              type: "none",
+              oldVersion: "1.0.0",
+              newVersion: "1.0.0",
+              changesets: [],
+            },
+          ],
+          preState: undefined,
+        },
+        {
+          ...defaultConfig,
+          changelog: [changesetsCliChangelogPath, null],
+        },
+      );
+
+      const readmePath = changedFiles.find((a) =>
+        a.endsWith(`app${path.sep}CHANGELOG.md`),
+      );
+
+      if (!readmePath) throw new Error(`could not find an updated changelog`);
+      const readme = await fs.readFile(readmePath, "utf-8");
+
+      expect(readme.trim()).toMatchInlineSnapshot(`
+        "# app
+
+        ## 1.0.1
+
+        ### Patch Changes
+
+        - Hey, let's have fun with testing!"
+      `);
+    });
+
     it("should only add updated dependencies line for dependencies that have been updated", async () => {
       const { changedFiles } = await testSetup(
         {
