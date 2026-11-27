@@ -4075,3 +4075,41 @@ Nice simple summary, much wow
     expect(mockedLogger.error).not.toHaveBeenCalled();
   });
 });
+
+describe("regression", () => {
+  describe("#2390", () => {
+    it("should behave like it's ran from root dir even if inside workspace", async () => {
+      const cwd = await testdir({
+        "package.json": JSON.stringify({
+          private: true,
+          workspaces: ["packages/*"],
+        }),
+        "package-lock.json": "",
+        "packages/pkg-a/package.json": JSON.stringify({
+          name: "pkg-a",
+          version: "1.0.0",
+          dependencies: {
+            "pkg-b": "1.0.0",
+          },
+        }),
+        "packages/pkg-b/package.json": JSON.stringify({
+          name: "pkg-b",
+          version: "1.0.0",
+        }),
+        ".changeset/config.json": JSON.stringify(modifiedDefaultConfig),
+        ".changeset/foo.md": '---\n"pkg-b": minor\n---\nchanges...',
+      });
+
+      await version({ cwd: path.join(cwd, "packages", "pkg-a") });
+
+      expect(await getPkgJSON("pkg-a", cwd)).toMatchObject({
+        name: "pkg-a",
+        version: "1.0.1",
+      });
+      expect(await getPkgJSON("pkg-b", cwd)).toMatchObject({
+        name: "pkg-b",
+        version: "1.1.0",
+      });
+    });
+  });
+});
