@@ -1,5 +1,40 @@
 # @changesets/apply-release-plan
 
+## 8.2.0
+
+### Minor Changes
+
+- [#2365](https://github.com/changesets/changesets/pull/2365) [`1ed9edd`](https://github.com/changesets/changesets/commit/1ed9edda6ed9e7576afea79503b593bba8cd2d9b) Thanks [@beeequeue](https://github.com/beeequeue)! - Now reads frontmatter metadata and passes it to changelog formatter functions:
+
+  ```markdown
+  ---
+  foo: minor
+  _:
+    your: "metadata here"
+    any: yaml
+    number: 123
+  ---
+
+  Something changed!
+  ```
+
+  ```ts
+  export default {
+    getReleaseLine: (changeset, changeType, options) => {
+      // { your: "metadata here", any: "yaml", number: 123 }
+      console.log(changeset.metadata);
+    },
+  };
+  ```
+
+### Patch Changes
+
+- Updated dependencies [[`b09779a`](https://github.com/changesets/changesets/commit/b09779a3d503a581df98a81384d5849db969eb03), [`06548ad`](https://github.com/changesets/changesets/commit/06548adc8461e3e3754def2efcafa556f091af71), [`bb2ff9b`](https://github.com/changesets/changesets/commit/bb2ff9b1cc8dc12c11eb323f1ac3b26339edf43d), [`1ed9edd`](https://github.com/changesets/changesets/commit/1ed9edda6ed9e7576afea79503b593bba8cd2d9b)]:
+  - @changesets/config@4.1.0
+  - @changesets/types@7.1.0
+  - @changesets/git@4.0.2
+  - @changesets/should-skip-package@1.0.1
+
 ## 8.1.1
 
 ### Patch Changes
