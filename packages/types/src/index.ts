@@ -55,14 +55,16 @@ export type ComprehensiveRelease =
   | ComprehensivePatchRelease
   | ComprehensiveNoneRelease;
 
-export type Changeset = {
+export type ChangesetMeta = Record<string, unknown>;
+
+export type NewChangeset = {
+  id: string;
   summary: string;
   releases: Array<Release>;
+  metadata?: ChangesetMeta;
 };
 
-export type NewChangeset = Changeset & {
-  id: string;
-};
+export type Changeset = Omit<NewChangeset, "id">;
 
 export type ReleasePlan = {
   changesets: NewChangeset[];

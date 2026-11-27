@@ -335,14 +335,19 @@ export async function getCurrentCommitId({
     .trim();
 }
 
-export async function remoteTagExists(tagStr: string) {
-  const gitCmd = await exec("git", [
-    "ls-remote",
-    "--tags",
-    "origin",
-    "-l",
-    tagStr,
-  ]);
+export async function remoteTagExists(tagStr: string, cwd: string) {
+  const gitCmd = await exec(
+    "git",
+    [
+      "ls-remote",
+      "--tags",
+      "origin",
+      // the short form is matched against a suffix of the ref name, so `pkg@1.0.0`
+      // would also find `@scope/pkg@1.0.0` — the full ref has to be matched instead
+      `refs/tags/${tagStr}`,
+    ],
+    { nodeOptions: { cwd } },
+  );
   const output = gitCmd.stdout.toString().trim();
   const tagExists = !!output;
   return tagExists;

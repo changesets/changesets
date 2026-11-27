@@ -21,6 +21,8 @@ Then you can use it in the [`changelog`](https://changesets.dev/guide/config#cha
 }
 ```
 
+This formatter also supports [overrides](https://changesets.dev/guide/writing-changesets#overrides-changesets-changelog-github-only) for certain values in the output.
+
 ## Options
 
 ### `repo`

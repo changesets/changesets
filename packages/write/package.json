@@ -19,7 +19,8 @@
   "dependencies": {
     "@changesets/format": "^0.1.3",
     "@changesets/types": "workspace:^",
-    "human-id": "^4.2.2"
+    "human-id": "^4.2.2",
+    "yaml": "^2.9.0"
   },
   "devDependencies": {
     "@changesets/parse": "workspace:*",

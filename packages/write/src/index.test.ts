@@ -54,6 +54,68 @@ describe("simple project", () => {
     });
   });
 
+  it("should write frontmatter metadata if it exists", async () => {
+    const cwd = await testdir({
+      "package.json": JSON.stringify({
+        private: true,
+        name: "root-pkg",
+        workspaces: ["packages/*"],
+      }),
+      "package-lock.json": "",
+      "packages/pkg-a/package.json": JSON.stringify({
+        name: "pkg-a",
+        version: "1.0.0",
+      }),
+    });
+
+    const changesetID = "foo-bar-biz";
+    mockedHumanId.mockReturnValueOnce(changesetID);
+
+    await writeChangeset(
+      {
+        summary: "This is a summary",
+        releases: [{ name: "pkg-a", type: "minor" }],
+        metadata: {
+          author: "bee",
+          pr: 1234,
+        },
+      },
+      cwd,
+    );
+
+    const mdPath = path.join(cwd, ".changeset", `${changesetID}.md`);
+    const mdContent = await fs.readFile(mdPath, "utf8");
+
+    expect(mdContent).toMatchInlineSnapshot(`
+      "---
+      pkg-a: minor
+      _:
+        author: bee
+        pr: 1234
+
+      ---
+
+      This is a summary
+      "
+    `);
+
+    expect(parse(mdContent)).toMatchInlineSnapshot(`
+      {
+        "metadata": {
+          "author": "bee",
+          "pr": 1234,
+        },
+        "releases": [
+          {
+            "name": "pkg-a",
+            "type": "minor",
+          },
+        ],
+        "summary": "This is a summary",
+      }
+    `);
+  });
+
   it("should not format if user opts out", async () => {
     const cwd = await testdir({
       "package.json": JSON.stringify({
