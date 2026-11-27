@@ -439,17 +439,22 @@ ${formatPackageList(unsuccessfulNpmPublishes, c.red)}
 
     const results = await createGitTags({
       packages,
+      gitTagFormat: config.gitTagFormat,
       releases: gitTagReleases,
       reporter,
     });
 
     p.stop(
-      formatGitTagResults(packages.tool, {
-        tagged: results.tagged.filter((release) =>
-          tagOnlyReleases.has(release),
-        ),
-        existing: results.existing,
-      }),
+      formatGitTagResults(
+        packages.tool,
+        {
+          tagged: results.tagged.filter((release) =>
+            tagOnlyReleases.has(release),
+          ),
+          existing: results.existing,
+        },
+        config.gitTagFormat,
+      ),
     );
   }
 
