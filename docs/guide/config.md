@@ -133,6 +133,8 @@ Example:
 }
 ```
 
+Patterns are matched against file paths relative to each package's directory, not the repository root. In the example above, a change to `packages/foo/src/index.ts` matches `src/**` for the package in `packages/foo`.
+
 ## format
 
 - **Type:** `"auto" | "prettier" | "oxfmt" | "deno" | "biome" | "dprint" | false`

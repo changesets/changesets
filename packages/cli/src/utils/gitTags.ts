@@ -26,7 +26,9 @@ export async function splitByTagStatus<T extends Release>(
   const tagStatuses = await Promise.all(
     releases.map(async (release) => {
       const tagName = buildGitTag(tool, release);
-      return localTags.has(tagName) || (await git.remoteTagExists(tagName));
+      return (
+        localTags.has(tagName) || (await git.remoteTagExists(tagName, cwd))
+      );
     }),
   );
 

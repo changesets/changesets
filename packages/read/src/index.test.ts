@@ -133,7 +133,7 @@ Everything is wrong`,
     });
 
     await expect(read(cwd)).rejects.toThrowErrorMatchingInlineSnapshot(`
-      [Error: could not parse changeset - missing or invalid frontmatter.
+      [Error: Could not parse changeset: missing or invalid frontmatter.
       Changesets must start with frontmatter delimited by "---".
       Example:
       ---
@@ -159,7 +159,7 @@ Everything is wrong`,
     });
 
     const changesets = await read(cwd);
-    expect(changesets).toEqual([
+    expect(changesets).toStrictEqual([
       {
         releases: [],
         summary: "",
