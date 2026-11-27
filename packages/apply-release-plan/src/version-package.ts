@@ -139,7 +139,10 @@ function getNewDependencyRange(
     if (lowerBound && upperBound) {
       let newUpperBound = upperBound.value;
       if (!semverSatisfies(newVersion, newUpperBound)) {
-        newUpperBound = `<${semverInc(newVersion, releaseType)}`;
+        const newVersionWithoutPrerelease = semverPrerelease(newVersion)
+          ? newVersion.slice(0, newVersion.indexOf("-"))
+          : newVersion;
+        newUpperBound = `<${semverInc(newVersionWithoutPrerelease, releaseType)}`;
       }
 
       return comparators[0] === lowerBound
