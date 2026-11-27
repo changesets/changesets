@@ -1,7 +1,7 @@
 import { stripVTControlCharacters } from "node:util";
 import { exec } from "tinyexec";
 import { streamNdjson } from "../utils/streamNdjson.ts";
-import { isAlreadyPublishedError } from "./common.ts";
+import { isAlreadyPublishedError, isStageConflictError } from "./common.ts";
 import type { PackageInfo, PublishResult, PublishTool } from "./types.ts";
 
 // -- PublishTool -- //
@@ -138,6 +138,7 @@ export const publish: PublishTool["publish"] = async ({
   tarballPath,
   interactive,
   otpCode,
+  stage,
 }) => {
   const resultBase = { name: release.name, version: release.version };
 
@@ -169,6 +170,7 @@ export const publish: PublishTool["publish"] = async ({
   ];
   if (!interactive) args.push("--json");
   if (otpCode) args.push("--otp", otpCode);
+  if (stage) args.push("--staged");
 
   const { exitCode, stdout, stderr } = await exec("yarn", args, {
     nodePath: false,
@@ -183,9 +185,27 @@ export const publish: PublishTool["publish"] = async ({
   });
 
   if (exitCode === 0) {
+    if (stage) {
+      let stageId: string | undefined;
+      for (const entry of streamNdjson(stdout)) {
+        if (
+          entry &&
+          typeof entry === "object" &&
+          "stageId" in entry &&
+          typeof entry.stageId === "string"
+        ) {
+          stageId = entry.stageId;
+        }
+      }
+      return {
+        ...resultBase,
+        result: "success",
+        stageId,
+      };
+    }
     return {
       ...resultBase,
-      result: "published",
+      result: "success",
     };
   }
 
@@ -201,12 +221,16 @@ export const publish: PublishTool["publish"] = async ({
 
   if (
     reporterError.code === "YN0035" &&
-    isAlreadyPublishedError(reporterError.message)
+    ((!stage && isAlreadyPublishedError(reporterError.message)) ||
+      (stage &&
+        reporterError.message.includes("Response Code: 409 (Conflict)") &&
+        isStageConflictError(reporterError.message)))
   ) {
     return {
       ...resultBase,
-      result: "failed:already-published",
+      result: "failed:already-done",
       code: reporterError.code,
+      message: reporterError.message,
     };
   }
 

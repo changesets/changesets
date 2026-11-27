@@ -196,6 +196,14 @@ const tests: CommandTest[] = [
           output: "output.ndjson",
         },
       },
+      {
+        args: ["--stage"],
+        options: { gitTag: true, stage: true },
+      },
+      {
+        args: ["--no-stage"],
+        options: { gitTag: true, stage: false },
+      },
     ],
   },
   {
