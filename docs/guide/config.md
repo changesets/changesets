@@ -294,3 +294,5 @@ When set to `true`, Changesets will only bump peer dependents when `peerDependen
 When enabled, `changeset publish` stages package versions for later
 approval instead of publishing them immediately. It can be overridden per
 invocation with `--stage` or `--no-stage`.
+
+Staged packages skip Git tags by default; an explicit `--git-tag` is respected.

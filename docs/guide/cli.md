@@ -123,6 +123,24 @@ one invocation.
 
 Staged publishing requires npm >=11.15.0, pnpm >=11.3.0, or Yarn >=4.16.0. Older supported versions can still publish directly with `--no-stage`.
 
+Staged packages do not get Git tags by default. Explicit `--git-tag` still
+creates them immediately; `--no-git-tag` disables tags. Private packages
+configured for tag-only releases are tagged immediately because they do not
+participate in npm staged publishing.
+
+The staged package IDs are reported in dependency order. Approve or reject
+them with:
+
+```sh
+changeset stage approve <id...>
+changeset stage reject <id...>
+```
+
+IDs are processed sequentially and the command stops at the first failure.
+`--otp` is forwarded to the package manager. `--registry` selects the registry
+for that invocation; when a release spans multiple registries, split the IDs
+into correctly scoped commands.
+
 ## publish-plan
 
 <div v-html="data.publishPlanHelpMessage" />

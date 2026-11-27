@@ -1445,7 +1445,7 @@ describe("Publish command e2e", () => {
         );
         const result = await runCliCommand({
           command: "publish",
-          args: ["--stage"],
+          args: ["--stage", "--git-tag"],
           cwd,
           pmBinPath,
           signal,
@@ -1492,7 +1492,7 @@ describe("Publish command e2e", () => {
           .not.toContain("Some packages failed to publish");
       });
 
-      it("stages the first version of a package with --stage", async ({
+      it("stages and approves the first version of a package with --stage", async ({
         signal,
       }) => {
         await using stack = new AsyncDisposableStack();
@@ -1523,25 +1523,41 @@ describe("Publish command e2e", () => {
           fixture,
         );
 
+        const outputPath = path.join(cwd, "staged-output.ndjson");
         const stageResult = await runCliCommand({
           command: "publish",
           args: ["--stage"],
           cwd,
           pmBinPath,
           signal,
+          env: { CHANGESETS_OUTPUT: outputPath },
         });
         expect.soft(stageResult.exitCode).toBe(0);
         const stageId = registry.requests.find(
           (request) => request.stageId,
         )?.stageId;
         expect(stageId).toEqual(expect.any(String));
+        const events = (await fs.readFile(outputPath, "utf8"))
+          .trim()
+          .split("\n")
+          .map((line) => JSON.parse(line));
+        expect.soft(events).toEqual([
+          expect.objectContaining({
+            type: "npm-stage",
+            packageName: "pkg-a",
+            version: "1.0.0",
+            tag: "latest",
+            gitTag: "pkg-a@1.0.0",
+            stageId,
+          }),
+        ]);
         expect.soft(await fetchStage(registry, stageId!)).toMatchObject({
           id: stageId,
           packageName: "pkg-a",
           version: "1.0.0",
           tag: "latest",
         });
-        expect.soft(await tagExists("pkg-a@1.0.0", cwd)).toBe(true);
+        expect.soft(await tagExists("pkg-a@1.0.0", cwd)).toBe(false);
 
         const response = await fetch(new URL("pkg-a", registry.url));
         expect.soft(response.status).toBe(404);
@@ -1560,9 +1576,21 @@ describe("Publish command e2e", () => {
               .map((request) => request.statusCode),
           )
           .toEqual([201, 409]);
+        const approveResult = await runCliCommand({
+          command: "stage",
+          args: ["approve", events[0].stageId, "--otp", "123456"],
+          cwd,
+          pmBinPath,
+          signal,
+        });
+        expect.soft(approveResult.exitCode).toBe(0);
+        expect.soft(await fetchPackument(registry, "pkg-a")).toMatchObject({
+          "dist-tags": { latest: "1.0.0" },
+          versions: { "1.0.0": { name: "pkg-a", version: "1.0.0" } },
+        });
       });
 
-      it("stages an existing package when enabled in config", async ({
+      it("stages and approves an existing package when enabled in config", async ({
         signal,
       }) => {
         await using stack = new AsyncDisposableStack();
@@ -1586,30 +1614,61 @@ describe("Publish command e2e", () => {
           fixture,
         );
 
+        const outputPath = path.join(cwd, "staged-output.ndjson");
         const stageResult = await runCliCommand({
           command: "publish",
           args: [],
           cwd,
           pmBinPath,
           signal,
+          env: { CHANGESETS_OUTPUT: outputPath },
         });
         expect.soft(stageResult.exitCode).toBe(0);
         const stageId = registry.requests.find(
           (request) => request.stageId,
         )?.stageId;
         expect(stageId).toEqual(expect.any(String));
+        const events = (await fs.readFile(outputPath, "utf8"))
+          .trim()
+          .split("\n")
+          .map((line) => JSON.parse(line));
+        expect.soft(events).toEqual([
+          expect.objectContaining({
+            type: "npm-stage",
+            packageName: "pkg-a",
+            version: "1.0.0",
+            tag: "latest",
+            gitTag: "pkg-a@1.0.0",
+            stageId,
+          }),
+        ]);
         expect.soft(await fetchStage(registry, stageId!)).toMatchObject({
           id: stageId,
           packageName: "pkg-a",
           version: "1.0.0",
           tag: "latest",
         });
-        expect.soft(await tagExists("pkg-a@1.0.0", cwd)).toBe(true);
+        expect.soft(await tagExists("pkg-a@1.0.0", cwd)).toBe(false);
 
         const response = await fetch(new URL("pkg-a", registry.url));
         expect.soft(response.status).toBe(200);
         const packument = await response.json();
         expect.soft(packument).not.toHaveProperty(["versions", "1.0.0"]);
+        const approveResult = await runCliCommand({
+          command: "stage",
+          args: ["approve", events[0].stageId, "--otp", "123456"],
+          cwd,
+          pmBinPath,
+          signal,
+        });
+        expect.soft(approveResult.exitCode).toBe(0);
+        expect.soft(await fetchPackument(registry, "pkg-a")).toMatchObject({
+          "dist-tags": { latest: "1.0.0" },
+          versions: {
+            "0.0.1": { name: "pkg-a", version: "0.0.1" },
+            "1.0.0": { name: "pkg-a", version: "1.0.0" },
+          },
+        });
       });
 
       it("publishes with --no-stage when staging is enabled in config", async ({
@@ -1676,7 +1735,7 @@ describe("Publish command e2e", () => {
                 .map((request) => request.pathname),
             )
             .toEqual(["/-/stage/package/pkg-a"]);
-          expect.soft(await tagExists("pkg-a@1.0.0", cwd)).toBe(true);
+          expect.soft(await tagExists("pkg-a@1.0.0", cwd)).toBe(false);
         },
       );
     }
