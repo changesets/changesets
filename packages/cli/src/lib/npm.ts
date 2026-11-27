@@ -3,7 +3,7 @@ import path from "node:path";
 import type { PackageJSON } from "@changesets/types";
 import { exec } from "tinyexec";
 import { getLastJsonObjectFromString } from "../utils/getLastJsonObjectFromString.ts";
-import { isAlreadyPublishedError } from "./common.ts";
+import { isAlreadyPublishedError, isStageConflictError } from "./common.ts";
 import type {
   PackageInfo,
   PublishResultFailedNeeds2fa,
@@ -277,6 +277,7 @@ export function handlePublishError(
   resultBase: Pick<PublishResult, "name" | "version">,
   json: unknown,
   processOutput: string,
+  stage?: boolean,
 ): PublishResult {
   // if we get back an unknown error
   if (!isNpmPublishError(json)) {
@@ -287,20 +288,25 @@ export function handlePublishError(
     };
   }
 
-  // npm v11 doesn't return a `code` on already-published errors
-  if (isAlreadyPublishedError(json.error.summary)) {
-    // we don't need to log anything here, it just turned out the version was already published so we gracefully exit the publish process
-    return {
-      ...resultBase,
-      result: "failed:already-published",
-      code: json.error.code!,
-    };
-  }
-
   const message = `
 ${json.error.summary ?? ""}
 ${json.error.detail ?? ""}
   `.trim();
+
+  // npm v11 doesn't return a `code` on already-published errors
+  if (
+    (!stage && isAlreadyPublishedError(json.error.summary)) ||
+    (stage &&
+      json.error.code === "E409" &&
+      isStageConflictError(json.error.summary))
+  ) {
+    return {
+      ...resultBase,
+      result: "failed:already-done",
+      code: json.error.code,
+      message: message || undefined,
+    };
+  }
 
   if (json.error.code === "EOTP") {
     const result: PublishResultFailedNeeds2fa = {
@@ -333,6 +339,7 @@ export const publish: PublishTool["publish"] = async ({
   tarballPath,
   interactive,
   otpCode,
+  stage,
 }: PublishOptions): Promise<PublishResult> => {
   // cwd is super important for correct resolution of `.npmrc`
   //
@@ -365,19 +372,42 @@ export const publish: PublishTool["publish"] = async ({
     args.unshift(path.resolve(cwd, pkg.packageJson.publishConfig.directory));
   }
 
-  const { exitCode, stdout, stderr } = await exec("npm", ["publish", ...args], {
-    nodePath: false,
-    nodeOptions: {
-      stdio: interactive ? "inherit" : "pipe",
-      env: sanitizeEnv(process.env),
-      cwd,
+  const command = stage ? ["stage", "publish"] : ["publish"];
+  const { exitCode, stdout, stderr } = await exec(
+    "npm",
+    [...command, ...args],
+    {
+      nodePath: false,
+      nodeOptions: {
+        stdio: interactive ? "inherit" : "pipe",
+        env: sanitizeEnv(process.env),
+        cwd,
+      },
     },
-  });
+  );
   const resultBase = { name: release.name, version: release.version };
   if (exitCode === 0) {
+    if (stage) {
+      const json = getLastJsonObjectFromString(stdout);
+      const value = Array.isArray(json)
+        ? json[0]
+        : (json?.[release.name] ?? json);
+      const stageId =
+        value &&
+        typeof value === "object" &&
+        "stageId" in value &&
+        typeof value.stageId === "string"
+          ? value.stageId
+          : undefined;
+      return {
+        ...resultBase,
+        result: "success",
+        stageId,
+      };
+    }
     return {
       ...resultBase,
-      result: "published",
+      result: "success",
     };
   }
 
@@ -392,5 +422,5 @@ export const publish: PublishTool["publish"] = async ({
     };
   }
 
-  return handlePublishError(resultBase, json, stderr || stdout);
+  return handlePublishError(resultBase, json, stderr || stdout, stage);
 };

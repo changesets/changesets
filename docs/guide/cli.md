@@ -115,6 +115,14 @@ Published versions are tagged on npm with `latest` by default. You may want to c
 $ changeset publish --tag beta
 ```
 
+### Staged publishing
+
+`--stage` stages packages for later approval instead of publishing
+them immediately. `--no-stage` disables a `stagedPublishing` config value for
+one invocation.
+
+Staged publishing requires npm >=11.15.0, pnpm >=11.3.0, or Yarn >=4.16.0. Older supported versions can still publish directly with `--no-stage`.
+
 ## publish-plan
 
 <div v-html="data.publishPlanHelpMessage" />

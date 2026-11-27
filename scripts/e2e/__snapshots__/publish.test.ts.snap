@@ -89,7 +89,9 @@ pkg-a@1.0.0
 ◒  Publishing packages
 Some packages failed to publish:
 pkg-a@1.0.0
-└ E401: 401 Unauthorized - PUT [registry-url]/pkg-a
+└ E401: Unable to authenticate, your authentication token seems to be invalid.
+To correct this please try logging in again with:
+  npm login
 🦋 Exited with code 1
 
 "
@@ -217,7 +219,9 @@ pkg-a@1.0.0
 ◒  Publishing packages
 Some packages failed to publish:
 pkg-a@1.0.0
-└ E401: 401 Unauthorized - PUT [registry-url]/pkg-a
+└ E401: Unable to authenticate, your authentication token seems to be invalid.
+To correct this please try logging in again with:
+  npm login
 🦋 Exited with code 1
 
 "
@@ -347,7 +351,9 @@ pkg-a@1.0.0
 ◒  Publishing packages
 Some packages failed to publish:
 pkg-a@1.0.0
-└ E401: 401 Unauthorized - PUT [registry-url]/pkg-a
+└ E401: Unable to authenticate, your authentication token seems to be invalid.
+To correct this please try logging in again with:
+  npm login
 🦋 Exited with code 1
 
 "
@@ -478,7 +484,9 @@ pkg-a@1.0.0
 ◒  Publishing packages
 Some packages failed to publish:
 pkg-a@1.0.0
-└ E401: 401 Unauthorized - PUT [registry-url]/pkg-a
+└ E401: Unable to authenticate, your authentication token seems to be invalid.
+To correct this please try logging in again with:
+  npm login
 🦋 Exited with code 1
 
 "
@@ -607,7 +615,9 @@ pkg-a@1.0.0
 ◒  Publishing packages
 Some packages failed to publish:
 pkg-a@1.0.0
-└ E401: 401 Unauthorized - PUT [registry-url]/pkg-a
+└ E401: Unable to authenticate, your authentication token seems to be invalid.
+To correct this please try logging in again with:
+  npm login
 🦋 Exited with code 1
 
 "
@@ -722,7 +732,7 @@ pkg-a@1.0.0
 ◒  Publishing packages
 Some packages failed to publish:
 pkg-a@1.0.0
-└ E401: 401 Unauthorized - PUT [registry-url]/pkg-a
+└ E401: Unable to authenticate, need: Bearer error="invalid_token"
 🦋 Exited with code 1
 
 "
@@ -737,7 +747,7 @@ pkg-a@1.0.0
 ◒  Publishing packages
 Some packages failed to publish:
 pkg-a@1.0.0
-└ E401: 401 Unauthorized - PUT [registry-url]/pkg-a
+└ E401: Unable to authenticate, need: Bearer
 🦋 Exited with code 1
 
 "
@@ -830,7 +840,7 @@ pkg-a@1.0.0
 
 Some packages failed to publish:
 pkg-a@1.0.0
-└ ERR_PNPM_FAILED_TO_PUBLISH: Failed to publish package pkg-a@1.0.0 (status 401 Unauthorized): Authentication required for package "pkg-a"
+└ ERR_PNPM_FAILED_TO_PUBLISH: Failed to publish package pkg-a@1.0.0 (status 401 Unauthorized): {"error":"Invalid authentication token","reason":"Invalid authentication token","code":"ERR_PNPR_UNAUTHENTICATED"}
 🦋 Exited with code 1
 
 "
@@ -845,7 +855,7 @@ pkg-a@1.0.0
 
 Some packages failed to publish:
 pkg-a@1.0.0
-└ ERR_PNPM_FAILED_TO_PUBLISH: Failed to publish package pkg-a@1.0.0 (status 401 Unauthorized): Authentication required for package "pkg-a"
+└ ERR_PNPM_FAILED_TO_PUBLISH: Failed to publish package pkg-a@1.0.0 (status 401 Unauthorized): {"error":"Authentication required for package \\"pkg-a\\"","reason":"Authentication required for package \\"pkg-a\\"","code":"ERR_PNPR_UNAUTHENTICATED"}
 🦋 Exited with code 1
 
 "

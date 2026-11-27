@@ -516,8 +516,8 @@ importers:
         specifier: 1.2.0-beta.15
         version: 1.2.0-beta.15
       '@pnpm/pnpr':
-        specifier: 0.1.0-alpha.8
-        version: 0.1.0-alpha.8
+        specifier: 0.1.0-alpha.22
+        version: 0.1.0-alpha.22
       '@tsconfig/node24':
         specifier: ^24.0.5
         version: 24.0.5
@@ -1005,54 +1005,59 @@ packages:
     resolution: {integrity: sha512-//0sR/cow/s4ICQaYoAobOl4aU8cjU6x/V24V7XkKotb9+O+3zySIYp146vpaobYHnxa4pZX8NkV54Z5AwbDKA==}
     engines: {node: '>=12'}
 
-  '@pnpm/pnpr.darwin-arm64@0.1.0-alpha.8':
-    resolution: {integrity: sha512-ZZ6e2GvqYQhUp5flmgj1rOS2hOKG/F60pFQE8uqC81pABnGObwXuFDPJJP74dbWoCBwvIDZHJOH2zl2wEnBFsQ==}
+  '@pnpm/pnpr.darwin-arm64@0.1.0-alpha.22':
+    resolution: {integrity: sha512-jGFEKaOcr6Bxus8JE34RYIICIXixs05udbuosuCn0YmtaPOw+4FTMiqGQmF0KNgrf4uTRCnIe4Lo1Bmgo38oNA==}
     cpu: [arm64]
     os: [darwin]
 
-  '@pnpm/pnpr.darwin-x64@0.1.0-alpha.8':
-    resolution: {integrity: sha512-waUS+Jqe82pcOH7VPGkhsKl/wB3OUifvMP/f5CSJqGE503e+6f8bwkhZVvtbT/am4OasbXd1WZb0LVBJndLTaQ==}
+  '@pnpm/pnpr.darwin-x64@0.1.0-alpha.22':
+    resolution: {integrity: sha512-H2w46g22GHTXlA4KZudHWo5qnJJYJOyDxJTR2nAoxvBhb6Thn3sLPXBFwFOZ9BZQCQWXBSIapY2wcR55sCeCkQ==}
     cpu: [x64]
     os: [darwin]
 
-  '@pnpm/pnpr.linux-arm64-musl@0.1.0-alpha.8':
-    resolution: {integrity: sha512-eC3bmhu+HSj1O4DnOaMQU8YbScayFUtABDghUC4AcolOTegzn2xv6LZsAJl4IYr4XZTF/QEV1dSmzHXHwGyEQw==}
+  '@pnpm/pnpr.linux-arm64-musl@0.1.0-alpha.22':
+    resolution: {integrity: sha512-bnoI56vhCj0Hm5nperQtkwEmRubRP2CYvU3oQMa3HnfVwMGhKQlG1db35+TrumlglSoPQiA7cI6SqDI4XOPnBw==}
     cpu: [arm64]
     os: [linux]
     libc: [musl]
 
-  '@pnpm/pnpr.linux-arm64@0.1.0-alpha.8':
-    resolution: {integrity: sha512-gH1PiH5ZrVCQ33wyy8GSma7vAWLwAovEPbb3/mUhBaw414AoRHRS1og8cotuJo3TA8UmCfttmEfWfKdihBKRYQ==}
+  '@pnpm/pnpr.linux-arm64@0.1.0-alpha.22':
+    resolution: {integrity: sha512-2QDNliSC3EbvobPsgqLAoj+iq6QamQVPNVHm4xQOfU38zLYQuywjwT4wvat6oKfmcUz3q2E05nApI/2ocvH8og==}
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
 
-  '@pnpm/pnpr.linux-x64-musl@0.1.0-alpha.8':
-    resolution: {integrity: sha512-RedLEo6Kjis9IkyeYXOzFE/ukiUIFLIIqHZVEZsj0CPu3zwkkOnPXXecFt5n+Cwmt7MKBqm0n+1s4O3ZeSW2vg==}
+  '@pnpm/pnpr.linux-x64-musl@0.1.0-alpha.22':
+    resolution: {integrity: sha512-1s3FNPDPY/j9kr4RUDlZqrFbSbqWCdsxEApkkJrGm5h9GcAkA90LMkxsGrOFDe+sAOOSZ4mkZPbsGCDyQy+JZg==}
     cpu: [x64]
     os: [linux]
     libc: [musl]
 
-  '@pnpm/pnpr.linux-x64@0.1.0-alpha.8':
-    resolution: {integrity: sha512-JxydCbSxtxUL5IskpuHtCnBaQPFOjeXsW/ts3oBNccoGkXxlhqTi/FYpvBF7XZ4E2nxx+wAFzclMJhM/UMi+fA==}
+  '@pnpm/pnpr.linux-x64@0.1.0-alpha.22':
+    resolution: {integrity: sha512-SZtcViDzmVOaueBk/Vgx714n9aqJgWsL1MSrryTuUJABtmP6VEkhzmWasQHFzCe0NSh9C0FaZ3/KKWRzRDCJ1A==}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
 
-  '@pnpm/pnpr.win32-arm64@0.1.0-alpha.8':
-    resolution: {integrity: sha512-GYe5puWVbGtwzboYq87H82qeNFaF1soAZPQlAiGLwlJD8oS4Y9GM8D+pHXl08IQoVdK0/8dLgUy62O95Ptg7qA==}
+  '@pnpm/pnpr.win32-arm64@0.1.0-alpha.22':
+    resolution: {integrity: sha512-bP/x9n596Uv81lvZCK3fLzLYJbGJpWupNrAlgEYtTHGycewekaEs2sWAPqWZDC08cEjxq/8/UY2Wj9no8eP6iA==}
     cpu: [arm64]
     os: [win32]
 
-  '@pnpm/pnpr.win32-x64@0.1.0-alpha.8':
-    resolution: {integrity: sha512-k1w4FzEnbsmsaBTaL61AAyUyAEaMWsrUhEIafg5moGoGvPggBIBKnwf0rvBbGAbAezRVZwr1sAzwYxzFPjVSQQ==}
+  '@pnpm/pnpr.win32-x64@0.1.0-alpha.22':
+    resolution: {integrity: sha512-+XsXJEt7KO+7RZl9SzgTbOLNqzoeJ3Suk2DgFOYpXZC8lX4iddRYSd0je1we873Bmu08HaA5/DQqAC9i3R3luA==}
     cpu: [x64]
     os: [win32]
 
-  '@pnpm/pnpr@0.1.0-alpha.8':
-    resolution: {integrity: sha512-6gf1XHdBSkM9QzJDkb/0Tx9jEEHSA7AYvxFASPTQmvur8wWIj81KVlXXuBFep8Jx8hB8z8t6C7pJMU89j8gf8A==}
-    engines: {node: '>=18.*'}
+  '@pnpm/pnpr@0.1.0-alpha.22':
+    resolution: {integrity: sha512-jtVg1gDi8ORVMvMJMF+f+qQcZgo1bwtJfZ4stBSHBkeMxBwHG3qMMl1dNHqdjufKqbMrUawz61o5WTfUQoBIXw==}
+    engines: {node: '>=18'}
     hasBin: true
+    peerDependencies:
+      '@pnpm/pnpr-ui': 0.1.0-alpha.22
+    peerDependenciesMeta:
+      '@pnpm/pnpr-ui':
+        optional: true
 
   '@publint/pack@0.1.7':
     resolution: {integrity: sha512-4EDEmvxWtgsCnnVeBvtFIFZtUhPPt1+bA9JrSwU4Sa//6oKtzCSlGGXYJr44OD9aGISymbieJ4mCKHUygUDU+g==}
@@ -3341,40 +3346,40 @@ snapshots:
       '@pnpm/network.ca-file': 1.0.2
       config-chain: 1.1.13
 
-  '@pnpm/pnpr.darwin-arm64@0.1.0-alpha.8':
+  '@pnpm/pnpr.darwin-arm64@0.1.0-alpha.22':
     optional: true
 
-  '@pnpm/pnpr.darwin-x64@0.1.0-alpha.8':
+  '@pnpm/pnpr.darwin-x64@0.1.0-alpha.22':
     optional: true
 
-  '@pnpm/pnpr.linux-arm64-musl@0.1.0-alpha.8':
+  '@pnpm/pnpr.linux-arm64-musl@0.1.0-alpha.22':
     optional: true
 
-  '@pnpm/pnpr.linux-arm64@0.1.0-alpha.8':
+  '@pnpm/pnpr.linux-arm64@0.1.0-alpha.22':
     optional: true
 
-  '@pnpm/pnpr.linux-x64-musl@0.1.0-alpha.8':
+  '@pnpm/pnpr.linux-x64-musl@0.1.0-alpha.22':
     optional: true
 
-  '@pnpm/pnpr.linux-x64@0.1.0-alpha.8':
+  '@pnpm/pnpr.linux-x64@0.1.0-alpha.22':
     optional: true
 
-  '@pnpm/pnpr.win32-arm64@0.1.0-alpha.8':
+  '@pnpm/pnpr.win32-arm64@0.1.0-alpha.22':
     optional: true
 
-  '@pnpm/pnpr.win32-x64@0.1.0-alpha.8':
+  '@pnpm/pnpr.win32-x64@0.1.0-alpha.22':
     optional: true
 
-  '@pnpm/pnpr@0.1.0-alpha.8':
+  '@pnpm/pnpr@0.1.0-alpha.22':
     optionalDependencies:
-      '@pnpm/pnpr.darwin-arm64': 0.1.0-alpha.8
-      '@pnpm/pnpr.darwin-x64': 0.1.0-alpha.8
-      '@pnpm/pnpr.linux-arm64': 0.1.0-alpha.8
-      '@pnpm/pnpr.linux-arm64-musl': 0.1.0-alpha.8
-      '@pnpm/pnpr.linux-x64': 0.1.0-alpha.8
-      '@pnpm/pnpr.linux-x64-musl': 0.1.0-alpha.8
-      '@pnpm/pnpr.win32-arm64': 0.1.0-alpha.8
-      '@pnpm/pnpr.win32-x64': 0.1.0-alpha.8
+      '@pnpm/pnpr.darwin-arm64': 0.1.0-alpha.22
+      '@pnpm/pnpr.darwin-x64': 0.1.0-alpha.22
+      '@pnpm/pnpr.linux-arm64': 0.1.0-alpha.22
+      '@pnpm/pnpr.linux-arm64-musl': 0.1.0-alpha.22
+      '@pnpm/pnpr.linux-x64': 0.1.0-alpha.22
+      '@pnpm/pnpr.linux-x64-musl': 0.1.0-alpha.22
+      '@pnpm/pnpr.win32-arm64': 0.1.0-alpha.22
+      '@pnpm/pnpr.win32-x64': 0.1.0-alpha.22
 
   '@publint/pack@0.1.7':
     dependencies:

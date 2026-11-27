@@ -59,6 +59,7 @@ export type PublishOptions = {
   tarballPath: string | null;
   interactive: boolean;
   otpCode: string | null;
+  stage?: boolean;
 };
 
 type PublishResultBase = {
@@ -68,7 +69,8 @@ type PublishResultBase = {
 };
 
 export type PublishResultSuccess = PublishResultBase & {
-  result: "published";
+  result: "success";
+  stageId?: string;
 };
 
 export type PublishResultFailed = PublishResultBase & {
@@ -77,9 +79,10 @@ export type PublishResultFailed = PublishResultBase & {
   message?: string;
 };
 
-export type PublishResultAlreadyPublished = PublishResultBase & {
-  result: "failed:already-published";
+export type PublishResultAlreadyDone = PublishResultBase & {
+  result: "failed:already-done";
   code?: string;
+  message?: string;
 };
 
 export type PublishResultFailedNeeds2fa = PublishResultBase & {
@@ -93,5 +96,5 @@ export type PublishResultFailedNeeds2fa = PublishResultBase & {
 export type PublishResult =
   | PublishResultSuccess
   | PublishResultFailed
-  | PublishResultAlreadyPublished
+  | PublishResultAlreadyDone
   | PublishResultFailedNeeds2fa;

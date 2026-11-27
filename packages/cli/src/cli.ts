@@ -124,6 +124,7 @@ cli
   .option("--tag <name>", "Publish with the given npm dist-tag")
   .option("--from-pack-dir <dir>", "Publish from a packed output directory")
   .option("--git-tag", "Create a git tag for the release", { default: true })
+  .option("--stage", "Stage packages for approval instead of publishing")
   .action(async (options) => {
     withEnvOptions(normalizeOptions(options));
     const { publish } = await import("./commands/publish/index.ts");

@@ -78,7 +78,7 @@ describe("publishing", () => {
     },
   } satisfies Package;
 
-  it("should return `published` if npm cli succeeds", async () => {
+  it("should return `success` if npm cli succeeds", async () => {
     mockedExec.mockResolvedValue({ exitCode: 0, stdout: "", stderr: "" });
 
     const result = await npm.publish({
@@ -89,7 +89,7 @@ describe("publishing", () => {
       otpCode: null,
     });
 
-    expect(result.result).toEqual("published");
+    expect(result.result).toEqual("success");
   });
 
   const alreadyPublishedCases = Object.entries(
@@ -109,7 +109,7 @@ describe("publishing", () => {
         otpCode: null,
       });
 
-      expect(result.result).toEqual("failed:already-published");
+      expect(result.result).toEqual("failed:already-done");
     },
   );
 
@@ -203,7 +203,7 @@ describe("publishing", () => {
       otpCode: null,
     });
 
-    expect(result.result).toEqual("published");
+    expect(result.result).toEqual("success");
     expect(mockedExec).toHaveBeenCalledWith(
       "npm",
       [

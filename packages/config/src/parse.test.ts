@@ -54,6 +54,7 @@ describe("readConfig", () => {
         "snapshot": {
           "useCalculatedVersion": false,
         },
+        "stagedPublishing": false,
         "updateInternalDependencies": "patch",
       }
     `);
@@ -135,6 +136,7 @@ describe("defaultConfig", () => {
         "snapshot": {
           "useCalculatedVersion": false,
         },
+        "stagedPublishing": false,
         "updateInternalDependencies": "patch",
       }
     `);
