@@ -138,10 +138,8 @@ function getNewDependencyRange(
     );
 
     if (lowerBound && upperBound) {
-      const parsed = semverParse(newVersion);
-      const baseVersion = parsed
-        ? `${parsed.major}.${parsed.minor}.${parsed.patch}`
-        : newVersion;
+      const parsed = semverParse(newVersion)!;
+      const baseVersion = `${parsed.major}.${parsed.minor}.${parsed.patch}`;
       let newUpperBound = upperBound.value;
       if (!semverSatisfies(baseVersion, newUpperBound)) {
         newUpperBound = `<${semverInc(baseVersion, releaseType)}`;
