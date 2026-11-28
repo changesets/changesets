@@ -1,6 +1,7 @@
 import type { ComprehensiveRelease, PackageJSON } from "@changesets/types";
 import Range from "semver/classes/range.js";
 import semverInc from "semver/functions/inc.js";
+import semverParse from "semver/functions/parse.js";
 import semverPrerelease from "semver/functions/prerelease.js";
 import semverSatisfies from "semver/functions/satisfies.js";
 import validRange from "semver/ranges/valid.js";
@@ -137,9 +138,11 @@ function getNewDependencyRange(
     );
 
     if (lowerBound && upperBound) {
+      const parsed = semverParse(newVersion)!;
+      const baseVersion = `${parsed.major}.${parsed.minor}.${parsed.patch}`;
       let newUpperBound = upperBound.value;
-      if (!semverSatisfies(newVersion, newUpperBound)) {
-        newUpperBound = `<${semverInc(newVersion, releaseType)}`;
+      if (!semverSatisfies(baseVersion, newUpperBound)) {
+        newUpperBound = `<${semverInc(baseVersion, releaseType)}`;
       }
 
       return comparators[0] === lowerBound
