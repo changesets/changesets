@@ -414,6 +414,63 @@ describe("apply release plan", () => {
       [">=1.0.0 <3.0.0", "1.0.0", "2.0.0", "major", ">=2.0.0 <3.0.0"],
       [">=1.2.0 <1.3.0", "1.2.0", "1.3.0", "minor", ">=1.3.0 <1.4.0"],
       [">=1.2.3 <1.2.4", "1.2.3", "1.2.4", "patch", ">=1.2.4 <1.2.5"],
+      // Prerelease versions must increment the base version for the upper bound so stable graduation remains in range.
+      [
+        ">=1.0.0 <2.0.0",
+        "1.0.0",
+        "2.0.0-alpha.0",
+        "major",
+        ">=2.0.0-alpha.0 <3.0.0",
+      ],
+      [
+        "workspace:>=1.0.0 <2.0.0",
+        "1.0.0",
+        "2.0.0-alpha.0",
+        "major",
+        "workspace:>=2.0.0-alpha.0 <3.0.0",
+      ],
+      [
+        "<2.0.0 >=1.0.0",
+        "1.0.0",
+        "2.0.0-alpha.0",
+        "major",
+        "<3.0.0 >=2.0.0-alpha.0",
+      ],
+      [
+        ">=1.2.0 <1.3.0",
+        "1.2.0",
+        "1.3.0-alpha.0",
+        "minor",
+        ">=1.3.0-alpha.0 <1.4.0",
+      ],
+      [
+        ">=1.2.3 <1.2.4",
+        "1.2.3",
+        "1.2.4-alpha.0",
+        "patch",
+        ">=1.2.4-alpha.0 <1.2.5",
+      ],
+      [
+        ">=1.0.0 <3.0.0",
+        "1.0.0",
+        "2.0.0-alpha.0",
+        "major",
+        ">=2.0.0-alpha.0 <3.0.0",
+      ],
+      [
+        ">=1.0.0 <2.0.0",
+        "1.0.0",
+        "1.1.0-alpha.0",
+        "minor",
+        ">=1.1.0-alpha.0 <2.0.0",
+      ],
+      [
+        ">=2.0.0-alpha.0 <3.0.0",
+        "2.0.0-alpha.0",
+        "2.0.0",
+        "patch",
+        ">=2.0.0 <3.0.0",
+      ],
     ] as const)(
       "should update the bounded dependency range %s",
       async (versionRange, oldVersion, newVersion, type, expected) => {
